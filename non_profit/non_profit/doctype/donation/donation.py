@@ -67,6 +67,19 @@ class Donation(Document):
 		pe.insert()
 		pe.submit()
 
+	def on_cancel(self):
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Payment Ledger Entry",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+		)
+
 
 @frappe.whitelist(allow_guest=True)
 def capture_razorpay_donations(*args, **kwargs):
