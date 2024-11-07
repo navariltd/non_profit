@@ -1,202 +1,32 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Member\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Non Profit Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Membership\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chapter\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chapter Member\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports & Masters</b></span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Loan Management\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Grant Application\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Membership\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Volunteer\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Chapter\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Donation\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Tax Exemption Certification (India)\",\"col\":4}}]",
+ "content": "[{\"id\":\"6wv5vSis7r\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Shortcuts</b></span>\",\"col\":12}},{\"id\":\"XLU3HtIgyo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Member\",\"col\":3}},{\"id\":\"hlr59CdM5Z\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Non Profit Settings\",\"col\":3}},{\"id\":\"8hWfo8Zmce\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Membership\",\"col\":3}},{\"id\":\"mDfxItbrgC\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Chapter\",\"col\":3}},{\"id\":\"ehTjE0Mms7\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"1BUjwsQ3GV\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"Cwv_RMxEPm\",\"type\":\"card\",\"data\":{\"card_name\":\"Donation\",\"col\":4}},{\"id\":\"BsuXUNbqZx\",\"type\":\"card\",\"data\":{\"card_name\":\"Membership\",\"col\":4}},{\"id\":\"f9XNMU-2gI\",\"type\":\"card\",\"data\":{\"card_name\":\"Volunteer\",\"col\":4}},{\"id\":\"MUo7eZfG6I\",\"type\":\"card\",\"data\":{\"card_name\":\"Certifications\",\"col\":4}},{\"id\":\"zcE5QvFDga\",\"type\":\"card\",\"data\":{\"card_name\":\"Chapter & Settings\",\"col\":4}},{\"id\":\"S3A_EZXfew\",\"type\":\"card\",\"data\":{\"card_name\":\"Grant Application\",\"col\":4}}]",
  "creation": "2020-03-02 17:23:47.811421",
+ "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
  "icon": "non-profit",
  "idx": 0,
+ "is_hidden": 0,
  "label": "Non Profit",
  "links": [
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Loan Management",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Loan Type",
-   "link_count": 0,
-   "link_to": "Loan Type",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Loan Application",
-   "link_count": 0,
-   "link_to": "Loan Application",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Loan",
-   "link_count": 0,
-   "link_to": "Loan",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Grant Application",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Grant Application",
-   "link_count": 0,
-   "link_to": "Grant Application",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Membership",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Member",
-   "link_count": 0,
-   "link_to": "Member",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Membership",
-   "link_count": 0,
-   "link_to": "Membership",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Membership Type",
-   "link_count": 0,
-   "link_to": "Membership Type",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Non Profit Settings",
-   "link_count": 0,
-   "link_to": "Non Profit Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Volunteer",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Volunteer",
-   "link_count": 0,
-   "link_to": "Volunteer",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Volunteer Type",
-   "link_count": 0,
-   "link_to": "Volunteer Type",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Chapter",
-   "link_count": 0,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Chapter",
-   "link_count": 0,
-   "link_to": "Chapter",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Donation",
-   "link_count": 0,
+   "link_count": 3,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
   {
-   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Donor",
    "link_count": 0,
    "link_to": "Donor",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Donor Type",
-   "link_count": 0,
-   "link_to": "Donor Type",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -214,8 +44,18 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Tax Exemption Certification (India)",
+   "label": "Donor Type",
    "link_count": 0,
+   "link_to": "Donor Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Volunteer",
+   "link_count": 2,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -223,21 +63,149 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Tax Exemption 80G Certificate",
+   "label": "Volunteer",
    "link_count": 0,
-   "link_to": "Tax Exemption 80G Certificate",
+   "link_to": "Volunteer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Volunteer Type",
+   "link_count": 0,
+   "link_to": "Volunteer Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Grant Application",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Grant Application",
+   "link_count": 0,
+   "link_to": "Grant Application",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Certifications",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Certified Consultant",
+   "link_count": 0,
+   "link_to": "Certified Consultant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Certification Application",
+   "link_count": 0,
+   "link_to": "Certification Application",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Membership",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Member",
+   "link_count": 0,
+   "link_to": "Member",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Membership",
+   "link_count": 0,
+   "link_to": "Membership",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Membership Type",
+   "link_count": 0,
+   "link_to": "Membership Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Chapter & Settings",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Chapter",
+   "link_count": 0,
+   "link_to": "Chapter",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Non Profit Settings",
+   "link_count": 0,
+   "link_to": "Non Profit Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2022-05-09 17:40:50.220877",
+ "modified": "2024-11-07 14:13:26.952793",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit",
+ "number_cards": [],
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,
+ "quick_lists": [],
  "restrict_to_domain": "Non Profit",
  "roles": [],
  "sequence_id": 18.0,
@@ -260,11 +228,6 @@
   {
    "label": "Chapter",
    "link_to": "Chapter",
-   "type": "DocType"
-  },
-  {
-   "label": "Chapter Member",
-   "link_to": "Chapter Member",
    "type": "DocType"
   }
  ],
