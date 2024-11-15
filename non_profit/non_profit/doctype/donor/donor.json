@@ -15,7 +15,11 @@
   "address_contacts",
   "address_html",
   "column_break_9",
-  "contact_html"
+  "contact_html",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project"
  ],
  "fields": [
   {
@@ -73,6 +77,28 @@
    "fieldname": "contact_html",
    "fieldtype": "HTML",
    "label": "Contact HTML"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "image_field": "image",
@@ -82,10 +108,11 @@
    "link_fieldname": "donor"
   }
  ],
- "modified": "2021-02-17 16:36:33.470731",
+ "modified": "2024-11-15 12:40:16.613908",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donor",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -105,6 +132,7 @@
  "restrict_to_domain": "Non Profit",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "donor_name",
  "track_changes": 1
 }
