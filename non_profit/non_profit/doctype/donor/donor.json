@@ -8,9 +8,10 @@
  "engine": "InnoDB",
  "field_order": [
   "donor_name",
+  "email",
   "column_break_5",
   "donor_type",
-  "email",
+  "is_a_frequent_donor",
   "image",
   "address_contacts",
   "address_html",
@@ -18,8 +19,7 @@
   "contact_html",
   "accounting_dimensions_section",
   "cost_center",
-  "dimension_col_break",
-  "project"
+  "dimension_col_break"
  ],
  "fields": [
   {
@@ -86,19 +86,19 @@
   },
   {
    "fieldname": "cost_center",
-   "fieldtype": "Link",
+   "fieldtype": "Table MultiSelect",
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "Beneficiary Program"
   },
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
+   "default": "0",
+   "fieldname": "is_a_frequent_donor",
+   "fieldtype": "Check",
+   "label": "Is a frequent donor?"
   }
  ],
  "image_field": "image",
@@ -106,9 +106,17 @@
   {
    "link_doctype": "Donation",
    "link_fieldname": "donor"
+  },
+  {
+   "link_doctype": "Beneficiary",
+   "link_fieldname": "donor"
+  },
+  {
+   "link_doctype": "Stock Entry",
+   "link_fieldname": "donor"
   }
  ],
- "modified": "2024-11-15 12:40:16.613908",
+ "modified": "2024-11-19 16:44:12.694418",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donor",
