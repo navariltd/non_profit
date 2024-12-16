@@ -8,21 +8,25 @@
  "engine": "InnoDB",
  "field_order": [
   "volunteer_name",
+  "national_id",
+  "phone_number",
+  "branch",
   "column_break_5",
   "volunteer_type",
   "email",
   "image",
-  "address_contacts",
-  "address_html",
-  "column_break_9",
-  "contact_html",
   "volunteer_availability_and_skills_details",
   "availability",
   "availability_timeslot",
   "column_break_12",
   "volunteer_skills",
   "section_break_15",
-  "note"
+  "note",
+  "address_contact_tab",
+  "address_contacts",
+  "address_html",
+  "column_break_9",
+  "contact_html"
  ],
  "fields": [
   {
@@ -39,7 +43,10 @@
   {
    "fieldname": "volunteer_type",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Volunteer Type",
    "options": "Volunteer Type",
    "reqd": 1
@@ -49,7 +56,6 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Email",
-   "reqd": 1,
    "unique": 1
   },
   {
@@ -116,14 +122,40 @@
    "fieldname": "note",
    "fieldtype": "Long Text",
    "label": "Note"
+  },
+  {
+   "fieldname": "address_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
+  },
+  {
+   "fieldname": "national_id",
+   "fieldtype": "Data",
+   "label": "National ID"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone number"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Branch",
+   "options": "Branch"
   }
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-09-16 23:45:15.595952",
+ "modified": "2024-12-16 11:08:54.407089",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -143,6 +175,7 @@
  "restrict_to_domain": "Non Profit",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "volunteer_name",
  "track_changes": 1
 }

@@ -19,6 +19,7 @@
   "mode_of_payment",
   "column_break_12",
   "payment_id",
+  "currency",
   "amended_from"
  ],
  "fields": [
@@ -112,15 +113,22 @@
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-16 17:18:45.611741",
+ "modified": "2024-12-16 11:12:01.236683",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donation",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -155,6 +163,7 @@
  "search_fields": "donor_name, email",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "donor_name",
  "track_changes": 1
 }
