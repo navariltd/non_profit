@@ -9,8 +9,11 @@
  "field_order": [
   "donor_name",
   "email",
+  "phone_number",
+  "birthday_date",
   "column_break_5",
   "donor_type",
+  "charter",
   "is_a_frequent_donor",
   "image",
   "address_contacts",
@@ -46,7 +49,6 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Email",
-   "reqd": 1,
    "unique": 1
   },
   {
@@ -99,6 +101,22 @@
    "fieldname": "is_a_frequent_donor",
    "fieldtype": "Check",
    "label": "Is a frequent donor?"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "birthday_date",
+   "fieldtype": "Date",
+   "label": "Birthday Date"
+  },
+  {
+   "fieldname": "charter",
+   "fieldtype": "Link",
+   "label": "Charter",
+   "options": "Funding Pool"
   }
  ],
  "image_field": "image",
@@ -110,13 +128,9 @@
   {
    "link_doctype": "Beneficiary",
    "link_fieldname": "donor"
-  },
-  {
-   "link_doctype": "Stock Entry",
-   "link_fieldname": "donor"
   }
  ],
- "modified": "2024-11-19 16:44:12.694418",
+ "modified": "2024-12-19 09:06:42.698826",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donor",
