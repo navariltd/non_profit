@@ -10,10 +10,13 @@
   "donor_name",
   "email",
   "phone_number",
-  "birthday_date",
+  "id_number",
+  "salutation",
   "column_break_5",
   "donor_type",
   "charter",
+  "birthday_date",
+  "date_registered",
   "is_a_frequent_donor",
   "image",
   "address_contacts",
@@ -117,6 +120,22 @@
    "fieldtype": "Link",
    "label": "Charter",
    "options": "Funding Pool"
+  },
+  {
+   "fieldname": "id_number",
+   "fieldtype": "Data",
+   "label": "ID Number"
+  },
+  {
+   "fieldname": "salutation",
+   "fieldtype": "Link",
+   "label": "Salutation",
+   "options": "Salutation"
+  },
+  {
+   "fieldname": "date_registered",
+   "fieldtype": "Date",
+   "label": "Date Registered"
   }
  ],
  "image_field": "image",
@@ -130,7 +149,7 @@
    "link_fieldname": "donor"
   }
  ],
- "modified": "2024-12-19 09:06:42.698826",
+ "modified": "2024-12-23 10:38:43.274257",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donor",
