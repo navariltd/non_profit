@@ -25,3 +25,39 @@ frappe.ui.form.on("Donation", {
     });
   },
 });
+
+frappe.ui.form.on("Donation Payment Item", {
+  amount: function (frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+    if (frm.doc.amount > 0) {
+      row.percentage = (row.amount / frm.doc.amount) * 100;
+    }
+    update_totals(frm);
+    frm.refresh_field("donation_payments");
+  },
+
+  percentage: function (frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+    if (frm.doc.amount > 0) {
+      row.amount = (row.percentage / 100) * frm.doc.amount;
+    }
+    update_totals(frm);
+    frm.refresh_field("donation_payments");
+  },
+});
+
+function update_totals(frm) {
+  let total_percentage = 0;
+  let total_amount = 0;
+
+  (frm.doc.donation_payments || []).forEach((row) => {
+    total_percentage += parseFloat(row.percentage) || 0;
+    total_amount += parseFloat(row.amount) || 0;
+  });
+
+  if (total_percentage >= 100) {
+    frm.set_value("paid", 1);
+  } else {
+    frm.set_value("paid", 0);
+  }
+}

@@ -84,6 +84,7 @@
    "options": "NPO-DTN-.YYYY.-"
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "paid",
    "fieldtype": "Check",
@@ -137,8 +138,8 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-14 19:13:54.592098",
- "modified_by": "e@e.com",
+ "modified": "2025-05-14 20:00:23.536010",
+ "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donation",
  "naming_rule": "By \"Naming Series\" field",
