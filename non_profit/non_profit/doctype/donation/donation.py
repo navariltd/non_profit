@@ -22,6 +22,32 @@ class Donation(Document):
 				self.create_donor_for_website_user()
 			else:
 				frappe.throw(_('Please select a Member'))
+		self.compute_total_and_validate()
+
+	def before_update_after_submit(self):
+		self.compute_total_and_validate()
+
+
+	def compute_total_and_validate(self):
+		donation_payments = self.get("donation_payments") or []
+		total_paid = sum(flt(row.amount) for row in donation_payments)
+		self.total_amount_paid = total_paid
+
+		for row in donation_payments:
+			if flt(self.amount):
+				row.percentage = (flt(row.amount) / flt(self.amount)) * 100
+			else:
+				row.percentage = 0
+
+		total_percentage = sum(flt(row.percentage) for row in donation_payments)
+
+		if total_paid > flt(self.amount):
+			frappe.throw(_('Total amount paid cannot exceed Donation Amount.'))
+
+		if total_percentage >= 100:
+			self.paid = 1
+		else:
+			self.paid = 0
 
 	def create_donor_for_website_user(self):
 		donor_name = frappe.get_value('Donor', dict(email=frappe.session.user))
