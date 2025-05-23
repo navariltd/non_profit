@@ -11,6 +11,41 @@ frappe.ui.form.on("Donation", {
     if (!frm.doc.date) {
       frm.set_value("date", frappe.datetime.get_today());
     }
+    frm.events.update_project_options(frm);
+  },
+
+  donor(frm) {
+    frm.events.update_project_options(frm);
+  },
+
+  update_project_options(frm) {
+    frappe.call({
+      method:
+        "non_profit.non_profit.doctype.donation.donation.project_filter_by_donor",
+      args: { donor: frm.doc.donor || null },
+      callback(r) {
+        const project_list = (r.message || []).map((p) => p.name);
+
+        if (frm.get_field("project").df.fieldtype === "Select") {
+          frm.set_df_property("project", "options", ["", ...project_list]);
+
+          if (!project_list.includes(frm.doc.project)) {
+            frm.set_value("project", "");
+          }
+
+          frm.refresh_field("project");
+          return;
+        }
+
+        frm.set_query("project", () => ({
+          filters: { name: ["in", project_list.length ? project_list : [""]] },
+        }));
+
+        if (frm.doc.project && !project_list.includes(frm.doc.project)) {
+          frm.set_value("project", "");
+        }
+      },
+    });
   },
 
   make_payment_entry: function (frm) {
