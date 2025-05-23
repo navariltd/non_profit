@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:email",
  "creation": "2017-09-19 16:20:27.510196",
@@ -147,7 +148,7 @@
    "link_fieldname": "donor"
   }
  ],
- "modified": "2025-05-16 19:10:26.476409",
+ "modified": "2025-05-17 14:50:15.607245",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donor",

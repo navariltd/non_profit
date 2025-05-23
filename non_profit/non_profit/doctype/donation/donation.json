@@ -13,6 +13,7 @@
   "column_break_4",
   "company",
   "date",
+  "project",
   "payment_details_section",
   "paid",
   "amount",
@@ -153,12 +154,18 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Total Amount Paid"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-05-16 19:09:57.082469",
+ "modified": "2025-05-23 14:02:23.791936",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donation",

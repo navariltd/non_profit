@@ -260,3 +260,25 @@ def notify_failure(log):
 		sendmail_to_system_managers(_('[Important] [ERPNext] Razorpay donation webhook failed, please check.'), content)
 	except Exception:
 		pass
+
+
+
+@frappe.whitelist()
+def project_filter_by_donor(donor=None):
+    if not frappe.db.exists("DocType", "Donor Table"):
+        return frappe.get_all("Project", fields=["name"])
+
+    projects = frappe.get_all("Project", fields=["name"])
+    result = []
+
+    for project in projects:
+        donors = frappe.get_all(
+            "Donor Table",
+            filters={"parent": project["name"], "parenttype": "Project"},
+            fields=["donor"]
+        )
+
+        if not donors or (donor and any(d["donor"] == donor for d in donors)):
+            result.append(project)
+
+    return result
