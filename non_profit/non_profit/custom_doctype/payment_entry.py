@@ -15,6 +15,22 @@ from erpnext.setup.utils import get_exchange_rate
 
 
 class NonProfitPaymentEntry(PaymentEntry):
+	def on_submit(self):
+		self.update_linked_donations()
+
+	def on_cancel(self):
+		self.update_linked_donations()
+
+	def update_linked_donations(self):
+		donations = {
+			ref.reference_name
+			for ref in self.references
+			if ref.reference_doctype == "Donation"
+		}
+		for donation in donations:
+			doc = frappe.get_doc("Donation", donation)
+			doc.compute_total_and_validate()
+
 	def validate_reference_documents(self):
 		if self.party_type == "Student":
 			valid_reference_doctypes = ("Fees", "Journal Entry")
@@ -159,7 +175,7 @@ def set_grand_total_and_outstanding_amount(party_amount, doc):
 		grand_total = outstanding_amount = party_amount
 	else:
 		grand_total = doc.amount
-		outstanding_amount = doc.amount
+		outstanding_amount = doc.amount - doc.total_amount_paid
 
 	return grand_total, outstanding_amount
 
