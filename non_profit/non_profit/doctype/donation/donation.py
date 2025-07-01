@@ -29,25 +29,29 @@ class Donation(Document):
 
 
 	def compute_total_and_validate(self):
-		donation_payments = self.get("donation_payments") or []
-		total_paid = sum(flt(row.amount) for row in donation_payments)
-		self.total_amount_paid = total_paid
+		non_profit_settings = frappe.get_doc(
+			"Non Profit Settings",
+			"Non Profit Settings",
+		) 
+		
+		enable_payment_table = non_profit_settings.get("enable_payment_table_on_donation", 0)
+		total_amount_paid = calculate_donation_paid_amount(self)
 
-		for row in donation_payments:
-			if flt(self.amount):
-				row.percentage = (flt(row.amount) / flt(self.amount)) * 100
-			else:
-				row.percentage = 0
+		frappe.db.set_value("Donation", self.name, "total_amount_paid", total_amount_paid)
+		
+		if enable_payment_table == 1:
+			donation_payments = self.get("donation_payments") or []
 
-		total_percentage = sum(flt(row.percentage) for row in donation_payments)
+			for row in donation_payments:
+				if flt(self.amount):
+					frappe.db.set_value(row.doctype, row.name, "percentage", (flt(row.amount) / flt(self.amount)) * 100)
+				else:
+					frappe.db.set_value(row.doctype, row.name, "percentage", 0)
 
-		if total_paid > flt(self.amount):
-			frappe.throw(_('Total amount paid cannot exceed Donation Amount.'))
-
-		if total_percentage >= 100:
-			self.paid = 1
+		if float(total_amount_paid) >= float(self.amount):
+			frappe.db.set_value("Donation", self.name, "paid", 1)
 		else:
-			self.paid = 0
+			frappe.db.set_value("Donation", self.name, "paid", 0)
 
 	def create_donor_for_website_user(self):
 		donor_name = frappe.get_value('Donor', dict(email=frappe.session.user))
@@ -282,3 +286,28 @@ def project_filter_by_donor(donor=None):
             result.append(project)
 
     return result
+
+@frappe.whitelist()
+def calculate_donation_paid_amount(doc):
+	settings = frappe.get_cached_doc("Non Profit Settings")
+
+	total_paid = 0.0
+	if settings.get("enable_payment_table_on_donation"):
+		payments = doc.get("donation_payments") or []
+		total_paid = sum(flt(row.amount) for row in payments)
+
+	refs = frappe.get_all(
+		"Payment Entry Reference",
+		filters={
+			"reference_doctype": "Donation",
+			"reference_name": doc.name
+		},
+		fields=["allocated_amount", "parent"]
+	)
+
+	for ref in refs:
+		pe = frappe.get_doc("Payment Entry", ref.parent)
+		if pe.docstatus == 1:
+			total_paid += flt(ref.allocated_amount)
+
+	return total_paid

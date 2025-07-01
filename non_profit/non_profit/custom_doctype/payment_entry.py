@@ -15,6 +15,22 @@ from erpnext.setup.utils import get_exchange_rate
 
 
 class NonProfitPaymentEntry(PaymentEntry):
+	def on_submit(self):
+		self.update_linked_donations()
+
+	def on_cancel(self):
+		self.update_linked_donations()
+
+	def update_linked_donations(self):
+		donations = {
+			ref.reference_name
+			for ref in self.references
+			if ref.reference_doctype == "Donation"
+		}
+		for donation in donations:
+			doc = frappe.get_doc("Donation", donation)
+			doc.compute_total_and_validate()
+
 	def validate_reference_documents(self):
 		if self.party_type == "Student":
 			valid_reference_doctypes = ("Fees", "Journal Entry")
@@ -31,12 +47,15 @@ class NonProfitPaymentEntry(PaymentEntry):
 
 		for d in self.get("references"):
 			if not d.allocated_amount:
-				continue
+				if len(self.get("references")) == 1:
+					d.allocated_amount = self.paid_amount
+				else:
+					continue
 			if d.reference_doctype not in valid_reference_doctypes:
 				frappe.throw(_("Reference Doctype must be one of {0}")
 					.format(comma_or(valid_reference_doctypes)))
 			elif d.reference_name:
-				if not frappe.db.exists(d.reference_doctype, d.reference_name):
+				if not frappe.db.exists(d.reference_doctype, d.reference_name):	
 					frappe.throw(_("{0} {1} does not exist").format(d.reference_doctype, d.reference_name))
 				else:
 					ref_doc = frappe.get_doc(d.reference_doctype, d.reference_name)
@@ -159,7 +178,7 @@ def set_grand_total_and_outstanding_amount(party_amount, doc):
 		grand_total = outstanding_amount = party_amount
 	else:
 		grand_total = doc.amount
-		outstanding_amount = doc.amount
+		outstanding_amount = doc.amount - doc.total_amount_paid
 
 	return grand_total, outstanding_amount
 

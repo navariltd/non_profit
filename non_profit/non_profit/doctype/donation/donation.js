@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Donation", {
-  refresh: function (frm) {
+  refresh: async function (frm) {
     if (frm.doc.docstatus === 1 && !frm.doc.paid) {
       frm.add_custom_button(__("Create Payment Entry"), function () {
         frm.events.make_payment_entry(frm);
@@ -11,6 +11,17 @@ frappe.ui.form.on("Donation", {
     if (!frm.doc.date) {
       frm.set_value("date", frappe.datetime.get_today());
     }
+
+    const { message: setting } = await frappe.db.get_value(
+      "Non Profit Settings",
+      "Non Profit Settings",
+      ["enable_payment_table_on_donation"]
+    );
+
+    if (setting && setting.enable_payment_table_on_donation == "1") {
+      frm.set_df_property("donation_payments", "hidden", 0);
+    }
+
     frm.events.update_project_options(frm);
   },
 
