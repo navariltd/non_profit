@@ -47,12 +47,15 @@ class NonProfitPaymentEntry(PaymentEntry):
 
 		for d in self.get("references"):
 			if not d.allocated_amount:
-				continue
+				if len(self.get("references")) == 1:
+					d.allocated_amount = self.paid_amount
+				else:
+					continue
 			if d.reference_doctype not in valid_reference_doctypes:
 				frappe.throw(_("Reference Doctype must be one of {0}")
 					.format(comma_or(valid_reference_doctypes)))
 			elif d.reference_name:
-				if not frappe.db.exists(d.reference_doctype, d.reference_name):
+				if not frappe.db.exists(d.reference_doctype, d.reference_name):	
 					frappe.throw(_("{0} {1} does not exist").format(d.reference_doctype, d.reference_name))
 				else:
 					ref_doc = frappe.get_doc(d.reference_doctype, d.reference_name)
