@@ -15,71 +15,88 @@ from erpnext.setup.utils import get_exchange_rate
 
 
 class NonProfitPaymentEntry(PaymentEntry):
-	def on_submit(self):
-		self.update_linked_donations()
-
-	def on_cancel(self):
-		self.update_linked_donations()
-
-	def update_linked_donations(self):
-		donations = {
-			ref.reference_name
-			for ref in self.references
-			if ref.reference_doctype == "Donation"
-		}
-		for donation in donations:
-			doc = frappe.get_doc("Donation", donation)
-			doc.compute_total_and_validate()
-
 	def validate_reference_documents(self):
-		if self.party_type == "Student":
-			valid_reference_doctypes = ("Fees", "Journal Entry")
-		elif self.party_type == "Customer":
-			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning")
-		elif self.party_type == "Supplier":
-			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry")
-		elif self.party_type == "Employee":
-			valid_reference_doctypes = ("Expense Claim", "Journal Entry", "Employee Advance")
-		elif self.party_type == "Shareholder":
-			valid_reference_doctypes = ("Journal Entry")
-		elif self.party_type == "Donor":
-			valid_reference_doctypes = ("Donation")
+		valid_reference_doctypes = self.get_valid_reference_doctypes()
+
+		if not valid_reference_doctypes:
+			return
 
 		for d in self.get("references"):
 			if not d.allocated_amount:
-				if len(self.get("references")) == 1:
-					d.allocated_amount = self.paid_amount
-				else:
-					continue
+				continue
 			if d.reference_doctype not in valid_reference_doctypes:
-				frappe.throw(_("Reference Doctype must be one of {0}")
-					.format(comma_or(valid_reference_doctypes)))
+				frappe.throw(
+					_("Reference Doctype must be one of {0}").format(
+						comma_or([_(d) for d in valid_reference_doctypes])
+					)
+				)
+
 			elif d.reference_name:
-				if not frappe.db.exists(d.reference_doctype, d.reference_name):	
+				if not frappe.db.exists(d.reference_doctype, d.reference_name):
 					frappe.throw(_("{0} {1} does not exist").format(d.reference_doctype, d.reference_name))
+
+				ref_doc = frappe.get_doc(d.reference_doctype, d.reference_name)
+
+				if d.reference_doctype != "Journal Entry":
+					if self.party != ref_doc.get(scrub(self.party_type)):
+						frappe.throw(
+							_("{0} {1} is not associated with {2} {3}").format(
+								_(d.reference_doctype), d.reference_name, _(self.party_type), self.party
+							)
+						)
 				else:
-					ref_doc = frappe.get_doc(d.reference_doctype, d.reference_name)
-					if d.reference_doctype != "Journal Entry":
-						if self.party != ref_doc.get(scrub(self.party_type)):
-							frappe.throw(_("{0} {1} is not associated with {2} {3}")
-								.format(d.reference_doctype, d.reference_name, self.party_type, self.party))
-					else:
-						self.validate_journal_entry()
-					if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Expense Claim", "Fees"):
-						if self.party_type == "Customer":
-							ref_party_account = get_party_account_based_on_invoice_discounting(d.reference_name) or ref_doc.debit_to
-						elif self.party_type == "Student":
-							ref_party_account = ref_doc.receivable_account
-						elif self.party_type=="Supplier":
-							ref_party_account = ref_doc.credit_to
-						elif self.party_type=="Employee":
-							ref_party_account = ref_doc.payable_account
-						if ref_party_account != self.party_account:
-								frappe.throw(_("{0} {1} is associated with {2}, but Party Account is {3}")
-									.format(d.reference_doctype, d.reference_name, ref_party_account, self.party_account))
-					if ref_doc.docstatus != 1:
-						frappe.throw(_("{0} {1} must be submitted")
-							.format(d.reference_doctype, d.reference_name))
+					self.validate_journal_entry()
+
+				if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Expense Claim", "Fees"):
+					if self.party_type == "Customer":
+						ref_party_account = (
+							get_party_account_based_on_invoice_discounting(d.reference_name)
+							or ref_doc.debit_to
+						)
+					elif self.party_type=="Supplier":
+						ref_party_account = ref_doc.credit_to
+					elif self.party_type=="Employee":
+						ref_party_account = ref_doc.payable_account
+					elif self.party_type == "Student":
+						ref_party_account = ref_doc.receivable_account
+
+					if (
+						ref_party_account != self.party_account
+						and not super().book_advance_payments_in_separate_party_account
+					):
+							frappe.throw(
+								_("{0} {1} is associated with {2}, but Party Account is {3}").format(
+									_(d.reference_doctype),
+									d.reference_name,
+									ref_party_account,
+									self.party_account
+									)
+								)
+
+					if ref_doc.doctype == "Purchase Invoice" and ref_doc.get("on_hold"):
+						frappe.throw(
+							_("{0} {1} is on hold").format(_(d.reference_doctype), d.reference_name),
+							title=_("Invalid Purchase Invoice"),
+						)
+
+				if ref_doc.docstatus != 1:
+					frappe.throw(
+						_("{0} {1} must be submitted").format(d.reference_doctype, d.reference_name)
+					)
+
+	def get_valid_reference_doctypes(self):
+		if self.party_type == "Student":
+			return("Fees", "Journal Entry")
+		elif self.party_type == "Customer":
+			return("Sales Order", "Sales Invoice", "Journal Entry", "Dunning", "Payment Entry")
+		elif self.party_type == "Supplier":
+			return("Purchase Order", "Purchase Invoice", "Journal Entry", "Payment Entry")
+		elif self.party_type == "Employee":
+			return("Expense Claim", "Journal Entry", "Employee Advance")
+		elif self.party_type == "Shareholder":
+			return("Journal Entry")
+		elif self.party_type == "Donor":
+			return("Donation", "Journal Entry")
 
 	def set_missing_ref_details(
 		self,
@@ -88,34 +105,39 @@ class NonProfitPaymentEntry(PaymentEntry):
 		reference_exchange_details: dict | None = None,
 	) -> None:
 		for d in self.get("references"):
-			if d.allocated_amount:
-				if (
-					update_ref_details_only_for
-					and (d.reference_doctype, d.reference_name) not in update_ref_details_only_for
-				):
+			if not d.allocated_amount:
+				continue
+
+			if update_ref_details_only_for and (
+				(d.reference_doctype, d.reference_name) not in update_ref_details_only_for
+			):
+				continue
+
+			ref_details = get_payment_reference_details(
+				d.reference_doctype,
+				d.reference_name,
+				self.party_account_currency,
+				self.party_type, self.party
+			)
+
+			# Only update exchange rate when the reference is Journal Entry
+			if (
+				reference_exchange_details
+				and d.reference_doctype == reference_exchange_details.reference_doctype
+				and d.reference_name == reference_exchange_details.reference_name
+			):
+				ref_details.update({"exchange_rate": reference_exchange_details.exchange_rate})
+
+			for field, value in ref_details.items():
+				if d.exchange_gain_loss:
+					# for cases where gain/loss is booked into invoice
+					# exchange_gain_loss is calculated from invoice & populated
+					# and row.exchange_rate is already set to payment entry's exchange rate
+					# refer -> `update_reference_in_payment_entry()` in utils.py
 					continue
 
-				ref_details = get_payment_reference_details(d.reference_doctype, d.reference_name, self.party_account_currency,
-															self.party_type, self.party)
-
-				# Only update exchange rate when the reference is Journal Entry
-				if (
-					reference_exchange_details
-					and d.reference_doctype == reference_exchange_details.reference_doctype
-					and d.reference_name == reference_exchange_details.reference_name
-				):
-					ref_details.update({"exchange_rate": reference_exchange_details.exchange_rate})
-
-				for field, value in ref_details.items():
-					if d.exchange_gain_loss:
-						# for cases where gain/loss is booked into invoice
-						# exchange_gain_loss is calculated from invoice & populated
-						# and row.exchange_rate is already set to payment entry's exchange rate
-						# refer -> `update_reference_in_payment_entry()` in utils.py
-						continue
-
-					if field == 'exchange_rate' or not d.get(field) or force:
-						d.db_set(field, value)
+				if field == 'exchange_rate' or not d.get(field) or force:
+					d.db_set(field, value)
 
 
 @frappe.whitelist()
@@ -178,7 +200,7 @@ def set_grand_total_and_outstanding_amount(party_amount, doc):
 		grand_total = outstanding_amount = party_amount
 	else:
 		grand_total = doc.amount
-		outstanding_amount = doc.amount - doc.total_amount_paid
+		outstanding_amount = doc.amount
 
 	return grand_total, outstanding_amount
 
