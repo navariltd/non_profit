@@ -32,13 +32,13 @@ class Donation(Document):
 		non_profit_settings = frappe.get_doc(
 			"Non Profit Settings",
 			"Non Profit Settings",
-		) 
-		
+		)
+
 		enable_payment_table = non_profit_settings.get("enable_payment_table_on_donation", 0)
 		total_amount_paid = calculate_donation_paid_amount(self)
 
 		frappe.db.set_value("Donation", self.name, "total_amount_paid", total_amount_paid)
-		
+
 		if enable_payment_table == 1:
 			donation_payments = self.get("donation_payments") or []
 
@@ -311,3 +311,9 @@ def calculate_donation_paid_amount(doc):
 			total_paid += flt(ref.allocated_amount)
 
 	return total_paid
+
+def update_donation_payment_status(payment_entry, method):
+	for ref in payment_entry.references:
+		if ref.reference_doctype == "Donation" and ref.reference_name:
+			donation = frappe.get_doc("Donation", ref.reference_name)
+			donation.compute_total_and_validate()
