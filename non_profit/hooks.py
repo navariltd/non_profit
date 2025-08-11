@@ -110,12 +110,8 @@ override_doctype_class = {
 # ---------------
 # Hook on document methods and events
 
-doc_events = {
-	"Payment Entry": {
-		"on_submit": "non_profit.non_profit.doctype.donation.donation.update_donation_payment_status",
-		"on_cancel": "non_profit.non_profit.doctype.donation.donation.update_donation_payment_status",
-	}
-}
+# doc_events = {
+# }
 
 # Scheduled Tasks
 # ---------------

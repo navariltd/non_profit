@@ -15,6 +15,22 @@ from erpnext.setup.utils import get_exchange_rate
 
 
 class NonProfitPaymentEntry(PaymentEntry):
+	def on_submit(self):
+		self.update_linked_donations()
+
+	def on_cancel(self):
+		self.update_linked_donations()
+
+	def update_linked_donations(self):
+		donations = {
+			ref.reference_name
+			for ref in self.references
+			if ref.reference_doctype == "Donation"
+		}
+		for donation in donations:
+			doc = frappe.get_doc("Donation", donation)
+			doc.compute_total_and_validate()
+
 	def validate_reference_documents(self):
 		valid_reference_doctypes = self.get_valid_reference_doctypes()
 
