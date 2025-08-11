@@ -311,9 +311,3 @@ def calculate_donation_paid_amount(doc):
 			total_paid += flt(ref.allocated_amount)
 
 	return total_paid
-
-def update_donation_payment_status(payment_entry, method):
-	for ref in payment_entry.references:
-		if ref.reference_doctype == "Donation" and ref.reference_name:
-			donation = frappe.get_doc("Donation", ref.reference_name)
-			donation.compute_total_and_validate()
