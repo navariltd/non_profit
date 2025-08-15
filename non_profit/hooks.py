@@ -198,3 +198,5 @@ standard_portal_menu_items = [
 	{"title": _("Certification"), "route": "/certification",
 	 "reference_doctype": "Certification Application", "role": "Non Profit Portal User"},
 ]
+
+website_route_rules = [{'from_route': '/frontend/<path:app_path>', 'to_route': 'frontend'}, {'from_route': '/bc/<path:app_path>', 'to_route': 'bc'}, {'from_route': '/frontend/<path:app_path>', 'to_route': 'frontend'}, {'from_route': '/frontend/<path:app_path>', 'to_route': 'frontend'}, {'from_route': '/frontend/<path:app_path>', 'to_route': 'frontend'}, {'from_route': '/frontend/<path:app_path>', 'to_route': 'frontend'}, {'from_route': '/frontend/<path:app_path>', 'to_route': 'frontend'},]
