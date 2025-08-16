@@ -16,9 +16,11 @@ from erpnext.setup.utils import get_exchange_rate
 
 class NonProfitPaymentEntry(PaymentEntry):
 	def on_submit(self):
+		super().on_submit()
 		self.update_linked_donations()
 
 	def on_cancel(self):
+		super().on_cancel()
 		self.update_linked_donations()
 
 	def update_linked_donations(self):
