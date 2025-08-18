@@ -1,40 +1,100 @@
-import { userResource } from "@/data/user";
 import { createRouter, createWebHistory } from "vue-router";
-import { session } from "./data/session";
+import { usersStore } from "./stores/user";
+import { sessionStore } from "./stores/session";
+import { useSettings } from "./stores/settings";
 
+let defaultRoute = "/courses";
 const routes = [
   {
     path: "/",
-    name: "Home",
-    component: () => import("@/pages/Home.vue"),
+    redirect: {
+      name: "Courses",
+    },
   },
   {
-    name: "Login",
-    path: "/account/login",
-    component: () => import("@/pages/Login.vue"),
+    path: "/user/:username",
+    name: "Profile",
+    component: () => import("@/pages/Profile.vue"),
+    props: true,
+    redirect: { name: "ProfileAbout" },
+    children: [
+      {
+        name: "ProfileAbout",
+        path: "",
+        component: () => import("@/pages/ProfileAbout.vue"),
+      },
+      {
+        name: "ProfileCertificates",
+        path: "certificates",
+        component: () => import("@/pages/ProfileCertificates.vue"),
+      },
+      {
+        name: "ProfileRoles",
+        path: "roles",
+        component: () => import("@/pages/ProfileRoles.vue"),
+      },
+      {
+        name: "ProfileEvaluator",
+        path: "slots",
+        component: () => import("@/pages/ProfileEvaluator.vue"),
+      },
+      {
+        name: "ProfileEvaluationSchedule",
+        path: "schedule",
+        component: () => import("@/pages/ProfileEvaluationSchedule.vue"),
+      },
+    ],
+  },
+  {
+    path: "/job-openings",
+    name: "Jobs",
+    component: () => import("@/pages/Jobs.vue"),
+  },
+  {
+    path: "/job-openings/:job",
+    name: "JobDetail",
+    component: () => import("@/pages/JobDetail.vue"),
+    props: true,
+  },
+  {
+    path: "/job-opening/:jobName/edit",
+    name: "JobForm",
+    component: () => import("@/pages/JobForm.vue"),
+    props: true,
+  },
+  {
+    path: "/persona",
+    name: "PersonaForm",
+    component: () => import("@/pages/PersonaForm.vue"),
   },
 ];
 
-const router = createRouter({
+let router = createRouter({
   history: createWebHistory("/vmms-portal"),
   routes,
 });
 
 router.beforeEach(async (to, from, next) => {
-  let isLoggedIn = session.isLoggedIn;
+  const { userResource } = usersStore();
+  let { isLoggedIn } = sessionStore();
+  const { allowGuestAccess } = useSettings();
+
   try {
-    await userResource.promise;
+    if (isLoggedIn) {
+      await userResource.promise;
+    }
   } catch (error) {
     isLoggedIn = false;
   }
 
-  if (to.name === "Login" && isLoggedIn) {
-    next({ name: "Home" });
-  } else if (to.name !== "Login" && !isLoggedIn) {
-    next({ name: "Login" });
-  } else {
-    next();
+  if (!isLoggedIn) {
+    await allowGuestAccess.promise;
+    if (!allowGuestAccess.data) {
+      window.location.href = "/login";
+      return;
+    }
   }
+  return next();
 });
 
 export default router;

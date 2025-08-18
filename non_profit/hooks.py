@@ -199,4 +199,6 @@ standard_portal_menu_items = [
 	 "reference_doctype": "Certification Application", "role": "Non Profit Portal User"},
 ]
 
-website_route_rules = [{"from_route": "/vmms-portal/<path:app_path>", "to_route": "vmms-portal"},]
+website_route_rules = [
+    {"from_route": "/vmms-portal/<path:app_path>", "to_route": "vmms-portal"},
+]
