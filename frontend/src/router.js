@@ -7,11 +7,18 @@ const routes = [
     path: "/",
     name: "Home",
     component: () => import("@/pages/Home.vue"),
+    meta: { requiresAuth: true },
   },
   {
     name: "Login",
     path: "/account/login",
     component: () => import("@/pages/Login.vue"),
+  },
+  {
+    name: "VMMSPortalSignup",
+    path: "/vmmsportalSignup",
+    component: () => import("@/pages/VmmsPortal.vue"),
+    meta: { requiresAuth: false },
   },
 ];
 
@@ -28,9 +35,7 @@ router.beforeEach(async (to, from, next) => {
     isLoggedIn = false;
   }
 
-  if (to.name === "Login" && isLoggedIn) {
-    next({ name: "Home" });
-  } else if (to.name !== "Login" && !isLoggedIn) {
+  if (to.meta.requiresAuth && !isLoggedIn) {
     next({ name: "Login" });
   } else {
     next();

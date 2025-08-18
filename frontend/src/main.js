@@ -22,7 +22,7 @@ import {
 import "./index.css"
 
 const globalComponents = {
-	Button,
+	 Button,
 	TextInput,
 	Input,
 	FormControl,

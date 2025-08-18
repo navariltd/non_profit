@@ -8,7 +8,9 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    EmptyState: typeof import('./src/components/EmptyState.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    VmmsPortalCard: typeof import('./src/components/VmmsPortalCard.vue')['default']
   }
 }
