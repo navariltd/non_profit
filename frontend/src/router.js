@@ -67,6 +67,17 @@ const routes = [
     name: "PersonaForm",
     component: () => import("@/pages/PersonaForm.vue"),
   },
+  {
+    name: "Login",
+    path: "/account/login",
+    component: () => import("@/pages/Login.vue"),
+  },
+  {
+    name: "VMMSPortalSignup",
+    path: "/vmmsportalSignup",
+    component: () => import("@/pages/VmmsPortal.vue"),
+    meta: { requiresAuth: false },
+  },
 ];
 
 let router = createRouter({
@@ -79,6 +90,10 @@ router.beforeEach(async (to, from, next) => {
   let { isLoggedIn } = sessionStore();
   const { allowGuestAccess } = useSettings();
 
+  if (to.meta.requiresAuth === false) {
+    return next();
+  }
+
   try {
     if (isLoggedIn) {
       await userResource.promise;
@@ -90,10 +105,10 @@ router.beforeEach(async (to, from, next) => {
   if (!isLoggedIn) {
     await allowGuestAccess.promise;
     if (!allowGuestAccess.data) {
-      window.location.href = "/login";
-      return;
+      return next({ name: "Login" });
     }
   }
+
   return next();
 });
 
