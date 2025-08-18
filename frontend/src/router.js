@@ -16,7 +16,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory("/portal"),
+  history: createWebHistory("/vmms-portal"),
   routes,
 });
 

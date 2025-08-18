@@ -11,7 +11,7 @@ export default defineConfig({
       jinjaBootData: true,
       lucideIcons: true,
       buildConfig: {
-        indexHtmlPath: "../non_profit/www/portal.html",
+        indexHtmlPath: "../non_profit/www/vmms-portal.html",
         emptyOutDir: true,
         sourcemap: true,
       },
