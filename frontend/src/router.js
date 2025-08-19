@@ -8,8 +8,14 @@ const routes = [
   {
     path: "/",
     redirect: {
-      name: "Courses",
+      name: "Dashboard",
     },
+  },
+
+  {
+    path: "/dashboard",
+    name: "Dashboard",
+    component: () => import("@/pages/Dashboard.vue"),
   },
   {
     path: "/user/:username",
