@@ -1,15 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="/assets/non_profit/frontend/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vmms Portal</title>
-    <script type="module" crossorigin src="/assets/non_profit/frontend/assets/index-DfH32xGh.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/non_profit/frontend/assets/index-C0gXqSrm.css">
+    <script type="module" crossorigin src="/assets/non_profit/frontend/assets/index-vjcnkzKd.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/non_profit/frontend/assets/index-BjMYC5E1.css">
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      window.csrf_token = "{{ frappe.session.csrf_token }}";
+    </script>
+
   
           <script>
               {% for key in boot %}
