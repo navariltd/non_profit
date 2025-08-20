@@ -87,3 +87,14 @@ def get_job_details(job):
 
     return job_details
 
+
+
+
+@frappe.whitelist(allow_guest=True)
+def get_regions():
+    return frappe.get_all("Company", filters={"is_group": 0})
+
+
+@frappe.whitelist(allow_guest=True)
+def get_branches():
+    return frappe.get_all("Branch")
