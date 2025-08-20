@@ -44,20 +44,11 @@
 </template>
 
 <script lang="ts" setup>
-import { createResource } from "frappe-ui";
-import { onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import Button from "frappe-ui/src/components/Button/Button.vue";
 import EmptyState from "../components/EmptyState.vue";
 import VmmsPortalCard from "../components/VmmsPortalCard.vue";
+import { membershipStore } from "../stores/membership";
 
-const membershipTypes = createResource({
-  url: "non_profit.non_profit.api.get_membership_types",
-  cache: "MembershipTypes",
-  auto: true,
-});
-
-onMounted(() => {
-  membershipTypes.fetch();
-});
+const { membershipTypes } = membershipStore();
 </script>
