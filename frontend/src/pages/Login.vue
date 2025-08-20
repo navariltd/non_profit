@@ -275,12 +275,7 @@ const createSignUp = createResource({
 
 function submit() {
   if (isLogin.value) {
-    console.log(
-      "Logging in with email:",
-      userEmail.value,
-      " and password:",
-      password.value
-    );
+    
 
     session.login.submit({
       usr: userEmail.value,
