@@ -29,6 +29,7 @@ def sign_up(**kwargs):
                 "last_name": kwargs.get("last_name"),
                 "password": kwargs.get("password"),
                 "gender": kwargs.get("gender"),
+                "enabled": 0
             }
         )
 
