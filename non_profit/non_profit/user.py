@@ -63,7 +63,7 @@ def sign_up(**kwargs):
             member = frappe.get_doc(
                 {
                     "doctype": "Member",
-                    "member_name": f"{kwargs.get("first_name")} {kwargs.get("last_name")}",
+                    "member_name": f'{kwargs.get("first_name")} {kwargs.get("last_name")}',
                     "email_id": user.name,
                     "membership_type": kwargs.get("membership_type"),
                     "custom_company": kwargs.get("region"),

@@ -275,9 +275,11 @@ const createSignUp = createResource({
 
 function submit() {
   if (isLogin.value) {
+    
+
     session.login.submit({
-      usr: signUpForm.email,
-      pwd: signUpForm.password,
+      usr: userEmail.value,
+      pwd: password.value,
     });
   } else {
     createSignUp.submit({
