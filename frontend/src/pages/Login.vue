@@ -42,51 +42,56 @@
               label="Last Name"
               v-model="signUpForm.lastName"
             />
-            <Select
-              :options="[
-                {
-                  label: 'Male',
-                  value: 'Male',
-                },
-                {
-                  label: 'Female',
-                  value: 'Female',
-                },
-              ]"
-              required
-              name="gender"
-              type="text"
-              placeholder="Female"
-              label="Gender"
-              v-model="signUpForm.gender"
-            />
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="flex flex-col">
-              <span class="text-gray-600 test-sm mb-2">Region</span>
+          <div class="w-full border p-4 rounded-lg bg-white">
+            <div class="mb-4">
+              <label for="gender" class="block text-gray-600 text-sm mb-2"
+                >Gender</label
+              >
               <Select
-                :options="regionOptions"
+                id="gender"
+                :options="[
+                  { label: 'Male', value: 'Male' },
+                  { label: 'Female', value: 'Female' },
+                ]"
                 required
-                name="region"
-                type="select"
-                placeholder="Eastern Region"
-                label="Region"
-                v-model="signUpForm.region"
-              />
-            </div>
-            <div class="flex flex-col">
-              <span class="text-gray-600 test-sm mb-2">Branch</span>
-              <Select
-                :options="branchOptions"
-                required
-                name="branch"
+                name="gender"
                 type="text"
-                placeholder="Eastern Region Branch"
-                label="Branch"
-                v-model="signUpForm.branch"
+                placeholder="Select Gender"
+                v-model="signUpForm.gender"
+                class="w-full"
               />
             </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex flex-col">
+                <label for="region" class="text-gray-600 text-sm mb-2"
+                  >Region</label
+                >
+                <Link
+                  id="region"
+                  doctype="Company"
+                  v-model="signUpForm.region"
+                  placeholder="Region"
+                  class="w-full min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
+                />
+              </div>
+
+              <div class="flex flex-col">
+                <label for="branch" class="text-gray-600 text-sm mb-2"
+                  >Branch</label
+                >
+                <Link
+                  id="branch"
+                  doctype="Branch"
+                  v-model="signUpForm.branch"
+                  placeholder="Branch"
+                  class="w-full min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
+                />
+              </div>
+            </div>
           </div>
+
           <Input
             required
             name="email"
@@ -211,12 +216,14 @@ import Dialog from "frappe-ui/src/components/Dialog/Dialog.vue";
 import VmmsPortalCard from "../components/VmmsPortalCard.vue";
 import { membershipStore } from "../stores/membership";
 import { useRouter } from "vue-router";
+import Dropdown from "frappe-ui/src/components/Dropdown/Dropdown.vue";
+import Link from "../components/Controls/Link.vue";
 
+const company = ref("");
 const router = useRouter();
 const isLogin = ref(true);
 const userEmail = ref("");
 const password = ref("");
-const dialog4 = ref(false);
 const membershipDialog = ref(false);
 const signInState = ref(false);
 interface RegionOption {
@@ -275,8 +282,6 @@ const createSignUp = createResource({
 
 function submit() {
   if (isLogin.value) {
-    
-
     session.login.submit({
       usr: userEmail.value,
       pwd: password.value,
