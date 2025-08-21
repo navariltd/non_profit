@@ -98,3 +98,20 @@ def get_regions():
 @frappe.whitelist(allow_guest=True)
 def get_branches():
     return frappe.get_all("Branch")
+
+@frappe.whitelist(allow_guest=True)
+def get_user_info():
+    if frappe.session.user == "Guest":
+        return None
+
+    user = frappe.db.get_value(
+        "User",
+        frappe.session.user,
+        ["name", "email", "enabled", "user_image", "full_name", "user_type", "username"],
+        as_dict=1,
+    )
+    user["roles"] = frappe.get_roles(user.name)
+    user.non_profit_member = "Non Profit Member" in user.roles
+    user.Employee = "Employee" in user.roles
+
+    return user
