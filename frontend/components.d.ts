@@ -78,6 +78,7 @@ declare module 'vue' {
     LiveClassAttendance: typeof import('./src/components/Modals/LiveClassAttendance.vue')['default']
     LiveClassModal: typeof import('./src/components/Modals/LiveClassModal.vue')['default']
     LMSLogo: typeof import('./src/components/Icons/LMSLogo.vue')['default']
+    Member: typeof import('./src/components/Member.vue')['default']
     Members: typeof import('./src/components/Settings/Members.vue')['default']
     MobileLayout: typeof import('./src/components/MobileLayout.vue')['default']
     MultiSelect: typeof import('./src/components/Controls/MultiSelect.vue')['default']
@@ -114,6 +115,7 @@ declare module 'vue' {
     VideoBlock: typeof import('./src/components/VideoBlock.vue')['default']
     VideoStatistics: typeof import('./src/components/Modals/VideoStatistics.vue')['default']
     VmmsPortalCard: typeof import('./src/components/VmmsPortalCard.vue')['default']
+    Volunteer: typeof import('./src/components/Volunteer.vue')['default']
     ZoomAccountModal: typeof import('./src/components/Modals/ZoomAccountModal.vue')['default']
     ZoomSettings: typeof import('./src/components/Settings/ZoomSettings.vue')['default']
   }
