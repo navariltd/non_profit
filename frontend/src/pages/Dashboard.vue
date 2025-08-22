@@ -1,9 +1,12 @@
 <template>
-  <Member v-if="roleResource.data.non_profit_member" />
+  <Member
+    v-if="roleResource.data.non_profit_member && !roleResource.data.volunteer"
+  />
 
-  <Volunteer v-if="roleResource.data.employee" />
+  <Volunteer
+    v-if="!roleResource.data.non_profit_member && roleResource.data.volunteer"
+  />
 </template>
-
 <script lang="ts" setup>
 import Member from "../components/Member.vue";
 import Volunteer from "../components/Volunteer.vue";
