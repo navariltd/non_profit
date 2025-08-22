@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "format:VD-{YYYY}-{MM}-{####}",
  "creation": "2025-08-22 08:19:57.612367",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -144,10 +145,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-22 10:06:57.564286",
+ "modified": "2025-08-22 13:24:29.665388",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Deployment",
+ "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [
   {
