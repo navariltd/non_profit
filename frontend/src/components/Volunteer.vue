@@ -10,7 +10,7 @@
           <h3 class="text-3xl font-bold text-gray-900">
             {{ volunteerStats.hours }}
           </h3>
-          <p class=" text-gray-500 mt-2">Total Hours</p>
+          <p class="text-gray-500 mt-2">Total Hours</p>
         </div>
         <div
           class="rounded-lg p-6 text-center border border-gray-200 min-w-32 bg-gradient-to-br from-gray-100 to-green-50"
@@ -18,7 +18,7 @@
           <h3 class="text-3xl font-bold text-gray-700">
             {{ volunteerStats.events }}
           </h3>
-          <p class=" text-gray-500 mt-2">Events Attended</p>
+          <p class="text-gray-500 mt-2">Events Attended</p>
         </div>
         <div
           class="rounded-lg p-6 text-center border border-gray-200 min-w-32 bg-gradient-to-br from-gray-100 to-yellow-50"
@@ -26,59 +26,15 @@
           <h3 class="text-3xl font-bold text-gray-700">
             {{ volunteerStats.badges }}
           </h3>
-          <p class=" text-gray-500 mt-2">Badges Earned</p>
+          <p class="text-gray-500 mt-2">Badges Earned</p>
         </div>
       </div>
     </div>
 
     <div class="grid grid-cols-1 gap-8 max-w-6xl mx-auto">
-      <div>
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-lg font-medium text-gray-700">Upcoming Events</h3>
-          <Button @click="showEventsDialog = true" variant="solid" size="sm">
-            View All Events
-          </Button>
-        </div>
-        <div class="space-y-3">
-          <div
-            v-for="event in upcomingEvents"
-            :key="event.name"
-            class="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200"
-          >
-            <div>
-              <p class="font-medium text-gray-800">{{ event.name }}</p>
-              <p class=" text-gray-500">{{ event.date }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Events />
 
-      <div>
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-lg font-medium text-gray-700">
-            Recommended Opportunities
-          </h3>
-          <Button
-            @click="showOpportunitiesDialog = true"
-            variant="solid"
-            size="sm"
-          >
-            View All Opportunities
-          </Button>
-        </div>
-        <div class="space-y-3">
-          <div
-            v-for="opportunity in recommendedOpportunities"
-            :key="opportunity.name"
-            class="p-4 bg-gray-50 rounded-lg border border-gray-200"
-          >
-            <p class="font-medium text-gray-800">{{ opportunity.name }}</p>
-            <p class=" text-gray-500">
-              Skills: {{ opportunity.skills }}
-            </p>
-          </div>
-        </div>
-      </div>
+      <Projects />
     </div>
 
     <Dialog
@@ -114,6 +70,8 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { ListView, Dialog, Button } from "frappe-ui";
+import Projects from "./Projects.vue";
+import Events from "./Events.vue";
 
 const volunteerStats = ref({
   hours: 125,
