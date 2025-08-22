@@ -26,7 +26,8 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Pending\nAccepted\nRejected"
+   "options": "Pending\nAccepted\nRejected",
+   "default": "Pending"
   }
  ],
  "grid_page_length": 50,
