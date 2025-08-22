@@ -216,5 +216,8 @@ fixtures = [
             ["dt", "=", "Member"],
             ["fieldname", "in", ["custom_company", "custom_branch"]],
         ],
+    },
+    {
+        "doctype": "Volunteer Status"
     }
 ]
