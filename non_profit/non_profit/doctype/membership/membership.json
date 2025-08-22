@@ -11,6 +11,7 @@
   "membership_type",
   "column_break_3",
   "company",
+  "branch",
   "membership_status",
   "membership_validity_section",
   "from_date",
@@ -141,17 +142,24 @@
    "reqd": 1
   },
   {
-    "fieldname": "column_break_19",
-    "fieldtype": "Column Break"
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
   },
   {
-    "fieldname": "column_break_16",
-    "fieldtype": "Column Break"
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-03-16 17:37:28.672916",
+ "modified": "2025-08-22 11:55:27.933881",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",
@@ -183,9 +191,11 @@
   }
  ],
  "restrict_to_domain": "Non Profit",
+ "row_format": "Dynamic",
  "search_fields": "member, member_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "member_name",
  "track_changes": 1
 }
