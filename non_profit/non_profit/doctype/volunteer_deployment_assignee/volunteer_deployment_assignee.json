@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-22 09:00:40.395783",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "volunteer",
+  "column_break_qbmp"
+ ],
+ "fields": [
+  {
+   "fieldname": "column_break_qbmp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "volunteer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Volunteer",
+   "options": "Volunteer",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-08-22 09:02:52.217028",
+ "modified_by": "Administrator",
+ "module": "Non Profit",
+ "name": "Volunteer Deployment Assignee",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

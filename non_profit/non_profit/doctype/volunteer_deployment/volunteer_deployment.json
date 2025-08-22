@@ -1,0 +1,171 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-22 08:19:57.612367",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "project",
+  "deployment_criteria",
+  "column_break_qbmp",
+  "company",
+  "branch",
+  "section_break_bckw",
+  "expected_start_date",
+  "column_break_uyxh",
+  "expected_end_date",
+  "section_break_odux",
+  "required_skills",
+  "column_break_jvby",
+  "number_of_volunteers_required",
+  "section_break_rmvn",
+  "remarks",
+  "section_break_r6sf",
+  "amended_from",
+  "volunteers_tab",
+  "volunteers"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_r6sf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Volunteer Deployment",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_qbmp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "project.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "project.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Branch",
+   "options": "Branch",
+   "reqd": 1
+  },
+  {
+   "fieldname": "volunteers_tab",
+   "fieldtype": "Tab Break",
+   "label": "Volunteers"
+  },
+  {
+   "fieldname": "volunteers",
+   "fieldtype": "Table",
+   "label": "Volunteers",
+   "options": "Volunteer Deployment Assignee"
+  },
+  {
+   "fetch_from": "project.expected_start_date",
+   "fieldname": "expected_start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Expected Start Date",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "project.expected_end_date",
+   "fieldname": "expected_end_date",
+   "fieldtype": "Date",
+   "label": "Expected End Date"
+  },
+  {
+   "fieldname": "section_break_bckw",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_uyxh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_rmvn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text Editor",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "section_break_odux",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "required_skills",
+   "fieldtype": "Table MultiSelect",
+   "label": "Required Skills",
+   "options": "Volunteer Skill"
+  },
+  {
+   "fieldname": "column_break_jvby",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "number_of_volunteers_required",
+   "fieldtype": "Int",
+   "label": "Number of Volunteers Required",
+   "non_negative": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Project",
+   "options": "Project",
+   "reqd": 1
+  },
+  {
+   "fieldname": "deployment_criteria",
+   "fieldtype": "Link",
+   "label": "Deployment Criteria",
+   "link_filters": "[[\"Volunteer Deployment Criteria\",\"docstatus\",\"=\",\"1\"]]",
+   "options": "Volunteer Deployment Criteria"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-08-22 10:06:57.564286",
+ "modified_by": "Administrator",
+ "module": "Non Profit",
+ "name": "Volunteer Deployment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
