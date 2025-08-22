@@ -8,7 +8,11 @@ from frappe.model.document import Document
 class VolunteerDeploymentCriteria(Document):
 	def before_submit(self):
 		total_weight = 0
-		child_table_name = "criteria"  
+	CRITERIA_CHILD_TABLE_FIELD = "criteria"
+
+	def before_submit(self):
+		total_weight = 0
+		child_table_name = self.CRITERIA_CHILD_TABLE_FIELD
 		
 		if not self.get(child_table_name):
 			frappe.throw("No criteria found. Please add criteria before submitting.")
