@@ -31,7 +31,7 @@ router.beforeEach((to, from, next) => {
   if (
     to.query.fromLesson ||
     to.path === "/persona" ||
-    to.path === "/vmmsportalSignup" ||
+    to.path === "/welcome" ||
     to.path === "/account/login"
   ) {
     noSidebar.value = true;

@@ -13,6 +13,7 @@
   "branch",
   "column_break_5",
   "volunteer_type",
+  "status",
   "email",
   "image",
   "volunteer_availability_and_skills_details",
@@ -147,11 +148,17 @@
    "in_standard_filter": 1,
    "label": "Branch",
    "options": "Branch"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Link",
+   "label": "Status",
+   "options": "Volunteer Status"
   }
  ],
  "image_field": "image",
  "links": [],
- "modified": "2024-12-16 11:08:54.407089",
+ "modified": "2025-08-22 10:31:42.116097",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer",
@@ -173,6 +180,7 @@
  ],
  "quick_entry": 1,
  "restrict_to_domain": "Non Profit",
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
