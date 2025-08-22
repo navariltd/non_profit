@@ -14,7 +14,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Project",
    "fieldname": "volunteer",
    "fieldtype": "Link",
    "in_list_view": 1,
