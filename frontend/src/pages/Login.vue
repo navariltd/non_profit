@@ -193,7 +193,7 @@
           label: 'Confirm',
           variant: 'solid',
           onClick: () => {
-            router.push({ name: 'VMMSPortalSignup' });
+            router.push({ name: 'Welcome' });
           },
         },
       ],

@@ -3,7 +3,6 @@ import { usersStore } from "./stores/user";
 import { sessionStore } from "./stores/session";
 import { useSettings } from "./stores/settings";
 
-let defaultRoute = "/courses";
 const routes = [
   {
     path: "/",
@@ -79,8 +78,8 @@ const routes = [
     component: () => import("@/pages/Login.vue"),
   },
   {
-    name: "VMMSPortalSignup",
-    path: "/vmmsportalSignup",
+    name: "Welcome",
+    path: "/welcome",
     component: () => import("@/pages/VmmsPortal.vue"),
     meta: { requiresAuth: false },
   },
