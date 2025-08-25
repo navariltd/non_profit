@@ -3,23 +3,26 @@ import frappe
 
 @frappe.whitelist(allow_guest=True)
 def sign_up(**kwargs):
+    """
+    Handles user sign-up by creating a new User, and optionally
+    an Employee (for volunteers) or Member document.
+    """
 
+    print(kwargs)
     try:
         frappe.db.begin()
-        user = frappe.db.get("User", {"email": kwargs.get("email")})
 
-        if user:
+        if frappe.db.exists("User", {"email": kwargs.get("email")}):
             frappe.throw("User already exists with this email")
 
-        else:
-            if frappe.db.get_creation_count("User", 60) > 300:
-                return frappe.respond_as_web_page(
-                    _("Temporarily Disabled"),
-                    _(
-                        "Too many users signed up recently, so the registration is disabled. Please try back in an hour"
-                    ),
-                    http_status_code=429,
-                )
+        if frappe.db.get_creation_count("User", 60) > 300:
+            return frappe.respond_as_web_page(
+                _("Temporarily Disabled"),
+                _(
+                    "Too many users signed up recently, so the registration is disabled. Please try back in an hour"
+                ),
+                http_status_code=429,
+            )
 
         user = frappe.get_doc(
             {
@@ -29,17 +32,21 @@ def sign_up(**kwargs):
                 "last_name": kwargs.get("last_name"),
                 "password": kwargs.get("password"),
                 "gender": kwargs.get("gender"),
-                "enabled": 0
+                "enabled": 1,
+                "user_type": "Website User",
             }
         )
 
-        user.flags.ignore_permissions = True
-        user.flags.ignore_password_policy = True
+        frappe.set_user("Administrator")
 
-        user.insert()
+        user.insert(ignore_permissions=True)
 
         if kwargs.get("category_volunteer"):
+            user.add_roles("Volunteer")
+        if kwargs.get("category_member"):
+            user.add_roles("Non Profit Member")
 
+        if kwargs.get("category_volunteer"):
             volunteer = frappe.get_doc(
                 {
                     "doctype": "Employee",
@@ -54,13 +61,9 @@ def sign_up(**kwargs):
                     "status": "Inactive",
                 }
             )
-
-            volunteer.flags.ignore_permissions = True
-            volunteer.insert()
+            volunteer.insert(ignore_permissions=True)
 
         if kwargs.get("category_member"):
-
-            user.add_roles("Non Profit Member")
             member = frappe.get_doc(
                 {
                     "doctype": "Member",
@@ -71,9 +74,7 @@ def sign_up(**kwargs):
                     "custom_branch": kwargs.get("branch"),
                 }
             )
-
-            member.flags.ignore_permissions = True
-            member.insert()
+            member.insert(ignore_permissions=True)
 
         frappe.db.commit()
 
