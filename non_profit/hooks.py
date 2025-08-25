@@ -221,3 +221,13 @@ fixtures = [
         "doctype": "Volunteer Status"
     }
 ]
+
+add_to_apps_screen = [
+	{
+		"name": "vmms",
+		"logo": "/assets/non_profit/frontend/vmms.svg",
+		"title": "VMMS Portal",
+		"route": "/vmms-portal",
+		"has_permission": "non_profit.non_profit.api.check_app_permission",
+	}
+]
