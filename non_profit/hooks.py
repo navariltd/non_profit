@@ -211,10 +211,9 @@ website_route_rules = [
 
 fixtures = [
     {
-        "doctype": "Custom Field",
+        "doctype": "Calendar View",
         "filters": [
-            ["dt", "=", "Member"],
-            ["fieldname", "in", ["custom_company", "custom_branch"]],
+            ["name", "=", "Volunteer Availability"],
         ],
     },
     {
