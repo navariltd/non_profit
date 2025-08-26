@@ -123,8 +123,15 @@ def get_user_info():
     roles = frappe.get_roles(user.name)
     user["roles"] = roles
 
+    employee_name, employee_company, employee_branch = frappe.db.get_value(
+        "Employee", {"user_id": user.name}, ["name", "company", "branch"]
+    )
+
     user["non_profit_member"] = "Non Profit Member" in roles
     user["volunteer"] = "Volunteer" in roles
+    user["employee"] = employee_name if employee_name else None
+    user["company"] = employee_company if employee_company else None
+    user["branch"] = employee_branch if employee_name else None
 
     return user
 
@@ -174,3 +181,21 @@ def get_projects():
             "expected_end_date",
         ],
     )
+
+
+@frappe.whitelist()
+def create_availability_slot(slot_data):
+
+    try:
+
+        doc = frappe.get_doc({"doctype": "Volunteer Availability Slot", **slot_data})
+
+        doc.insert(ignore_permissions=True)
+
+        frappe.db.commit()
+        return {"success": True, "name": doc.name, "data": doc.as_dict()}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Availability Slot Creation Error")
+
+        frappe.throw("Availability Slot Creation Error")
