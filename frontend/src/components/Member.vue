@@ -100,7 +100,7 @@
 import { ListView } from "frappe-ui";
 import Button from "frappe-ui/src/components/Button/Button.vue";
 import { ref } from "vue";
-import Events from "./Events.vue";
+import Events from "../pages/Events.vue";
 // TODO: Replace with actual API calls or store data
 const membershipStatus = ref({
   status: "Active",

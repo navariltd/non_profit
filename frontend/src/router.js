@@ -16,6 +16,7 @@ const routes = [
     name: "Dashboard",
     component: () => import("@/pages/Dashboard.vue"),
   },
+
   {
     path: "/user/:username",
     name: "Profile",
@@ -83,6 +84,18 @@ const routes = [
     component: () => import("@/pages/VmmsPortal.vue"),
     meta: { requiresAuth: false },
   },
+  {
+    name: "Events",
+    path: "/events",
+    component: () => import("@/pages/Events.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    name: "Projects",
+    path: "/projects",
+    component: () => import("@/pages/Projects.vue"),
+    meta: { requiresAuth: true },
+  },
 ];
 
 let router = createRouter({
@@ -109,8 +122,16 @@ router.beforeEach(async (to, from, next) => {
 
   if (!isLoggedIn) {
     await allowGuestAccess.promise;
-    if (!allowGuestAccess.data) {
-      return next({ name: "Login" });
+    if (allowGuestAccess.data) {
+      if (to.meta.requiresAuth) {
+        return next({ name: "Login" });
+      } else {
+        return next();
+      }
+    } else {
+      if (to.name !== "Login") {
+        return next({ name: "Login" });
+      }
     }
   }
 
