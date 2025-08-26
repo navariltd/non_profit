@@ -8,7 +8,14 @@ export const membershipStore = defineStore("membership", () => {
     auto: true,
   });
 
+  const events = createResource({
+    url: "non_profit.non_profit.api.get_events",
+    auto: true,
+    cache: ["events"],
+  });
+
   return {
     membershipTypes,
+    events,
   };
 });

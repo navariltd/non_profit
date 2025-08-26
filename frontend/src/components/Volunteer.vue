@@ -1,159 +1,171 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8 px-4">
-    <div class="max-w-7xl mx-auto">
-      <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Volunteer Dashboard</h1>
-        <div class="flex items-center space-x-4">
+  <div>
+    <!-- Volunteer stats and availability -->
+    <div class="flex flex-col md:flex-row justify-evenly items-center m-8">
+      <div class="flex justify-center">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
           <div
-            class="flex items-center space-x-2 border border-gray-700 rounded-lg p-2"
+            class="bg-white rounded-lg shadow-lg p-6 text-center border border-gray-200 bg-gradient-to-br from-blue-50 to-blue-100"
           >
-            <Switch
-              size="sm"
-              label="Set Availability"
-              description="If On, you will receive notifications for new projects"
-              :disabled="false"
-              v-model="isAvailable"
-            />
+            <h3 class="text-4xl font-bold text-blue-700 mb-2">
+              {{ volunteerStats.hours }}
+            </h3>
+            <p class="text-gray-600 font-medium">Total Hours</p>
           </div>
-
           <div
-            class="relative cursor-pointer"
-            @click="showNotificationDialog = true"
+            class="bg-white rounded-lg shadow-lg p-6 text-center border border-gray-200 bg-gradient-to-br from-green-50 to-green-100"
           >
-            <FeatherIcon
-              name="bell"
-              class="w-6 h-6 text-gray-600 hover:text-gray-800"
-            />
+            <h3 class="text-4xl font-bold text-green-700 mb-2">
+              {{ volunteerStats.events }}
+            </h3>
+            <p class="text-gray-600 font-medium">Events Attended</p>
+          </div>
+          <div
+            class="bg-white rounded-lg shadow-lg p-6 text-center border border-gray-200 bg-gradient-to-br from-yellow-50 to-yellow-100"
+          >
+            <h3 class="text-4xl font-bold text-yellow-700 mb-2">
+              {{ volunteerStats.badges }}
+            </h3>
+            <p class="text-gray-600 font-medium">Badges Earned</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center space-x-4 mb-6">
+        <div class="flex items-center space-x-2 rounded-lg p-2">
+          <Button
+            variant="solid"
+            size="lg"
+            theme="green"
+            @click="setAvailability = true"
+          >
+            Set Availability
+          </Button>
+        </div>
+        <div
+          class="relative cursor-pointer"
+          @click="showNotificationDialog = true"
+        >
+          <div
+            class="relative inline-block"
+            :class="{ 'animate-bounce': hasNotification }"
+          >
+            <Bell class="text-xl" />
+
             <span
               v-if="hasNotification"
-              class="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-white bg-red-400"
+              class="absolute -top-1 -right-1 block h-3 w-3 rounded-full ring-2 ring-white bg-red-600"
             ></span>
           </div>
         </div>
       </div>
+    </div>
 
-      <p class="text-gray-600 -mt-6 mb-8 text-center">
-        Track your volunteer activities and discover new opportunities
-      </p>
-
-      <div class="mb-12">
-        <h2 class="text-xl font-semibold text-gray-700 mb-6 text-center">
-          Your Impact
-        </h2>
-        <div class="flex justify-center">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
-            <div
-              class="bg-white rounded-lg shadow-lg p-6 text-center border border-gray-200 bg-gradient-to-br from-blue-50 to-blue-100"
-            >
-              <h3 class="text-4xl font-bold text-blue-700 mb-2">
-                {{ volunteerStats.hours }}
-              </h3>
-              <p class="text-gray-600 font-medium">Total Hours</p>
-            </div>
-            <div
-              class="bg-white rounded-lg shadow-lg p-6 text-center border border-gray-200 bg-gradient-to-br from-green-50 to-green-100"
-            >
-              <h3 class="text-4xl font-bold text-green-700 mb-2">
-                {{ volunteerStats.events }}
-              </h3>
-              <p class="text-gray-600 font-medium">Events Attended</p>
-            </div>
-            <div
-              class="bg-white rounded-lg shadow-lg p-6 text-center border border-gray-200 bg-gradient-to-br from-yellow-50 to-yellow-100"
-            >
-              <h3 class="text-4xl font-bold text-yellow-700 mb-2">
-                {{ volunteerStats.badges }}
-              </h3>
-              <p class="text-gray-600 font-medium">Badges Earned</p>
-            </div>
-          </div>
-        </div>
+    <!-- Current Projects Section -->
+    <div
+      class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+    >
+      <div
+        class="p-6 border-b border-gray-100 bg-gradient-to-r from-green-50 to-emerald-50"
+      >
+        <h3 class="text-xl font-semibold text-gray-700">Current Projects</h3>
+        <p class="text-gray-600 text-sm mt-1">
+          Your ongoing volunteer commitments
+        </p>
       </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div
-          class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
-        >
-          <div
-            class="p-6 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50"
-          >
-            <h3 class="text-xl font-semibold text-gray-700">Upcoming Events</h3>
-            <p class="text-gray-600 text-sm mt-1">
-              Stay connected with your volunteer community
-            </p>
-          </div>
-          <div class="p-6">
-            <Events />
-          </div>
-        </div>
-
-        <div
-          class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
-        >
-          <div
-            class="p-6 border-b border-gray-100 bg-gradient-to-r from-green-50 to-emerald-50"
-          >
-            <h3 class="text-xl font-semibold text-gray-700">
-              Current Projects
-            </h3>
-            <p class="text-gray-600 text-sm mt-1">
-              Your ongoing volunteer commitments
-            </p>
-          </div>
-          <div class="p-6">
-            <Projects />
-          </div>
-        </div>
+      <div class="p-6">
+        <Projects />
       </div>
     </div>
+
+    <!-- Notification Dialog -->
+    <Dialog v-model="showNotificationDialog">
+      <template #body-title>
+        <h3 class="text-2xl font-semibold text-gray-900">
+          New Project Assignment
+        </h3>
+      </template>
+      <template #body-content>
+        <div v-if="assignedProject">
+          <p class="text-lg text-gray-700 mb-4">
+            You have been assigned to the following project:
+          </p>
+          <div class="bg-gray-50 p-4 rounded-md">
+            <p class="text-base font-semibold text-gray-800">
+              {{ assignedProject.name }}
+            </p>
+            <p class="text-sm text-gray-600 mt-1">
+              Manager: {{ assignedProject.manager }}
+            </p>
+            <p class="text-sm text-gray-600 mt-1">
+              Status: {{ assignedProject.status }}
+            </p>
+            <p class="text-sm text-gray-600 mt-2 italic">
+              "{{ assignedProject.description }}"
+            </p>
+          </div>
+        </div>
+      </template>
+      <template #actions>
+        <div class="flex space-x-2">
+          <Button variant="solid" color="green" @click="acceptAssignment">
+            Accept
+          </Button>
+          <Button variant="solid" theme="red" @click="rejectAssignment">
+            Reject
+          </Button>
+        </div>
+      </template>
+    </Dialog>
   </div>
 
-  <Dialog v-model="showNotificationDialog">
-    <template #body-title>
-      <h3 class="text-2xl font-semibold text-gray-900">
-        New Project Assignment
-      </h3>
-    </template>
+  <Dialog v-model="setAvailability">
+    <template #body-title>Choose Available Timeslots</template>
     <template #body-content>
-      <div v-if="assignedProject">
-        <p class="text-lg text-gray-700 mb-4">
-          You have been assigned to the following project:
-        </p>
-        <div class="bg-gray-50 p-4 rounded-md">
-          <p class="text-base font-semibold text-gray-800">
-            {{ assignedProject.name }}
-          </p>
-          <p class="text-sm text-gray-600 mt-1">
-            Manager: {{ assignedProject.manager }}
-          </p>
-          <p class="text-sm text-gray-600 mt-1">
-            Status: {{ assignedProject.status }}
-          </p>
-          <p class="text-sm text-gray-600 mt-2 italic">
-            "{{ assignedProject.description }}"
-          </p>
-        </div>
+      <div class="flex flex-col md:flex-row gap-2 p-2">
+        <DateTimePicker
+          v-model="availabilityslot.starts_on"
+          variant="subtle"
+          placeholder="From"
+          :disabled="false"
+          label="From"
+        />
+
+        <DateTimePicker
+          v-model="availabilityslot.ends_on"
+          variant="subtle"
+          placeholder="To"
+          :disabled="false"
+          label="To"
+        />
       </div>
     </template>
     <template #actions>
-      <div class="flex space-x-2">
-        <Button variant="solid" color="green" @click="acceptAssignment">
-          Accept
-        </Button>
-        <Button variant="solid" theme="red" @click="rejectAssignment">
-          Reject
-        </Button>
-      </div>
+      <Button
+        v-if="availabilityslot.starts_on && availabilityslot.ends_on"
+        variant="solid"
+        :loading="newSlot.loading"
+        theme="blue"
+        @click="createSlot"
+      >
+        Confirm Slots
+      </Button>
+      <ErrorMessage :message="newSlot.error" />
     </template>
   </Dialog>
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
-import { Dialog, Button, FeatherIcon } from "frappe-ui";
+import { reactive, ref } from "vue";
+import {
+  Dialog,
+  Button,
+  createResource,
+  DateTimePicker,
+  ErrorMessage,
+} from "frappe-ui";
 import Projects from "./Projects.vue";
-import Events from "../pages/Events.vue";
-import Switch from "frappe-ui/src/components/Switch/Switch.vue";
+import { Bell } from "lucide-vue-next";
+import { usersStore } from "../stores/user";
 
 const volunteerStats = ref({
   hours: 125,
@@ -161,10 +173,22 @@ const volunteerStats = ref({
   badges: 3,
 });
 
+const { roleResource } = usersStore();
+
 const isAvailable = ref(true);
 
 const hasNotification = ref(true);
 const showNotificationDialog = ref(false);
+const setAvailability = ref(false);
+
+const availabilityslot = reactive({
+  employee: roleResource.data.employee,
+  company: roleResource.data.company,
+  branch: roleResource.data.branch,
+  user: roleResource.data.name,
+  starts_on: "",
+  ends_on: "",
+});
 
 const assignedProject = ref({
   name: "Community Garden",
@@ -186,5 +210,29 @@ const acceptAssignment = () => {
 const rejectAssignment = () => {
   hasNotification.value = false;
   showNotificationDialog.value = false;
+};
+
+const newSlot = createResource({
+  url: "non_profit.non_profit.api.create_availability_slot",
+  makeParams(values) {
+    return {
+      slot_data: values,
+    };
+  },
+});
+
+const createSlot = () => {
+  newSlot.submit(
+    { doctype: "Volunteer Availability Slot", ...availabilityslot },
+    {
+      onSuccess(data) {
+        setAvailability.value = false;
+        console.log("submitted", data);
+      },
+      onError(err) {
+        console.log("err", err);
+      },
+    }
+  );
 };
 </script>

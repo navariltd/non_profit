@@ -293,26 +293,30 @@ def get_user_info():
     roles = frappe.get_roles(user.name)
     user["roles"] = roles
 
-    allowed_roles = {"Volunteer", "Non Profit Member"}
+    employee_name, employee_company, employee_branch = frappe.db.get_value(
+        "Employee", {"user_id": user.name}, ["name", "company", "branch"]
+    )
 
     user["non_profit_member"] = "Non Profit Member" in roles
     user["volunteer"] = "Volunteer" in roles
-
-    user["allowed"] = set(roles).issubset(allowed_roles)
+    user["employee"] = employee_name if employee_name else None
+    user["company"] = employee_company if employee_company else None
+    user["branch"] = employee_branch if employee_name else None
 
     return user
 
+
 def check_app_permission():
-	"""Check if the user has permission to access the app."""
-	if frappe.session.user == "Administrator":
-		return True
+    """Check if the user has permission to access the app."""
+    if frappe.session.user == "Administrator":
+        return True
 
-	roles = frappe.get_roles()
-	vmms_roles = ["Volunteer", "Non Profit Member"]
-	if any(role in roles for role in vmms_roles):
-		return True
+    roles = frappe.get_roles()
+    vmms_roles = ["Volunteer", "Non Profit Member"]
+    if any(role in roles for role in vmms_roles):
+        return True
 
-	return False
+    return False
 
 
 @frappe.whitelist()
@@ -347,3 +351,21 @@ def get_projects():
             "expected_end_date",
         ],
     )
+
+
+@frappe.whitelist()
+def create_availability_slot(slot_data):
+
+    try:
+
+        doc = frappe.get_doc({"doctype": "Volunteer Availability Slot", **slot_data})
+
+        doc.insert(ignore_permissions=True)
+
+        frappe.db.commit()
+        return {"success": True, "name": doc.name, "data": doc.as_dict()}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Availability Slot Creation Error")
+
+        frappe.throw("Availability Slot Creation Error")
