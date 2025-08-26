@@ -131,3 +131,37 @@ def get_user_info():
     user["allowed"] = set(roles).issubset(allowed_roles)
 
     return user
+
+
+@frappe.whitelist()
+def get_events():
+    return frappe.get_all(
+        "Event",
+        fields=[
+            "name",
+            "subject",
+            "event_category",
+            "event_type",
+            "starts_on",
+            "ends_on",
+            "status",
+        ],
+    )
+
+
+@frappe.whitelist()
+def get_projects():
+    return frappe.get_all(
+        "Project",
+        fields=[
+            "name",
+            "project_name",
+            "status",
+            "project_type",
+            "is_active",
+            "percent_complete",
+            "priority",
+            "expected_start_date",
+            "expected_end_date",
+        ],
+    )
