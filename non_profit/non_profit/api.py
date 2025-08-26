@@ -123,26 +123,23 @@ def get_user_info():
     roles = frappe.get_roles(user.name)
     user["roles"] = roles
 
-    allowed_roles = {"Volunteer", "Non Profit Member"}
-
     user["non_profit_member"] = "Non Profit Member" in roles
     user["volunteer"] = "Volunteer" in roles
 
-    user["allowed"] = set(roles).issubset(allowed_roles)
-
     return user
 
+
 def check_app_permission():
-	"""Check if the user has permission to access the app."""
-	if frappe.session.user == "Administrator":
-		return True
+    """Check if the user has permission to access the app."""
+    if frappe.session.user == "Administrator":
+        return True
 
-	roles = frappe.get_roles()
-	vmms_roles = ["Volunteer", "Non Profit Member"]
-	if any(role in roles for role in vmms_roles):
-		return True
+    roles = frappe.get_roles()
+    vmms_roles = ["Volunteer", "Non Profit Member"]
+    if any(role in roles for role in vmms_roles):
+        return True
 
-	return False
+    return False
 
 
 @frappe.whitelist()
