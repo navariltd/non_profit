@@ -1,5 +1,174 @@
-import frappe
+import json
+import re
 
+import frappe
+from frappe import _, cint, cstr
+from frappe.desk.search import build_for_autosuggest, get_std_fields_list, LinkSearchResults, relevance_sorter, sanitize_searchfield
+from frappe.model.db_query import get_order_by
+from frappe.utils.data import make_filter_tuple
+
+
+@frappe.whitelist(allow_guest=True)
+def search_widget(
+    doctype: str,
+    txt: str,
+    query: str | None = None,
+    searchfield: str | None = None,
+    start: int = 0,
+    page_length: int = 10,
+    filters: str | None | dict | list = None,
+    filter_fields=None,
+    as_dict: bool = False,
+    reference_doctype: str | None = None,
+    ignore_permissions: bool = True,  
+):
+
+    start = cint(start)
+
+    if isinstance(filters, str):
+        filters = json.loads(filters)
+
+    if searchfield:
+        sanitize_searchfield(searchfield)
+
+    if not searchfield:
+        searchfield = "name"
+
+    standard_queries = frappe.get_hooks().standard_queries or {}
+
+    if not query and doctype in standard_queries:
+        query = standard_queries[doctype][-1]
+
+    if query: 
+        try:
+            return frappe.call(
+                query,
+                doctype,
+                txt,
+                searchfield,
+                start,
+                page_length,
+                filters,
+                as_dict=as_dict,
+                reference_doctype=reference_doctype,
+                ignore_user_permissions=True,
+            )
+        except Exception:
+            return []
+
+    meta = frappe.get_meta(doctype)
+
+    if isinstance(filters, dict):
+        filters_items = filters.items()
+        filters = []
+        for key, value in filters_items:
+            filters.append(make_filter_tuple(doctype, key, value))
+
+    if filters is None:
+        filters = []
+    or_filters = []
+
+    if txt:
+        field_types = {
+            "Data", "Text", "Small Text", "Long Text", "Link",
+            "Select", "Read Only", "Text Editor"
+        }
+        search_fields = ["name"]
+        if meta.title_field:
+            search_fields.append(meta.title_field)
+
+        if meta.search_fields:
+            search_fields.extend(meta.get_search_fields())
+
+        for f in search_fields:
+            fmeta = meta.get_field(f.strip())
+            if not meta.translated_doctype and (f == "name" or (fmeta and fmeta.fieldtype in field_types)):
+                or_filters.append([doctype, f.strip(), "like", f"%{txt}%"])
+
+    if meta.get("fields", {"fieldname": "enabled", "fieldtype": "Check"}):
+        filters.append([doctype, "enabled", "=", 1])
+    if meta.get("fields", {"fieldname": "disabled", "fieldtype": "Check"}):
+        filters.append([doctype, "disabled", "!=", 1])
+
+    fields = get_std_fields_list(meta, searchfield or "name")
+    if filter_fields:
+        fields = list(set(fields + json.loads(filter_fields)))
+    formatted_fields = [f"`tab{meta.name}`.`{f.strip()}`" for f in fields]
+
+    if meta.show_title_field_in_link and meta.title_field:
+        formatted_fields.insert(1, f"`tab{meta.name}`.{meta.title_field} as `label`")
+
+    order_by_based_on_meta = get_order_by(doctype, meta)
+    order_by = f"`tab{doctype}`.idx desc, {order_by_based_on_meta}"
+
+    if not meta.translated_doctype:
+        _txt = frappe.db.escape((txt or "").replace("%", "").replace("@", ""))
+        _relevance = f"(1 / nullif(locate({_txt}, `tab{doctype}`.`name`), 0))"
+        formatted_fields.append(f"""{_relevance} as `_relevance`""")
+        if frappe.db.db_type == "mariadb":
+            order_by = f"ifnull(_relevance, -9999) desc, {order_by}"
+        elif frappe.db.db_type == "postgres":
+            order_by = f"{len(formatted_fields)} desc nulls last, {order_by}"
+
+    ignore_permissions = True
+
+    values = frappe.get_list(
+        doctype,
+        filters=filters,
+        fields=formatted_fields,
+        or_filters=or_filters,
+        limit_start=start,
+        limit_page_length=None if meta.translated_doctype else page_length,
+        order_by=order_by,
+        ignore_permissions=ignore_permissions,
+        reference_doctype=reference_doctype,
+        as_list=not as_dict,
+        strict=False,
+    )
+
+    if meta.translated_doctype:
+        values = (
+            result
+            for result in values
+            if any(
+                re.search(f"{re.escape(txt)}.*", _(cstr(value)) or "", re.IGNORECASE)
+                for value in (result.values() if as_dict else result)
+            )
+        )
+
+    values = sorted(values, key=lambda x: relevance_sorter(x, txt, as_dict))
+
+    if not meta.translated_doctype:
+        if as_dict:
+            for r in values:
+                r.pop("_relevance", None)
+        else:
+            values = [r[:-1] for r in values]
+
+    return values
+
+@frappe.whitelist(allow_guest=True)
+def custom_search_link(	doctype: str,
+	txt: str,
+	query: str | None = None,
+	filters: str | dict | list | None = None,
+	page_length: int = 10,
+	searchfield: str | None = None,
+	reference_doctype: str | None = None,
+	ignore_permissions: bool = False,
+) -> list[LinkSearchResults]:
+    results = search_widget(
+        doctype,
+        txt.strip(),
+        query,
+        searchfield=searchfield,
+        page_length=page_length,
+        filters=filters,
+        reference_doctype=reference_doctype,
+        ignore_permissions=ignore_permissions,
+    )
+
+    return build_for_autosuggest(results, doctype=doctype)
 
 @frappe.whitelist(allow_guest=True)
 def get_membership_types():
@@ -13,7 +182,8 @@ def get_membership_types():
 def get_job_openings(filters=None, orFilters=None):
     if not filters:
         filters = {}
-
+    print(filters)
+    print("==================================")
     jobs = frappe.get_all(
         "Job Opening",
         filters=filters,

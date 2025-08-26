@@ -4,7 +4,9 @@
       <div class="flex justify-between items-center mb-8">
         <h1 class="text-3xl font-bold text-gray-800">Volunteer Dashboard</h1>
         <div class="flex items-center space-x-4">
-          <div class="flex items-center space-x-2 border border-gray-700 rounded-lg p-2">
+          <div
+            class="flex items-center space-x-2 border border-gray-700 rounded-lg p-2"
+          >
             <Switch
               size="sm"
               label="Set Availability"
@@ -150,7 +152,7 @@
 import { ref } from "vue";
 import { Dialog, Button, FeatherIcon } from "frappe-ui";
 import Projects from "./Projects.vue";
-import Events from "./Events.vue";
+import Events from "../pages/Events.vue";
 import Switch from "frappe-ui/src/components/Switch/Switch.vue";
 
 const volunteerStats = ref({
