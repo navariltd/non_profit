@@ -7,21 +7,27 @@ from frappe.utils.password import update_password
 @frappe.whitelist(allow_guest=True)
 def sign_up(**kwargs):
 
+    frappe.db.begin()
+
     try:
+
+        user = create_user(kwargs)
+
         if kwargs.get("category_member"):
-            create_member(kwargs)
+            create_member(kwargs, user)
 
         if kwargs.get("category_volunteer"):
             create_volunteer(kwargs)
 
+        frappe.db.commit()
+
     except Exception as e:
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), "Sign Up Error")
-        frappe.throw(str(e))
+        frappe.throw("Sign Up Error")
 
 
 def create_user(kwargs):
-    frappe.db.begin()
 
     if frappe.db.exists("User", {"email": kwargs.get("email")}):
         frappe.throw("User already exists with this email")
@@ -58,9 +64,7 @@ def create_user(kwargs):
     return user
 
 
-def create_member(kwargs):
-
-    user = create_user(kwargs)
+def create_member(kwargs, user=None):
 
     member = frappe.get_doc(
         {
@@ -96,13 +100,8 @@ def create_member(kwargs):
 
         membership.insert(ignore_permissions=True)
 
-    frappe.db.commit()
-
-    return {"success": True, "message": "Sign Up Successful"}
-
 
 def create_volunteer(kwargs):
-    user = create_user(kwargs)
 
     if frappe.db.exists("Job Applicant", kwargs.get("email")):
         frappe.throw("Job Application already exists")
@@ -121,7 +120,3 @@ def create_volunteer(kwargs):
     )
 
     job_applicant.insert(ignore_permissions=True)
-
-    frappe.db.commit()
-
-    return {"success": True, "message": "Sign Up Successful"}

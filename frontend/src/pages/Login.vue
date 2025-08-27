@@ -279,6 +279,7 @@ function submit() {
 
     if (signUpForm.categoryMember && !signUpForm.membershipType) {
       createSignUp.error = "Please select a membership type from the dialog.";
+      membershipDialog.value = true;
       return;
     }
 
