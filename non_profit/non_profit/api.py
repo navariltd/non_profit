@@ -182,13 +182,17 @@ def get_membership_types():
 def get_job_openings(filters=None, orFilters=None):
     if not filters:
         filters = {}
+    filters["publish"] = 1
     jobs = frappe.get_all(
         "Job Opening",
         filters=filters,
         or_filters=orFilters,
         fields=[
             "job_title",
+            "posted_on",
             "closes_on",
+            "closed_on",
+            "branch",
             "designation",
             "vacancies",
             "location",
@@ -199,6 +203,7 @@ def get_job_openings(filters=None, orFilters=None):
             "creation",
             "description",
             "status",
+            "is_internal",
         ],
         order_by="creation desc",
     )
@@ -218,7 +223,10 @@ def get_job_details(job):
         job,
         [
             "job_title",
+            "posted_on",
             "closes_on",
+            "closed_on",
+            "branch",
             "designation",
             "vacancies",
             "location",
@@ -228,8 +236,9 @@ def get_job_details(job):
             "name",
             "creation",
             "description",
+            "route",
             "status",
-            "owner",
+            "is_internal",
         ],
         as_dict=1,
     )
@@ -258,6 +267,40 @@ def get_job_details(job):
 
     return job_details
 
+@frappe.whitelist(allow_guest=True)
+def submit_job_application(job_opening, applicant_name, email, phone, cover_letter, resume=None):
+    try:
+        company, branch = frappe.db.get_value("Job Opening", job_opening, ["company", "branch"])
+        
+        job_application = frappe.get_doc({
+            "doctype": "Job Applicant",
+            "job_title": job_opening,
+            "applicant_name": applicant_name,
+            "email_id": email,
+            "phone_number": phone,
+            "cover_letter": cover_letter,
+            "status": "Open",
+            "company": company,
+            "branch": branch
+        })
+        
+        if resume:
+            job_application.resume_attachment = resume
+            
+        job_application.insert(ignore_permissions=True)
+        frappe.db.commit()
+        
+        return {
+            "success": True,
+            "message": "Job application submitted successfully",
+            "name": job_application.name
+        }
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Job Application Submission Error")
+        return {
+            "success": False,
+            "message": f"Failed to submit job application: {str(e)}"
+        }
 
 @frappe.whitelist(allow_guest=True)
 def get_regions():
