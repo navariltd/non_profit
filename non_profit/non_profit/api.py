@@ -182,8 +182,6 @@ def get_membership_types():
 def get_job_openings(filters=None, orFilters=None):
     if not filters:
         filters = {}
-    print(filters)
-    print("==================================")
     jobs = frappe.get_all(
         "Job Opening",
         filters=filters,
