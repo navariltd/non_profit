@@ -37,7 +37,7 @@ required_apps = ["erpnext"]
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 doctype_js = {
     "Project": "non_profit/overrides/client/project.js",
-    "Job Opening": "non_profit/overrides/client/job_opening.js"
+    "Job Opening": "non_profit/overrides/client/job_opening.js",
 }
 
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
@@ -217,17 +217,33 @@ fixtures = [
             ["name", "=", "Volunteer Availability"],
         ],
     },
+    {"doctype": "Volunteer Status"},
     {
-        "doctype": "Volunteer Status"
-    }
+        "doctype": "Role",
+        "filters": [
+            ["name", "=", "Volunteer"],
+        ],
+    },
+    {
+        "doctype": "Role Profile",
+        "filters": [
+            ["name", "in", ["Volunteer","Member"]],
+        ],
+    },
+    {
+        "doctype": "Module Profile",
+        "filters": [
+            ["name", "=", "Volunteer"],
+        ],
+    },
 ]
 
 add_to_apps_screen = [
-	{
-		"name": "vmms",
-		"logo": "/assets/non_profit/frontend/vmms.svg",
-		"title": "VMMS Portal",
-		"route": "/vmms-portal",
-		"has_permission": "non_profit.non_profit.api.check_app_permission",
-	}
+    {
+        "name": "vmms",
+        "logo": "/assets/non_profit/frontend/vmms.svg",
+        "title": "VMMS Portal",
+        "route": "/vmms-portal",
+        "has_permission": "non_profit.non_profit.api.check_app_permission",
+    }
 ]
