@@ -227,11 +227,17 @@ fixtures = [
     {
         "doctype": "Role Profile",
         "filters": [
-            ["name", "in", ["Volunteer","Member"]],
+            ["name", "in", ["Volunteer", "Member"]],
         ],
     },
     {
         "doctype": "Module Profile",
+        "filters": [
+            ["name", "=", "Volunteer"],
+        ],
+    },
+    {
+        "doctype": "Designation",
         "filters": [
             ["name", "=", "Volunteer"],
         ],
