@@ -1,117 +1,117 @@
 <template>
-  <div class="">
+  <div>
     <header
-      class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
+      class="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-4 py-3 sm:px-6"
     >
       <Breadcrumbs
         class="h-7"
         :items="[
-          {
-            label: __('Jobs'),
-            route: { name: 'Jobs' },
-          },
+          { label: __('Jobs'), route: { name: 'Jobs' } },
           {
             label: job.data?.job_title,
             route: { name: 'JobDetail', params: { job: job.data?.name } },
           },
         ]"
       />
-      <div
-        v-if="user.data?.name && !readOnlyMode"
-        class="flex items-center space-x-2"
-      >
-        <!-- Show edit button if owner -->
-        <router-link
-          v-if="user.data.name == job.data?.owner"
-          :to="{ name: 'JobForm', params: { jobName: job.data?.name } }"
-        >
-          <Button>
-            <template #prefix>
-              <Pencil class="h-4 w-4 stroke-1.5" />
-            </template>
-            {{ __("Edit") }}
-          </Button>
-        </router-link>
 
-        <!-- Company Website -->
-        <Button @click="redirectToWebsite(job.data?.company)">
+      <div class="flex items-center gap-2">
+        <!-- <Button
+          @click="redirectToWebsite(job.data.route)"
+          v-if="job.data?.route"
+        >
           <template #prefix>
-            <SquareArrowOutUpRight class="h-4 w-4 stroke-1.5" />
+            <SquareArrowOutUpRight class="w-4 h-4 stroke-1.5" />
           </template>
           {{ __("Visit Website") }}
-        </Button>
+        </Button> -->
 
-        <!-- Apply Button / Badge -->
         <Button
           v-if="!jobApplication.data?.length"
           variant="solid"
           @click="openApplicationModal()"
         >
           <template #prefix>
-            <SendHorizonal class="h-4 w-4" />
+            <SendHorizonal class="w-4 h-4" />
           </template>
           {{ __("Apply") }}
         </Button>
-        <Badge v-else variant="subtle" theme="green" size="lg">
-          <template #prefix>
-            <Check class="h-4 w-4" />
-          </template>
-          {{ __("You have applied") }}
-        </Badge>
-      </div>
 
-      <!-- Login Button -->
-      <div v-else-if="!readOnlyMode">
-        <Button @click="redirectToLogin(job.data?.name)">
-          <span>
-            {{ __("Login to apply") }}
-          </span>
+        <Button v-else variant="outline" disabled>
+          <template #prefix>
+            <Check class="w-4 h-4 text-green-600" />
+          </template>
+          {{ __("Application submitted") }}
         </Button>
       </div>
     </header>
 
-    <!-- Job Content -->
-    <div v-if="job.data" class="max-w-3xl mx-auto pt-5">
-      <div class="p-4">
-        <div class="space-y-5 mb-12">
-          <!-- Header -->
-          <div class="flex">
-            <img
-              :src="job.data.company_logo"
-              class="size-10 rounded-lg object-contain cursor-pointer mr-4"
-              :alt="job.data.company"
-              @click="redirectToWebsite(job.data.company_website)"
-            />
-            <div class="">
-              <div class="text-2xl text-ink-gray-9 font-semibold mb-1">
-                {{ job.data.job_title }}
+    <div v-if="job.data" class="mx-auto px-4 sm:px-6 pt-6">
+      <div class="p-6 bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="space-y-6 mb-10">
+          <div class="flex items-start gap-4">
+            <div>
+              <img
+                v-if="job.data.company_logo"
+                :src="job.data.company_logo"
+                class="w-14 h-14 rounded-lg object-contain cursor-pointer bg-gray-50"
+                :alt="job.data.company"
+                @click="redirectToWebsite(job.data.company_website)"
+              />
+              <div
+                v-else
+                class="w-14 h-14 flex items-center justify-center rounded-lg bg-gray-100 text-gray-700 font-semibold text-lg cursor-default"
+              >
+                {{ getCompanyAbbr(job.data.company) }}
               </div>
-              <div class="text-sm text-ink-gray-5 font-semibold">
-                {{ job.data.company }} - {{ job.data.location }},
-                {{ job.data.country }}
+            </div>
+
+            <div>
+              <h1 class="text-2xl font-semibold text-gray-900 mb-1">
+                {{ job.data.job_title }}
+              </h1>
+              <div class="text-sm font-medium text-gray-500">
+                {{ job.data.company }}
+                <span
+                  v-if="job.data.location || job.data.country"
+                  class="text-gray-400"
+                >
+                  — {{ job.data.location
+                  }}<span v-if="job.data.country"
+                    >, {{ job.data.country }}</span
+                  >
+                </span>
               </div>
             </div>
           </div>
 
-          <!-- Badges -->
-          <div class="space-x-5">
-            <Badge size="lg">
+          <div class="flex flex-wrap gap-3">
+            <Badge
+              size="lg"
+              class="bg-gray-50 text-gray-700 border border-gray-200"
+            >
               <template #prefix>
-                <CalendarDays class="size-3 stroke-2 text-ink-gray-7" />
+                <CalendarDays class="w-4 h-4 stroke-2 text-gray-500" />
               </template>
               {{ dayjs(job.data.creation).fromNow() }}
             </Badge>
 
-            <Badge size="lg">
+            <Badge
+              size="lg"
+              class="bg-blue-50 text-blue-700 border border-blue-200"
+            >
               <template #prefix>
-                <ClipboardType class="size-3 stroke-2 text-ink-gray-7" />
+                <ClipboardType class="w-4 h-4 stroke-2 text-blue-600" />
               </template>
               {{ job.data.employment_type }}
             </Badge>
 
-            <Badge v-if="job.data.applicant_count" size="lg">
+            <Badge
+              v-if="job.data.applicant_count"
+              size="lg"
+              class="bg-green-50 text-green-700 border border-green-200"
+            >
               <template #prefix>
-                <SquareUserRound class="size-3 stroke-2 text-ink-gray-7" />
+                <SquareUserRound class="w-4 h-4 stroke-2 text-green-600" />
               </template>
               {{ job.data.applicant_count }}
               {{
@@ -123,23 +123,18 @@
           </div>
         </div>
 
-        <!-- Divider -->
-        <div class="flex items-center justify-between">
-          <div class="bg-surface-gray-2 h-px m-1 w-1/2"></div>
-          <div>
-            <FileText class="size-3 stroke-1 text-ink-gray-5" />
-          </div>
-          <div class="bg-surface-gray-2 h-px m-1 w-1/2"></div>
+        <div class="flex items-center justify-between my-4">
+          <div class="flex-1 h-px bg-gray-200"></div>
+          <FileText class="w-4 h-4 mx-3 text-gray-400" />
+          <div class="flex-1 h-px bg-gray-200"></div>
         </div>
 
-        <!-- Description -->
-        <p
+        <div
           v-html="job.data.description"
-          class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal mt-12"
-        ></p>
+          class="prose prose-sm max-w-none text-gray-700 mt-8 prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-gray-200 prose-th:border-gray-200 prose-th:bg-gray-50"
+        ></div>
       </div>
 
-      <!-- Application Modal -->
       <JobApplicationModal
         v-model="showApplicationModal"
         v-model:application="jobApplication"
@@ -184,23 +179,23 @@ const props = defineProps({
   },
 });
 
-// Job Opening Details
+// Job details
 const job = createResource({
   url: "non_profit.non_profit.api.get_job_details",
   params: { job: props.job },
   cache: ["job", props.job],
   auto: true,
-  onSuccess: (data) => {
+  onSuccess: () => {
     if (user.data?.name) {
       jobApplication.submit();
     }
   },
 });
 
-// Job Applicant (for logged-in user)
+// Job Application
 const jobApplication = createResource({
   url: "frappe.client.get_list",
-  makeParams(values) {
+  makeParams() {
     return {
       doctype: "Job Applicant",
       filters: {
@@ -215,28 +210,23 @@ const openApplicationModal = () => {
   showApplicationModal.value = true;
 };
 
-const redirectToLogin = (job) => {
-  window.location.href = `/login?redirect-to=/job-openings/${job}`;
-};
-
 const redirectToWebsite = (url) => {
   window.open(url, "_blank");
 };
 
-usePageMeta(() => {
-  return {
-    title: job.data?.job_title,
-    icon: brand.favicon,
-  };
-});
-</script>
+// Company initials fallback
+const getCompanyAbbr = (name) => {
+  if (!name) return "NA";
+  return name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+};
 
-<style>
-p {
-  margin-bottom: 0.5rem !important;
-  line-height: 1.5;
-}
-p span {
-  line-height: 1.5;
-}
-</style>
+usePageMeta(() => ({
+  title: job.data?.job_title,
+  icon: brand.favicon,
+}));
+</script>

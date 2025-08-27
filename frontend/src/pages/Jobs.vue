@@ -22,7 +22,7 @@
           >
             <Filter class="h-4 w-4" />
           </Button>
-          <router-link
+          <!-- <router-link
             v-if="user.data?.name"
             :to="{ name: 'JobForm', params: { jobName: 'new' } }"
           >
@@ -37,7 +37,7 @@
               <span class="hidden sm:inline">{{ __("New Job") }}</span>
               <span class="sm:hidden">{{ __("New") }}</span>
             </Button>
-          </router-link>
+          </router-link> -->
         </div>
       </header>
 
