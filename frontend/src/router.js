@@ -9,6 +9,8 @@ const routes = [
     redirect: {
       name: "Dashboard",
     },
+    name: "Dashboard",
+    component: () => import("@/pages/Dashboard.vue"),
   },
 
   {
@@ -52,18 +54,18 @@ const routes = [
     ],
   },
   {
-    path: "/job-openings",
+    path: "/opportunities",
     name: "Jobs",
     component: () => import("@/pages/Jobs.vue"),
   },
   {
-    path: "/job-openings/:job",
+    path: "/opportunities/:job",
     name: "JobDetail",
     component: () => import("@/pages/JobDetail.vue"),
     props: true,
   },
   {
-    path: "/job-opening/:jobName/edit",
+    path: "/opportunities/:jobName/edit",
     name: "JobForm",
     component: () => import("@/pages/JobForm.vue"),
     props: true,

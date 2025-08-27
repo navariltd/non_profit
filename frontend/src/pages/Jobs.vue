@@ -1,115 +1,174 @@
 <template>
-  <div class="">
-    <header
-      class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
-    >
-      <Breadcrumbs
-        class="h-7"
-        :items="[{ label: __('Jobs'), route: { name: 'Jobs' } }]"
-      />
-      <router-link
-        v-if="user.data?.name"
-        :to="{ name: 'JobForm', params: { jobName: 'new' } }"
+  <div class="flex flex-col lg:flex-row min-h-screen">
+    <main class="flex-1 min-w-0">
+      <header
+        class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-4 py-3 sm:px-6"
       >
-        <Button v-if="!readOnlyMode" variant="solid">
-          <template #prefix>
-            <Plus class="h-4 w-4" />
-          </template>
-          {{ __("New Job") }}
-        </Button>
-      </router-link>
-    </header>
-
-    <div>
-      <!-- Top Filters -->
-      <div
-        class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:items-center justify-between w-full md:w-4/5 mx-auto p-5"
-      >
-        <div class="text-xl font-semibold text-ink-gray-7 mb-4 md:mb-0">
-          {{ __("{0} Open Jobs").format(jobCount) }}
+        <div class="flex items-center space-x-2">
+          <Breadcrumbs
+            class="h-7 text-sm sm:text-base"
+            :items="[{ label: __('Jobs'), route: { name: 'Jobs' } }]"
+          />
+          <div class="text-lg font-semibold text-ink-gray-7 hidden sm:block">
+            {{ __("{0} Open Jobs").format(jobCount) }}
+          </div>
         </div>
 
-        <div
-          class="grid grid-cols-1 gap-2"
-          :class="user.data ? 'md:grid-cols-5' : 'md:grid-cols-6'"
-        >
-          <!-- Search -->
+        <div class="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            class="lg:hidden p-2"
+            @click="showFilters = !showFilters"
+          >
+            <Filter class="h-4 w-4" />
+          </Button>
+          <router-link
+            v-if="user.data?.name"
+            :to="{ name: 'JobForm', params: { jobName: 'new' } }"
+          >
+            <Button
+              v-if="!readOnlyMode"
+              variant="solid"
+              class="whitespace-nowrap"
+            >
+              <template #prefix>
+                <Plus class="h-4 w-4" />
+              </template>
+              <span class="hidden sm:inline">{{ __("New Job") }}</span>
+              <span class="sm:hidden">{{ __("New") }}</span>
+            </Button>
+          </router-link>
+        </div>
+      </header>
+
+      <div class="flex justify-center border-b px-4 py-3 bg-gray-50">
+        <div class="w-full max-w-4xl">
+          <TabButtons
+            :buttons="courseTabs"
+            v-model="currentTab"
+            class="w-full justify-center sm:justify-start"
+          />
+        </div>
+      </div>
+
+      <div class="w-full max-w-7xl mx-auto px-4 py-6">
+        <div class="mb-4 lg:hidden">
           <FormControl
             type="text"
-            :placeholder="__('Search')"
+            :placeholder="__('Search jobs...')"
             v-model="searchQuery"
-            class="min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
+            class="w-full"
             @input="updateJobs"
           >
             <template #prefix>
               <Search class="w-4 h-4 stroke-1.5 text-ink-gray-5" />
             </template>
           </FormControl>
-
-          <!-- Country filter -->
-          <Link
-            v-if="user.data"
-            doctype="Country"
-            v-model="country"
-            :placeholder="__('Country')"
-            class="min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
-          />
-
-          <!-- Company filter -->
-          <Link
-            doctype="Company"
-            v-model="company"
-            :placeholder="__('Company')"
-            class="min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
-            @change="updateJobs"
-          />
-
-          <!-- Employment Type filter -->
-          <Link
-            doctype="Employment Type"
-            v-model="jobType"
-            :placeholder="__('Employment Type')"
-            class="min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
-            @change="updateJobs"
-          />
-
-          <!-- Designation filter -->
-          <Link
-            doctype="Designation"
-            v-model="designation"
-            :placeholder="__('Designation')"
-            class="min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
-            @change="updateJobs"
-          />
-
-          <!-- Department filter -->
-          <Link
-            doctype="Department"
-            v-model="department"
-            :placeholder="__('Department')"
-            class="min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
-            @change="updateJobs"
-          />
         </div>
-      </div>
 
-      <!-- Job List -->
-      <div v-if="jobs.data?.length" class="w-full md:w-4/5 mx-auto p-5 pt-0">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div
+          v-if="jobs.data?.length"
+          class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
+        >
           <router-link
             v-for="job in jobs.data"
             :key="job.name"
             :to="{ name: 'JobDetail', params: { job: job.name } }"
+            class="transition-transform hover:scale-[1.02]"
           >
             <JobCard :job="job" />
           </router-link>
         </div>
+        <EmptyState v-else type="Job Openings" />
       </div>
-      <EmptyState v-else type="Job Openings" />
-    </div>
+    </main>
+
+    <aside
+      :class="[
+        'w-full lg:w-80 xl:w-96 border-l bg-surface-white p-5 space-y-4 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto transition-transform duration-300',
+        showFilters ? 'block' : 'hidden lg:block',
+      ]"
+    >
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-lg font-semibold text-ink-gray-7">
+          {{ __("Filters") }}
+        </div>
+        <Button
+          variant="ghost"
+          class="lg:hidden p-1"
+          @click="showFilters = false"
+        >
+          <X class="h-4 w-4" />
+        </Button>
+      </div>
+
+      <FormControl
+        type="text"
+        :placeholder="__('Search jobs...')"
+        v-model="searchQuery"
+        class="w-full hidden lg:block"
+        @input="updateJobs"
+      >
+        <template #prefix>
+          <Search class="w-4 h-4 stroke-1.5 text-ink-gray-5" />
+        </template>
+      </FormControl>
+
+      <div class="text-sm font-medium text-ink-gray-6 pt-2">
+        {{ __("Organization") }}
+      </div>
+
+      <MultiSelect
+        doctype="Company"
+        v-model="companies"
+        :label="__('Companies')"
+        class="w-full"
+        @change="updateJobs"
+      />
+
+      <MultiSelect
+        doctype="Branch"
+        v-model="branches"
+        :label="__('Branches')"
+        :filters="branchFilters"
+        class="w-full"
+        @change="updateJobs"
+      />
+
+      <div class="text-sm font-medium text-ink-gray-6 pt-2">
+        {{ __("Job Details") }}
+      </div>
+
+      <Link
+        doctype="Employment Type"
+        v-model="jobType"
+        :placeholder="__('Employment Type')"
+        class="w-full"
+        @change="updateJobs"
+      />
+
+      <Link
+        doctype="Designation"
+        v-model="designation"
+        :placeholder="__('Designation')"
+        class="w-full"
+        @change="updateJobs"
+      />
+
+      <Link
+        doctype="Department"
+        v-model="department"
+        :placeholder="__('Department')"
+        class="w-full"
+        @change="updateJobs"
+      />
+
+      <Button variant="outline" class="w-full mt-4" @click="clearFilters">
+        {{ __("Clear All Filters") }}
+      </Button>
+    </aside>
   </div>
 </template>
-
 <script setup>
 import {
   Button,
@@ -117,13 +176,15 @@ import {
   createResource,
   FormControl,
   usePageMeta,
+  TabButtons,
 } from "frappe-ui";
-import { Plus, Search } from "lucide-vue-next";
+import { Plus, Search, Filter, X } from "lucide-vue-next";
 import { sessionStore } from "../stores/session";
-import { inject, ref, onMounted, watch } from "vue";
+import { inject, ref, onMounted, watch, computed } from "vue";
 import JobCard from "@/components/JobCard.vue";
 import Link from "@/components/Controls/Link.vue";
 import EmptyState from "@/components/EmptyState.vue";
+import MultiSelect from "@/components/Controls/MultiSelect.vue";
 
 const user = inject("$user");
 const { brand } = sessionStore();
@@ -132,13 +193,37 @@ const jobType = ref(null);
 const designation = ref(null);
 const department = ref(null);
 const searchQuery = ref("");
-const country = ref(null);
-const company = ref(null); // ✅ new filter
+const companies = ref([]);
+const branches = ref([]);
+const showFilters = ref(false);
+
+const branchesMultiselect = ref(null);
 
 const filters = ref({});
 const orFilters = ref({});
 const jobCount = ref(0);
 const readOnlyMode = window.read_only_mode;
+
+const currentTab = ref("Live");
+
+const courseTabs = computed(() => {
+  let tabs = [
+    { label: __("Live") },
+    { label: __("New") },
+    { label: __("Upcoming") },
+  ];
+  if (
+    user.data?.is_moderator ||
+    user.data?.is_instructor ||
+    user.data?.is_evaluator
+  ) {
+    tabs.push({ label: __("Created") });
+    tabs.push({ label: __("Unpublished") });
+  } else if (user.data) {
+    tabs.push({ label: __("Enrolled") });
+  }
+  return tabs;
+});
 
 onMounted(() => {
   let queries = new URLSearchParams(location.search);
@@ -167,28 +252,25 @@ const updateJobs = () => {
 const updateFilters = () => {
   filters.value.status = "Open";
 
-  if (jobType.value) {
-    filters.value.employment_type = jobType.value;
-  } else {
-    delete filters.value.employment_type;
-  }
+  if (jobType.value) filters.value.employment_type = jobType.value;
+  else delete filters.value.employment_type;
 
-  if (designation.value) {
-    filters.value.designation = designation.value;
-  } else {
-    delete filters.value.designation;
-  }
+  if (designation.value) filters.value.designation = designation.value;
+  else delete filters.value.designation;
 
-  if (department.value) {
-    filters.value.department = department.value;
-  } else {
-    delete filters.value.department;
-  }
+  if (department.value) filters.value.department = department.value;
+  else delete filters.value.department;
 
-  if (company.value) {
-    filters.value.company = company.value;
+  if (companies.value?.length) {
+    filters.value.company = ["in", companies.value];
   } else {
     delete filters.value.company;
+  }
+
+  if (branches.value?.length) {
+    filters.value.branch = ["in", branches.value];
+  } else {
+    delete filters.value.branch;
   }
 
   if (searchQuery.value) {
@@ -200,15 +282,38 @@ const updateFilters = () => {
   } else {
     orFilters.value = {};
   }
-
-  if (country.value) {
-    filters.value.country = country.value;
-  } else {
-    delete filters.value.country;
-  }
 };
 
-watch([country, company, jobType, designation, department], () => updateJobs());
+const branchFilters = computed(() => {
+  if (companies.value?.length) {
+    return { company: ["in", companies.value] };
+  }
+  return {};
+});
+
+const clearFilters = () => {
+  companies.value = [];
+  branches.value = [];
+  jobType.value = null;
+  designation.value = null;
+  department.value = null;
+  searchQuery.value = "";
+  updateJobs();
+};
+
+watch([jobType, designation, department], () => updateJobs());
+
+watch(companies, (newCompanies, oldCompanies) => {
+  updateJobs();
+  if (JSON.stringify(newCompanies) !== JSON.stringify(oldCompanies)) {
+    branches.value = [];
+    if (branchesMultiselect.value) {
+      branchesMultiselect.value.reload();
+    }
+  }
+});
+
+watch(branches, () => updateJobs());
 
 watch(jobs, () => {
   jobCount.value = jobs.data?.length || 0;
