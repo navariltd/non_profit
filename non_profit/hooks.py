@@ -198,3 +198,13 @@ standard_portal_menu_items = [
 	{"title": _("Certification"), "route": "/certification",
 	 "reference_doctype": "Certification Application", "role": "Non Profit Portal User"},
 ]
+
+fixtures = [
+    {
+        "doctype": "Property Setter",
+        "filters": [
+            ["is_system_generated", "=", 0],
+            ["module", "=", "Non Profit"],
+        ],
+    },
+]
