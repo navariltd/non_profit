@@ -233,7 +233,7 @@ fixtures = [
     {
         "doctype": "Module Profile",
         "filters": [
-            ["name", "=", "Volunteer"],
+            ["name", "in", ["Volunteer", "Member"]],
         ],
     },
     {
