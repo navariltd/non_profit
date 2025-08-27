@@ -271,6 +271,17 @@ function submit() {
       pwd: password.value,
     });
   } else {
+    if (!signUpForm.categoryVolunteer && !signUpForm.categoryMember) {
+      createSignUp.error =
+        "Please select at least one category (Volunteer or Member).";
+      return;
+    }
+
+    if (signUpForm.categoryMember && !signUpForm.membershipType) {
+      createSignUp.error = "Please select a membership type from the dialog.";
+      return;
+    }
+
     createSignUp.submit({
       first_name: signUpForm.firstName,
       last_name: signUpForm.lastName,
@@ -286,7 +297,6 @@ function submit() {
     });
   }
 }
-
 function selectMembership(membershipType: string) {
   signUpForm.membershipType = membershipType;
   membershipDialog.value = false;
