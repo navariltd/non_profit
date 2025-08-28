@@ -38,6 +38,7 @@ required_apps = ["erpnext"]
 doctype_js = {
     "Project": "non_profit/overrides/client/project.js",
     "Job Opening": "non_profit/overrides/client/job_opening.js",
+    "Membership": "non_profit/overrides/client/membership.js",
 }
 
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
