@@ -19,13 +19,17 @@ frappe.ui.form.on("Volunteer Deployment", {
       };
     });
 
-    if (frm.doc.docstatus === 0) {
+    if (frm.doc.docstatus === 0 && !frm.is_new()) {
       frm
         .add_custom_button(__("Fetch Available Volunteers"), function () {
           frm.events.fetch_volunteers(frm);
         })
         .addClass("btn-primary");
     }
+  },
+
+  fetch_available_volunteers(frm) {
+    frm.events.fetch_volunteers(frm);
   },
 
   fetch_volunteers: function (frm) {
@@ -74,13 +78,21 @@ frappe.ui.form.on("Volunteer Deployment", {
               width: 50,
             },
             {
-              fieldname: "volunteer",
+              fieldname: "employee",
               fieldtype: "Link",
-              label: __("Volunteer"),
-              options: "Volunteer",
+              label: __("Volunteer ID"),
+              options: "Employee",
               in_list_view: 1,
               read_only: 1,
-              cols: 3,
+              width: 120,
+            },
+            {
+              fieldname: "employee_name",
+              fieldtype: "Data",
+              label: __("Volunteer Name"),
+              in_list_view: 1,
+              read_only: 1,
+              width: 180,
             },
             {
               fieldname: "skills",
@@ -88,7 +100,7 @@ frappe.ui.form.on("Volunteer Deployment", {
               label: __("Skills"),
               in_list_view: 1,
               read_only: 1,
-              cols: 4,
+              width: 250,
             },
           ],
         },
@@ -113,10 +125,9 @@ frappe.ui.form.on("Volunteer Deployment", {
   add_selected_volunteers: function (frm, volunteers) {
     volunteers.forEach(function (volunteer) {
       var row = frm.add_child("volunteers");
-      row.volunteer = volunteer.volunteer;
-      row.volunteer_name = volunteer.volunteer_name;
+      row.volunteer = volunteer.employee;
+      row.volunteer_name = volunteer.employee_name;
       row.status = "Pending";
-      row.assignment_date = frappe.datetime.get_today();
     });
 
     frm.refresh_field("volunteers");

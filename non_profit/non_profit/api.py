@@ -393,7 +393,7 @@ def get_projects():
         ],
     )
 
-
+ 
 @frappe.whitelist()
 def create_availability_slot(slot_data):
 
