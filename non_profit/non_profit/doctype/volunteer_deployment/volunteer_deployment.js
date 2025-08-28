@@ -19,13 +19,17 @@ frappe.ui.form.on("Volunteer Deployment", {
       };
     });
 
-    if (frm.doc.docstatus === 0) {
+    if (frm.doc.docstatus === 0 && !frm.is_new()) {
       frm
         .add_custom_button(__("Fetch Available Volunteers"), function () {
           frm.events.fetch_volunteers(frm);
         })
         .addClass("btn-primary");
     }
+  },
+
+  fetch_available_volunteers(frm) {
+    frm.events.fetch_volunteers(frm);
   },
 
   fetch_volunteers: function (frm) {

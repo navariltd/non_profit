@@ -22,7 +22,7 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Volunteer",
-   "options": "Volunteer",
+   "options": "Employee",
    "reqd": 1
   },
   {
@@ -41,7 +41,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-22 13:29:36.741149",
+ "modified": "2025-08-27 12:04:48.839913",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Deployment Assignee",

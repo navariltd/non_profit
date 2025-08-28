@@ -37,7 +37,8 @@ required_apps = ["erpnext"]
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 doctype_js = {
     "Project": "non_profit/overrides/client/project.js",
-    "Job Opening": "non_profit/overrides/client/job_opening.js"
+    "Job Opening": "non_profit/overrides/client/job_opening.js",
+    "Employee Onboarding": "non_profit/overrides/client/employee_onboarding.js"
 }
 
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
@@ -112,8 +113,18 @@ override_doctype_class = {
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# }
+doc_events = {
+    "LMS Enrollment": {
+        "on_update": "non_profit.non_profit.overrides.server.lms_enrollment.on_update"
+    },
+    "Employee": {
+        "after_insert": "non_profit.non_profit.overrides.server.employee.after_insert"
+    },
+    "Employee Onboarding": {
+        "after_insert": "non_profit.non_profit.overrides.server.employee_onboarding.after_insert",
+        "on_update_after_submit": "non_profit.non_profit.overrides.server.employee_onboarding.on_update_after_submit"
+    }
+}
 
 # Scheduled Tasks
 # ---------------

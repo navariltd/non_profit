@@ -19,6 +19,7 @@
   "required_skills",
   "column_break_jvby",
   "number_of_volunteers_required",
+  "fetch_available_volunteers",
   "section_break_rmvn",
   "remarks",
   "section_break_r6sf",
@@ -139,13 +140,18 @@
    "label": "Deployment Criteria",
    "link_filters": "[[\"Volunteer Deployment Criteria\",\"docstatus\",\"=\",\"1\"]]",
    "options": "Volunteer Deployment Criteria"
+  },
+  {
+   "fieldname": "fetch_available_volunteers",
+   "fieldtype": "Button",
+   "label": "Fetch Available Volunteers"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-22 13:24:29.665388",
+ "modified": "2025-08-28 07:15:07.204348",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Deployment",
