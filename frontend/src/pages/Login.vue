@@ -170,7 +170,7 @@
   <Dialog
     :options="{
       title: 'Successfully Registered',
-      message: 'Await communication via email',
+      message: 'Await communication via email from RedCross',
       size: 'lg',
       icon: {
         name: 'alert-triangle',
@@ -181,7 +181,7 @@
           label: 'Confirm',
           variant: 'solid',
           onClick: () => {
-            router.push({ name: 'Welcome' });
+            router.push('/account/login');
           },
         },
       ],
@@ -255,12 +255,17 @@ const region = createResource({
       return { label: region.name, value: region.value };
     });
   },
+  onError(err) {
+    createSignUp.error = err;
+  },
 });
 
 const createSignUp = createResource({
   url: "non_profit.non_profit.user.sign_up",
   onSuccess(data: any) {
     signInState.value = true;
+    resetSignUpForm();
+    isLogin.value = true
   },
 });
 
@@ -313,4 +318,18 @@ watch(
     }
   }
 );
+
+function resetSignUpForm() {
+  signUpForm.firstName = "";
+  signUpForm.lastName = "";
+  signUpForm.region = "";
+  signUpForm.branch = "";
+  signUpForm.email = "";
+  signUpForm.password = "";
+  signUpForm.categoryVolunteer = false;
+  signUpForm.categoryMember = false;
+  signUpForm.membershipType = "";
+  signUpForm.gender = "";
+  signUpForm.phone_number = "";
+}
 </script>
