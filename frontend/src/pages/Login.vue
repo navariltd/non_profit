@@ -44,25 +44,6 @@
             />
           </div>
           <div class="w-full border p-4 rounded-lg bg-white">
-            <div class="mb-4">
-              <label for="gender" class="block text-gray-600 text-sm mb-2"
-                >Gender</label
-              >
-              <Select
-                id="gender"
-                :options="[
-                  { label: 'Male', value: 'Male' },
-                  { label: 'Female', value: 'Female' },
-                ]"
-                required
-                name="gender"
-                type="text"
-                placeholder="Select Gender"
-                v-model="signUpForm.gender"
-                class="w-full"
-              />
-            </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex flex-col">
                 <label for="region" class="text-gray-600 text-sm mb-2"
@@ -73,7 +54,7 @@
                   doctype="Company"
                   v-model="signUpForm.region"
                   placeholder="Region"
-                  class="w-full min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
+                  class="w-full"
                 />
               </div>
 
@@ -86,7 +67,7 @@
                   doctype="Branch"
                   v-model="signUpForm.branch"
                   placeholder="Branch"
-                  class="w-full min-w-40 lg:min-w-0 lg:w-32 xl:w-40"
+                  class="w-full"
                 />
               </div>
             </div>
@@ -99,6 +80,14 @@
             placeholder="johndoe@email.com"
             label="Email"
             v-model="signUpForm.email"
+          />
+          <Input
+            type="text"
+            size="sm"
+            variant="subtle"
+            placeholder="+254123456789"
+            label="PhoneNumber"
+            v-model="signUpForm.phone_number"
           />
           <Input
             required
@@ -122,10 +111,8 @@
               <label class="flex items-center space-x-1">
                 <Checkbox
                   size="sm"
-                  :value="false"
                   v-model="signUpForm.categoryMember"
                   label="Member"
-                  @change="onMemberChange"
                 />
               </label>
             </div>
@@ -170,6 +157,7 @@
     <template #body-content>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <VmmsPortalCard
+          class="cursor-pointer"
           v-for="membershipType in membershipTypes.data"
           :key="membershipType.name"
           :membershipType="membershipType"
@@ -207,16 +195,14 @@ import Button from "frappe-ui/src/components/Button/Button.vue";
 import { sessionStore } from "../stores/session";
 import Card from "frappe-ui/src/components/Card.vue";
 import Input from "frappe-ui/src/components/Input.vue";
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
 import Checkbox from "frappe-ui/src/components/Checkbox/Checkbox.vue";
-import { createResource } from "frappe-ui";
-import Select from "frappe-ui/src/components/Select/Select.vue";
+import { createResource, TextInput } from "frappe-ui";
 import Dialog from "frappe-ui/src/components/Dialog/Dialog.vue";
 import VmmsPortalCard from "../components/VmmsPortalCard.vue";
 import { membershipStore } from "../stores/membership";
 import { useRouter } from "vue-router";
-import Dropdown from "frappe-ui/src/components/Dropdown/Dropdown.vue";
 import Link from "../components/Controls/Link.vue";
 
 const company = ref("");
@@ -246,6 +232,7 @@ const signUpForm = reactive({
   categoryMember: false,
   membershipType: "",
   gender: "",
+  phone_number: "",
 });
 
 const session = sessionStore();
@@ -275,9 +262,6 @@ const createSignUp = createResource({
   onSuccess(data: any) {
     signInState.value = true;
   },
-  // onError(error: any) {
-  //   console.error("Sign up failed:", error);
-  // },
 });
 
 function submit() {
@@ -287,6 +271,18 @@ function submit() {
       pwd: password.value,
     });
   } else {
+    if (!signUpForm.categoryVolunteer && !signUpForm.categoryMember) {
+      createSignUp.error =
+        "Please select at least one category (Volunteer or Member).";
+      return;
+    }
+
+    if (signUpForm.categoryMember && !signUpForm.membershipType) {
+      createSignUp.error = "Please select a membership type from the dialog.";
+      membershipDialog.value = true;
+      return;
+    }
+
     createSignUp.submit({
       first_name: signUpForm.firstName,
       last_name: signUpForm.lastName,
@@ -298,19 +294,23 @@ function submit() {
       category_member: signUpForm.categoryMember,
       membership_type: signUpForm.membershipType,
       gender: signUpForm.gender,
+      phone_number: signUpForm.phone_number,
     });
   }
 }
-
 function selectMembership(membershipType: string) {
   signUpForm.membershipType = membershipType;
   membershipDialog.value = false;
 }
-function onMemberChange(checked: boolean) {
-  if (checked) {
-    membershipDialog.value = true;
-  } else {
-    signUpForm.membershipType = "";
+watch(
+  () => signUpForm.categoryMember,
+  (newValue) => {
+    if (newValue) {
+      membershipDialog.value = true;
+    } else {
+      signUpForm.membershipType = "";
+      membershipDialog.value = false;
+    }
   }
-}
+);
 </script>
