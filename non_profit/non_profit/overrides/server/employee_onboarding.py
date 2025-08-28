@@ -4,7 +4,7 @@ from frappe.model.document import Document
 
 
 @frappe.whitelist()
-def after_insert(doc: Document, method: str) -> None:
+def on_update(doc: Document, method: str) -> None:
     activities = doc.activities
     for activity in activities:
         course = activity.course

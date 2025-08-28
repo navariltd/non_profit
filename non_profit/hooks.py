@@ -121,7 +121,7 @@ doc_events = {
         "after_insert": "non_profit.non_profit.overrides.server.employee.after_insert"
     },
     "Employee Onboarding": {
-        "after_insert": "non_profit.non_profit.overrides.server.employee_onboarding.after_insert",
+        "on_update": "non_profit.non_profit.overrides.server.employee_onboarding.on_update",
         "on_update_after_submit": "non_profit.non_profit.overrides.server.employee_onboarding.on_update_after_submit"
     }
 }
