@@ -5,21 +5,21 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "volunteer_skill"
+  "skill"
  ],
  "fields": [
   {
-   "fieldname": "volunteer_skill",
+   "fieldname": "skill",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Volunteer Skill",
-   "options": "User Skill",
+   "label": "Skill",
+   "options": "Skill",
    "reqd": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2025-08-22 09:17:25.184652",
+ "modified": "2025-08-28 09:13:43.521183",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Skill",
