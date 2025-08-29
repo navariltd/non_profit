@@ -40,6 +40,7 @@ doctype_js = {
     "Job Opening": "non_profit/overrides/client/job_opening.js",
     "Employee Onboarding": "non_profit/overrides/client/employee_onboarding.js",
     "Membership": "non_profit/overrides/client/membership.js",
+    "Employee": "non_profit/overrides/client/employee.js"
 }
 
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
@@ -221,7 +222,6 @@ website_route_rules = [
     {"from_route": "/vmms-portal/<path:app_path>", "to_route": "vmms-portal"},
 ]
 
-
 fixtures = [
     {
         "doctype": "Calendar View",
@@ -252,6 +252,12 @@ fixtures = [
         "doctype": "Designation",
         "filters": [
             ["name", "=", "Volunteer"],
+        ],
+    },
+    {
+        "doctype": "Property Setter",
+        "filters": [
+            ["module", "=", "Non Profit"],
         ],
     },
 ]
