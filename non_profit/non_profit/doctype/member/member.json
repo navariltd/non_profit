@@ -19,6 +19,8 @@
   "customer_name",
   "supplier_section",
   "supplier",
+  "section_break_dblh",
+  "volunteer",
   "address_contacts",
   "address_html",
   "column_break_9",
@@ -60,8 +62,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Membership Type",
-   "options": "Membership Type",
-   "reqd": 1
+   "options": "Membership Type"
   },
   {
    "fieldname": "image",
@@ -166,14 +167,27 @@
    "fieldtype": "Select",
    "label": "Subscription Status",
    "options": "\nActive\nHalted"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_dblh",
+   "fieldtype": "Section Break",
+   "label": "Volunteer"
+  },
+  {
+   "fieldname": "volunteer",
+   "fieldtype": "Link",
+   "label": "Volunteer",
+   "options": "Employee"
   }
  ],
  "image_field": "image",
  "links": [],
- "modified": "2021-07-11 14:27:26.368039",
+ "modified": "2025-08-29 13:32:59.040381",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Member",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -203,8 +217,10 @@
  ],
  "quick_entry": 1,
  "restrict_to_domain": "Non Profit",
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "member_name",
  "track_changes": 1
 }

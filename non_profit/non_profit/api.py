@@ -410,3 +410,26 @@ def create_availability_slot(slot_data):
         frappe.log_error(frappe.get_traceback(), "Availability Slot Creation Error")
 
         frappe.throw("Availability Slot Creation Error")
+
+
+@frappe.whitelist()
+def create_volunteer(user_details):
+	volunteer = frappe.new_doc("Employee")
+	volunteer.first_name = user_details.fullname
+	volunteer.full_name = user_details.fullname
+	volunteer.email = user_details.email
+	volunteer.phone = user_details.phone
+	volunteer.is_volunteer = 1
+	volunteer.date_of_joining = frappe.utils.today()
+	volunteer.insert(ignore_permissions=True)
+	return volunteer.name
+
+@frappe.whitelist()
+def create_member(name):
+    volunteer_details = frappe.get_doc("Employee", name)
+    member = frappe.new_doc("Member")
+    member.member_name = volunteer_details.employee_name
+    member.email_id = volunteer_details.personal_email
+    member.volunteer = volunteer_details.name
+    member.insert(ignore_permissions=True)
+    return member.name

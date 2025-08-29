@@ -11,6 +11,7 @@ from frappe.utils import cint, get_link_to_form
 from payments.utils import get_payment_gateway_controller
 
 from non_profit.non_profit.doctype.membership_type.membership_type import get_membership_type
+from non_profit.non_profit.api import create_volunteer
 
 
 class Member(Document):
@@ -70,6 +71,20 @@ class Member(Document):
 		self.save()
 		frappe.msgprint(_("Customer {0} has been created succesfully.").format(self.customer))
 
+	@frappe.whitelist()
+	def make_volunteer_and_link(self):
+		if self.volunteer:
+			frappe.msgprint(_("A volunteer is already linked to this Member"))
+
+		volunteer =  create_volunteer(frappe._dict({
+			'fullname': self.member_name,
+			'email': self.email_id,
+			'phone': None
+		}))
+
+		self.volunteer = volunteer
+		self.save()
+		frappe.msgprint(_("Volunteer {0} has been created succesfully.").format(self.volunteer))
 
 def get_or_create_member(user_details):
 	member_list = frappe.get_all("Member", filters={'email': user_details.email, 'membership_type': user_details.plan_id})
