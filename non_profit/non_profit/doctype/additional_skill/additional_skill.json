@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-09-01 13:20:39.542718",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "additional_skill"
+ ],
+ "fields": [
+  {
+   "fieldname": "additional_skill",
+   "fieldtype": "Data",
+   "label": "Additional Skill"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-09-01 13:22:20.168147",
+ "modified_by": "Administrator",
+ "module": "Non Profit",
+ "name": "Additional Skill",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
