@@ -194,11 +194,6 @@
    "label": "Skills and Trainings"
   },
   {
-   "fieldname": "languages",
-   "fieldtype": "Data",
-   "label": "Languages"
-  },
-  {
    "fieldname": "column_break_hvzt",
    "fieldtype": "Column Break"
   },
@@ -247,13 +242,19 @@
    "fieldtype": "Table",
    "label": "Disabilities",
    "options": "Disability"
+  },
+  {
+   "fieldname": "languages",
+   "fieldtype": "Table",
+   "label": "Languages",
+   "options": "Volunteer Language"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-01 15:30:16.984662",
+ "modified": "2025-09-01 17:30:56.291488",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Signup",

@@ -268,7 +268,7 @@ function submit() {
     }
   }
   emptyVolunteerFormError.value = "";
-  console.log("Volunteer Form Submitted (Raw):", rawVolunteerForm);
+
   emit("volunteer-data-submitted", rawVolunteerForm);
 }
 </script>

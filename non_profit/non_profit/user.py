@@ -121,6 +121,8 @@ def create_volunteer(kwargs):
         {"disability": disability} for disability in kwargs.get("disabilities", [])
     ]
 
+    languages = [{"language": language} for language in kwargs.get("languages", [])]
+
     volunteer_signup = frappe.get_doc(
         {
             "doctype": "Volunteer Signup",
@@ -146,6 +148,7 @@ def create_volunteer(kwargs):
             "additional_skills": additional_skills_data,
             # "allergies": allergies_data,
             "disabilities": disabilities_data,
+            "languages": languages,
         }
     )
 
