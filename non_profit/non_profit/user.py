@@ -7,13 +7,15 @@ from frappe.utils.password import update_password
 @frappe.whitelist(allow_guest=True)
 def sign_up(**kwargs):
 
+    print(kwargs)
+
     frappe.db.begin()
 
     try:
 
-        user = create_user(kwargs)
-
         if kwargs.get("category_member"):
+            user = create_user(kwargs)
+
             create_member(kwargs, user)
 
         if kwargs.get("category_volunteer"):
@@ -24,7 +26,7 @@ def sign_up(**kwargs):
     except Exception as e:
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), "Sign Up Error")
-        frappe.throw("Sign Up Error")
+        frappe.throw(str(e))
 
 
 def create_user(kwargs):
@@ -103,20 +105,48 @@ def create_member(kwargs, user=None):
 
 def create_volunteer(kwargs):
 
-    if frappe.db.exists("Job Applicant", kwargs.get("email")):
-        frappe.throw("Job Application already exists")
+    if frappe.db.exists("User", {"email": kwargs.get("email")}):
+        frappe.throw("User already exists with this email")
 
-    job_applicant = frappe.get_doc(
+    # Prepare child table data for array fields
+    trainings_data = [{"training_program": "test"}]
+
+    additional_skills_data = [
+        {"additional_skill": skill} for skill in kwargs.get("additional_skills", [])
+    ]
+
+    # allergies_data = [{"allergies": allergy} for allergy in kwargs.get("allergies", [])]
+
+    disabilities_data = [
+        {"disability": disability} for disability in kwargs.get("disabilities", [])
+    ]
+
+    volunteer_signup = frappe.get_doc(
         {
-            "doctype": "Job Applicant",
-            "applicant_name": f'{kwargs.get("first_name")} {kwargs.get("last_name")}',
-            "email_id": kwargs.get("email"),
+            "doctype": "Volunteer Signup",
+            "status": "Pending",
+            "surname": kwargs.get("last_name"),
+            "other_names": kwargs.get("first_name"),
+            "email": kwargs.get("email"),
             "phone_number": kwargs.get("phone_number"),
-            "company": kwargs.get("region"),
-            "branch": kwargs.get("branch"),
-            "designation": "Volunteer",
-            "status": "Open",
+            "mobile_money_number": kwargs.get("mobile_money_number"),
+            "gender": kwargs.get("gender"),
+            "date_of_birth": kwargs.get("date_of_birth"),
+            "idpassport": kwargs.get("idpassport"),
+            "region": kwargs.get("region"),
+            "countybranch": kwargs.get("branch"),
+            "marital_status": kwargs.get("marital_status"),
+            "education": kwargs.get("education"),
+            "place_of_work": kwargs.get("place_of_work"),
+            "profession": kwargs.get("profession"),
+            "reason_to_join": kwargs.get("reason_to_join"),
+            "blood_group": kwargs.get("blood_group"),
+            "docstatus": 0,
+            "trainings": trainings_data,
+            "additional_skills": additional_skills_data,
+            # "allergies": allergies_data,
+            "disabilities": disabilities_data,
         }
     )
 
-    job_applicant.insert(ignore_permissions=True)
+    volunteer_signup.insert(ignore_permissions=True)

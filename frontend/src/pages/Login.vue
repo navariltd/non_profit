@@ -46,21 +46,8 @@
           <div class="w-full border p-4 rounded-lg bg-white">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex flex-col">
-                <label for="region" class="text-gray-600 text-sm mb-2"
-                  >Region</label
-                >
-                <Link
-                  id="region"
-                  doctype="Company"
-                  v-model="signUpForm.region"
-                  placeholder="Region"
-                  class="w-full"
-                />
-              </div>
-
-              <div class="flex flex-col">
                 <label for="branch" class="text-gray-600 text-sm mb-2"
-                  >Branch</label
+                  >Branch/County</label
                 >
                 <Link
                   id="branch"
@@ -68,6 +55,19 @@
                   v-model="signUpForm.branch"
                   placeholder="Branch"
                   class="w-full"
+                />
+              </div>
+              <div class="flex flex-col">
+                <label for="region" class="text-gray-600 text-sm mb-2"
+                  >Region</label
+                >
+                <Input
+                  id="region"
+                  doctype="Company"
+                  v-model="signUpForm.region"
+                  placeholder="Region"
+                  class="w-full"
+                  readonly
                 />
               </div>
             </div>
@@ -89,14 +89,12 @@
             label="PhoneNumber"
             v-model="signUpForm.phone_number"
           />
-          <Input
-            required
-            name="password"
-            type="password"
-            placeholder="••••••"
-            label="Password"
-            v-model="signUpForm.password"
+          <Select
+            v-model="signUpForm.gender"
+            class=""
+            :options="genderOptions"
           />
+
           <div class="flex flex-col space-y-1">
             <label class="text-sm font-medium">Please select Category</label>
             <div class="flex space-x-4">
@@ -188,6 +186,21 @@
     }"
     v-model="signInState"
   />
+
+  <Dialog :options="{ size: '6xl' }" v-model="showVolunteerModal">
+    <template #body-title>
+      <h3 class="text-2xl font-semibold text-ink-gray-9">
+        Additional Details for Volunteer Signup
+      </h3>
+    </template>
+    <template #body-content>
+      <div class="">
+        <VolunteerSignup
+          @volunteer-data-submitted="handleVolunteerDataSubmitted"
+        />
+      </div>
+    </template>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -195,15 +208,16 @@ import Button from "frappe-ui/src/components/Button/Button.vue";
 import { sessionStore } from "../stores/session";
 import Card from "frappe-ui/src/components/Card.vue";
 import Input from "frappe-ui/src/components/Input.vue";
-import { reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
 import Checkbox from "frappe-ui/src/components/Checkbox/Checkbox.vue";
-import { createResource, TextInput } from "frappe-ui";
+import { createResource, TextInput, Select } from "frappe-ui";
 import Dialog from "frappe-ui/src/components/Dialog/Dialog.vue";
 import VmmsPortalCard from "../components/VmmsPortalCard.vue";
 import { membershipStore } from "../stores/membership";
 import { useRouter } from "vue-router";
 import Link from "../components/Controls/Link.vue";
+import { VolunteerSignupData, initialVolunteerForm } from "../utils/volunteer";
 
 const company = ref("");
 const router = useRouter();
@@ -215,13 +229,29 @@ const signInState = ref(false);
 interface RegionOption {
   label: string;
   value: string;
+  company: string;
 }
 const regionOptions = ref<RegionOption[]>([]);
 const branchOptions = ref<RegionOption[]>([]);
-
+const volunteerDataToSubmit = ref<VolunteerSignupData | null>(null);
+const showVolunteerModal = ref(false);
 const { membershipTypes } = membershipStore();
 
-const signUpForm = reactive({
+interface SignUp extends VolunteerSignupData {
+  firstName: string;
+  lastName: string;
+  region: string;
+  branch: string;
+  email: string;
+  password: string;
+  categoryVolunteer: boolean;
+  categoryMember: boolean;
+  membershipType: string;
+  gender: string;
+  phone_number: string;
+}
+
+const initialForm: SignUp = {
   firstName: "",
   lastName: "",
   region: "",
@@ -233,39 +263,56 @@ const signUpForm = reactive({
   membershipType: "",
   gender: "",
   phone_number: "",
-});
+  ...initialVolunteerForm,
+};
+
+const signUpForm = reactive<SignUp>({ ...initialForm });
 
 const session = sessionStore();
+const genderOptions = [
+  { label: "Male", value: "Male" },
+  { label: "Female", value: "Female" },
+  { label: "Other", value: "Other" },
+];
 
-createResource({
+const branches = createResource({
   url: "non_profit.non_profit.api.get_branches",
   auto: true,
   onSuccess(data: any) {
     branchOptions.value = data.map((branch) => {
-      return { label: branch.name, value: branch.value };
+      return {
+        label: branch.name,
+        value: branch.name,
+        company: branch.company,
+      };
     });
   },
 });
 
-const region = createResource({
-  url: "non_profit.non_profit.api.get_regions",
-  auto: true,
-  onSuccess(data: any) {
-    regionOptions.value = data.map((region) => {
-      return { label: region.name, value: region.value };
-    });
-  },
-  onError(err) {
-    createSignUp.error = err;
-  },
+onMounted(() => {
+  branches.fetch();
 });
+watch(
+  () => signUpForm.branch,
+  (newBranch) => {
+    const selectedBranch = branchOptions.value.find(
+      (b) => b.value === newBranch
+    );
+
+    if (selectedBranch) {
+      signUpForm.region = selectedBranch.company;
+    } else {
+      signUpForm.region = "";
+    }
+  }
+);
 
 const createSignUp = createResource({
   url: "non_profit.non_profit.user.sign_up",
   onSuccess(data: any) {
     signInState.value = true;
     resetSignUpForm();
-    isLogin.value = true
+    isLogin.value = true;
   },
 });
 
@@ -300,6 +347,8 @@ function submit() {
       membership_type: signUpForm.membershipType,
       gender: signUpForm.gender,
       phone_number: signUpForm.phone_number,
+      // Include volunteer details if category is volunteer
+      ...(signUpForm.categoryVolunteer ? volunteerDataToSubmit.value : {}),
     });
   }
 }
@@ -318,6 +367,14 @@ watch(
     }
   }
 );
+watch(
+  () => signUpForm.categoryVolunteer,
+  (newValue) => {
+    if (newValue) {
+      showVolunteerModal.value = true;
+    }
+  }
+);
 
 function resetSignUpForm() {
   signUpForm.firstName = "";
@@ -331,5 +388,11 @@ function resetSignUpForm() {
   signUpForm.membershipType = "";
   signUpForm.gender = "";
   signUpForm.phone_number = "";
+}
+
+function handleVolunteerDataSubmitted(data) {
+  console.log("Volunteer data submitted:", data);
+  volunteerDataToSubmit.value = data;
+  showVolunteerModal.value = false;
 }
 </script>

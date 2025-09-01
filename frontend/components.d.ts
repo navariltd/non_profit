@@ -119,6 +119,7 @@ declare module 'vue' {
     VideoStatistics: typeof import('./src/components/Modals/VideoStatistics.vue')['default']
     VmmsPortalCard: typeof import('./src/components/VmmsPortalCard.vue')['default']
     Volunteer: typeof import('./src/components/Volunteer.vue')['default']
+    VolunteerSignup: typeof import('./src/components/VolunteerSignup.vue')['default']
     ZoomAccountModal: typeof import('./src/components/Modals/ZoomAccountModal.vue')['default']
     ZoomSettings: typeof import('./src/components/Settings/ZoomSettings.vue')['default']
   }

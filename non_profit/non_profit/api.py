@@ -3,7 +3,13 @@ import re
 
 import frappe
 from frappe import _, cint, cstr
-from frappe.desk.search import build_for_autosuggest, get_std_fields_list, LinkSearchResults, relevance_sorter, sanitize_searchfield
+from frappe.desk.search import (
+    build_for_autosuggest,
+    get_std_fields_list,
+    LinkSearchResults,
+    relevance_sorter,
+    sanitize_searchfield,
+)
 from frappe.model.db_query import get_order_by
 from frappe.utils.data import make_filter_tuple
 
@@ -20,7 +26,7 @@ def search_widget(
     filter_fields=None,
     as_dict: bool = False,
     reference_doctype: str | None = None,
-    ignore_permissions: bool = True,  
+    ignore_permissions: bool = True,
 ):
 
     start = cint(start)
@@ -39,7 +45,7 @@ def search_widget(
     if not query and doctype in standard_queries:
         query = standard_queries[doctype][-1]
 
-    if query: 
+    if query:
         try:
             return frappe.call(
                 query,
@@ -70,8 +76,14 @@ def search_widget(
 
     if txt:
         field_types = {
-            "Data", "Text", "Small Text", "Long Text", "Link",
-            "Select", "Read Only", "Text Editor"
+            "Data",
+            "Text",
+            "Small Text",
+            "Long Text",
+            "Link",
+            "Select",
+            "Read Only",
+            "Text Editor",
         }
         search_fields = ["name"]
         if meta.title_field:
@@ -82,7 +94,9 @@ def search_widget(
 
         for f in search_fields:
             fmeta = meta.get_field(f.strip())
-            if not meta.translated_doctype and (f == "name" or (fmeta and fmeta.fieldtype in field_types)):
+            if not meta.translated_doctype and (
+                f == "name" or (fmeta and fmeta.fieldtype in field_types)
+            ):
                 or_filters.append([doctype, f.strip(), "like", f"%{txt}%"])
 
     if meta.get("fields", {"fieldname": "enabled", "fieldtype": "Check"}):
@@ -147,15 +161,17 @@ def search_widget(
 
     return values
 
+
 @frappe.whitelist(allow_guest=True)
-def custom_search_link(	doctype: str,
-	txt: str,
-	query: str | None = None,
-	filters: str | dict | list | None = None,
-	page_length: int = 10,
-	searchfield: str | None = None,
-	reference_doctype: str | None = None,
-	ignore_permissions: bool = False,
+def custom_search_link(
+    doctype: str,
+    txt: str,
+    query: str | None = None,
+    filters: str | dict | list | None = None,
+    page_length: int = 10,
+    searchfield: str | None = None,
+    reference_doctype: str | None = None,
+    ignore_permissions: bool = False,
 ) -> list[LinkSearchResults]:
     results = search_widget(
         doctype,
@@ -169,6 +185,7 @@ def custom_search_link(	doctype: str,
     )
 
     return build_for_autosuggest(results, doctype=doctype)
+
 
 @frappe.whitelist(allow_guest=True)
 def get_membership_types():
@@ -267,40 +284,48 @@ def get_job_details(job):
 
     return job_details
 
+
 @frappe.whitelist(allow_guest=True)
-def submit_job_application(job_opening, applicant_name, email, phone, cover_letter, resume=None):
+def submit_job_application(
+    job_opening, applicant_name, email, phone, cover_letter, resume=None
+):
     try:
-        company, branch = frappe.db.get_value("Job Opening", job_opening, ["company", "branch"])
-        
-        job_application = frappe.get_doc({
-            "doctype": "Job Applicant",
-            "job_title": job_opening,
-            "applicant_name": applicant_name,
-            "email_id": email,
-            "phone_number": phone,
-            "cover_letter": cover_letter,
-            "status": "Open",
-            "company": company,
-            "branch": branch
-        })
-        
+        company, branch = frappe.db.get_value(
+            "Job Opening", job_opening, ["company", "branch"]
+        )
+
+        job_application = frappe.get_doc(
+            {
+                "doctype": "Job Applicant",
+                "job_title": job_opening,
+                "applicant_name": applicant_name,
+                "email_id": email,
+                "phone_number": phone,
+                "cover_letter": cover_letter,
+                "status": "Open",
+                "company": company,
+                "branch": branch,
+            }
+        )
+
         if resume:
             job_application.resume_attachment = resume
-            
+
         job_application.insert(ignore_permissions=True)
         frappe.db.commit()
-        
+
         return {
             "success": True,
             "message": "Job application submitted successfully",
-            "name": job_application.name
+            "name": job_application.name,
         }
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Job Application Submission Error")
         return {
             "success": False,
-            "message": f"Failed to submit job application: {str(e)}"
+            "message": f"Failed to submit job application: {str(e)}",
         }
+
 
 @frappe.whitelist(allow_guest=True)
 def get_regions():
@@ -309,7 +334,7 @@ def get_regions():
 
 @frappe.whitelist(allow_guest=True)
 def get_branches():
-    return frappe.get_all("Branch")
+    return frappe.get_all("Branch", fields=["name", "company"])
 
 
 @frappe.whitelist(allow_guest=True)
@@ -393,7 +418,7 @@ def get_projects():
         ],
     )
 
- 
+
 @frappe.whitelist()
 def create_availability_slot(slot_data):
 
