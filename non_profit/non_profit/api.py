@@ -359,9 +359,12 @@ def get_user_info():
     roles = frappe.get_roles(user.name)
     user["roles"] = roles
 
-    employee_name, employee_company, employee_branch = frappe.db.get_value(
-        "Employee", {"user_id": user.name}, ["name", "company", "branch"]
-    )
+    employee_name = employee_company = employee_branch = None
+
+    if frappe.db.exists("Employee", {"user_id": user.name, "status": "Active"}):
+        employee_name, employee_company, employee_branch = frappe.db.get_value(
+            "Employee", {"user_id": user.name}, ["name", "company", "branch"]
+        )
 
     user["non_profit_member"] = "Non Profit Member" in roles
     user["volunteer"] = "Volunteer" in roles
@@ -439,15 +442,16 @@ def create_availability_slot(slot_data):
 
 @frappe.whitelist()
 def create_volunteer(user_details):
-	volunteer = frappe.new_doc("Employee")
-	volunteer.first_name = user_details.fullname
-	volunteer.full_name = user_details.fullname
-	volunteer.email = user_details.email
-	volunteer.phone = user_details.phone
-	volunteer.is_volunteer = 1
-	volunteer.date_of_joining = frappe.utils.today()
-	volunteer.insert(ignore_permissions=True)
-	return volunteer.name
+    volunteer = frappe.new_doc("Employee")
+    volunteer.first_name = user_details.fullname
+    volunteer.full_name = user_details.fullname
+    volunteer.email = user_details.email
+    volunteer.phone = user_details.phone
+    volunteer.is_volunteer = 1
+    volunteer.date_of_joining = frappe.utils.today()
+    volunteer.insert(ignore_permissions=True)
+    return volunteer.name
+
 
 @frappe.whitelist()
 def create_member(name):
