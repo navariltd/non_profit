@@ -3,6 +3,7 @@
  "allow_rename": 1,
  "creation": "2025-08-22 09:00:40.395783",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "volunteer",
@@ -27,6 +28,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "Pending",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -53,7 +55,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-28 12:54:30.858552",
+ "modified": "2025-09-02 10:07:55.009256",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Deployment Assignee",
