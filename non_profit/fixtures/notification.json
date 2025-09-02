@@ -1,0 +1,43 @@
+[
+ {
+  "attach_print": 0,
+  "channel": "Email",
+  "condition": null,
+  "date_changed": null,
+  "days_in_advance": 0,
+  "docstatus": 0,
+  "doctype": "Notification",
+  "document_type": "Volunteer Signup",
+  "enabled": 1,
+  "event": "Method",
+  "is_standard": 0,
+  "message": "<h3>New Volunteer Signup</h3>\n  \n  \n<b>{{ _(\"VOlunteer Signup Dcoument\") }}:</b> {{ frappe.utils.get_link_to_form(doc.doctype, doc.name) }}\n\n  \n  <ul>\n    <li><strong>Status:</strong> {{ doc.status }}</li>\n    <li><strong>Name:</strong> {{ doc.other_names }} {{ doc.surname }}</li>\n    <li><strong>Email:</strong> {{ doc.email }}</li>\n    <li><strong>Phone Number:</strong> {{ doc.phone_number }}</li>\n  </ul>\n  \n  <p>Please review their information and take any necessary next steps to welcome them to the team.</p>\n  \n",
+  "message_type": "Markdown",
+  "method": "after_insert",
+  "modified": "2025-09-02 11:40:15.773877",
+  "module": null,
+  "name": "Volunteer Signup",
+  "print_format": null,
+  "property_value": null,
+  "recipients": [
+   {
+    "bcc": null,
+    "cc": null,
+    "condition": null,
+    "parent": "Volunteer Signup",
+    "parentfield": "recipients",
+    "parenttype": "Notification",
+    "receiver_by_document_field": null,
+    "receiver_by_role": "Branch Coordinator"
+   }
+  ],
+  "send_system_notification": 1,
+  "send_to_all_assignees": 0,
+  "sender": null,
+  "sender_email": null,
+  "set_property_after_alert": null,
+  "slack_webhook_url": null,
+  "subject": "{{ doc.name }} Delivered",
+  "value_changed": null
+ }
+]
