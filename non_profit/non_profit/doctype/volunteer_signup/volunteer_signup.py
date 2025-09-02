@@ -25,7 +25,7 @@ class VolunteerSignup(Document):
             except Exception as e:
                 frappe.throw("An error occurred while processing your request.")
                 frappe.log_error(
-                    frappe.get_traceback(), "Volunteer Signup Approval Failed"
+                    frappe.get_traceback(), f"Volunteer Signup Approval Failed {str(e)}"
                 )
         if self.status == "Rejected":
             frappe.sendmail(
@@ -50,13 +50,13 @@ class VolunteerSignup(Document):
                 "last_name": self.other_names,
                 "gender": self.gender,
                 "enabled": 1,
-                "role_profile_name": "Volunteer",
                 "module_profile": "Volunteer",
-                "default_app": "lms"
+                "default_app": "lms",
             }
         )
 
         user.insert(ignore_permissions=True)
+        user.add_roles("Volunteer")
 
         return user
 
@@ -68,14 +68,14 @@ class VolunteerSignup(Document):
                 "first_name": self.surname,
                 "last_name": self.other_names,
                 "gender": self.gender,
-                "employee_name": f"{self.first_name} {self.other_names}",
+                "employee_name": f"{self.surname} {self.other_names}",
                 "date_of_birth": self.date_of_birth,
                 "date_of_joining": frappe.utils.nowdate(),
                 "status": "Active",
                 "department": "Volunteer",
                 "user_id": user.name,
                 "company": self.region,
-                "branch": self.branch,
+                "branch": self.countybranch,
                 "is_volunteer": 1,
                 "cell_number": self.phone_number,
                 "personal_email": self.email,
@@ -85,3 +85,4 @@ class VolunteerSignup(Document):
         )
 
         employee.insert(ignore_permissions=True)
+        frappe.db.set_value("User", user.name, "role_profile_name", "Volunteer")

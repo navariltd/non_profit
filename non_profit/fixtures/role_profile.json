@@ -2,16 +2,10 @@
  {
   "docstatus": 0,
   "doctype": "Role Profile",
-  "modified": "2025-08-27 12:55:16.561540",
+  "modified": "2025-09-02 15:19:09.369707",
   "name": "Volunteer",
   "role_profile": "Volunteer",
   "roles": [
-   {
-    "parent": "Volunteer",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
-    "role": "Employee"
-   },
    {
     "parent": "Volunteer",
     "parentfield": "roles",
