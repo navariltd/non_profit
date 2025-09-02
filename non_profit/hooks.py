@@ -123,8 +123,8 @@ doc_events = {
     },
     "Employee Onboarding": {
         "on_update": "non_profit.non_profit.overrides.server.employee_onboarding.on_update",
-        "on_update_after_submit": "non_profit.non_profit.overrides.server.employee_onboarding.on_update_after_submit"
-    }
+        "on_update_after_submit": "non_profit.non_profit.overrides.server.employee_onboarding.on_update_after_submit",
+    },
 }
 
 # Scheduled Tasks
@@ -233,7 +233,7 @@ fixtures = [
     {
         "doctype": "Role",
         "filters": [
-            ["name", "=", "Volunteer"],
+            ["name", "in", ["Volunteer", "Branch Coordinator"]],
         ],
     },
     {
@@ -252,6 +252,12 @@ fixtures = [
         "doctype": "Designation",
         "filters": [
             ["name", "=", "Volunteer"],
+        ],
+    },
+    {
+        "doctype": "Notification",
+        "filters": [
+            ["name", "=", "Volunteer Signup"],
         ],
     },
 ]
