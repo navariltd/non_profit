@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "project",
+  "task",
   "deployment_criteria",
   "column_break_qbmp",
   "company",
@@ -50,7 +51,10 @@
    "fetch_from": "project.company",
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -59,7 +63,10 @@
    "fetch_from": "project.branch",
    "fieldname": "branch",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Branch",
    "options": "Branch",
    "reqd": 1
@@ -70,23 +77,29 @@
    "label": "Volunteers"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "volunteers",
    "fieldtype": "Table",
    "label": "Volunteers",
    "options": "Volunteer Deployment Assignee"
   },
   {
-   "fetch_from": "project.expected_start_date",
    "fieldname": "expected_start_date",
    "fieldtype": "Datetime",
+   "in_filter": 1,
    "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Expected Start Date",
    "reqd": 1
   },
   {
-   "fetch_from": "project.expected_end_date",
    "fieldname": "expected_end_date",
    "fieldtype": "Datetime",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Expected End Date"
   },
   {
@@ -129,7 +142,10 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Project",
    "options": "Project",
    "reqd": 1
@@ -145,13 +161,23 @@
    "fieldname": "fetch_available_volunteers",
    "fieldtype": "Button",
    "label": "Fetch Available Volunteers"
+  },
+  {
+   "fieldname": "task",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Task",
+   "options": "Task"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-08-28 11:48:41.461843",
+ "modified": "2025-09-02 09:23:02.176692",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Deployment",
