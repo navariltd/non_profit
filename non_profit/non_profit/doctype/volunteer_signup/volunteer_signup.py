@@ -56,7 +56,6 @@ class VolunteerSignup(Document):
         )
 
         user.insert(ignore_permissions=True)
-        user.add_roles("Volunteer")
 
         return user
 
