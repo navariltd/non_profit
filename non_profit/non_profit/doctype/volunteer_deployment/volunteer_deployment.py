@@ -151,12 +151,13 @@ class VolunteerDeployment(Document):
                 project = frappe.get_doc("Project", self.project)
                 existing_users = {row.user for row in project.users}
                 employee = frappe.get_value("Employee", row.volunteer, ["user_id"], as_dict=True)
-                
+                user_added = False
                 if employee and employee.user_id and employee.user_id not in existing_users:
                     project.append("users", {"user": employee.user_id})
                     existing_users.add(employee.user_id)
-                    
-                project.save(ignore_permissions=True)
+                    user_added = True
+                if user_added:
+                    project.save(ignore_permissions=True)
 
 
     def _ensure_todo(self, user_id, ref_type, ref_name):
