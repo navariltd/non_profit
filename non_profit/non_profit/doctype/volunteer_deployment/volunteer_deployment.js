@@ -26,6 +26,63 @@ frappe.ui.form.on("Volunteer Deployment", {
         })
         .addClass("btn-primary");
     }
+    frm.fields_dict["volunteers"].grid.get_field("volunteer").get_query =
+      function (doc, cdt, cdn) {
+        const row = locals[cdt][cdn];
+
+        const selectedVolunteers = [];
+        (doc.volunteers || []).forEach(function (d) {
+          if (d.name !== row.name && d.volunteer) {
+            selectedVolunteers.push(d.volunteer);
+          }
+        });
+
+        return {
+          filters: {
+            is_volunteer: 1,
+            status: "Active",
+            branch: doc.branch,
+            name: ["not in", selectedVolunteers],
+          },
+        };
+      };
+  },
+
+  task(frm) {
+    if (!frm.doc.task) return;
+
+    frappe.db.get_value("Task", frm.doc.task, "project").then((r) => {
+      if (r && r.message && r.message.project) {
+        frm.set_value("project", r.message.project);
+      }
+    });
+  },
+
+  project(frm) {
+    if (!frm.doc.project) return;
+
+    frappe.db
+      .get_value("Project", frm.doc.project, [
+        "company",
+        "branch",
+        "expected_start_date",
+        "expected_end_date",
+      ])
+      .then((r) => {
+        if (r && r.message) {
+          frm.set_value("company", r.message.company || "");
+          frm.set_value("branch", r.message.branch || "");
+          frm.set_value(
+            "expected_start_date",
+            r.message.expected_start_date || ""
+          );
+          frm.set_value("expected_end_date", r.message.expected_end_date || "");
+        }
+      });
+  },
+
+  volunteers_add(frm, cdt, cdn) {
+    set_volunteer_query(frm);
   },
 
   fetch_available_volunteers(frm) {
@@ -136,3 +193,42 @@ frappe.ui.form.on("Volunteer Deployment", {
     );
   },
 });
+
+frappe.ui.form.on("Volunteer Deployment Assignee", {
+  volunteer: function (frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+
+    let duplicate = frm.doc.volunteers.filter(
+      (v) => v.volunteer === row.volunteer
+    );
+    if (duplicate.length > 1) {
+      frappe.msgprint(__("This volunteer is already selected."));
+      frappe.model.set_value(cdt, cdn, "volunteer", "");
+    }
+  },
+
+  form_render: function (frm, cdt, cdn) {
+    set_volunteer_query(frm);
+  },
+});
+
+function set_volunteer_query(frm) {
+  frm.fields_dict.volunteers.grid.get_field("volunteer").get_query = function (
+    doc,
+    cdt,
+    cdn
+  ) {
+    let used = (frm.doc.volunteers || [])
+      .filter((v) => v.volunteer)
+      .map((v) => v.volunteer);
+
+    return {
+      filters: {
+        name: ["not in", used],
+        branch: frm.doc.branch,
+        is_volunteer: 1,
+        status: "Active",
+      },
+    };
+  };
+}
