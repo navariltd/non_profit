@@ -45,7 +45,6 @@ onMounted(() => {
   const { roleResource } = usersStore();
 
   if (!user.data) {
-    console.log("User is not logged in");
 
     toast.warning("You must be logged in to view this page.");
     setTimeout(() => {
@@ -53,7 +52,6 @@ onMounted(() => {
     }, 500);
   } else {
     roleResource.reload();
-    console.log("User is logged in", user.data);
   }
 });
 </script>
