@@ -71,23 +71,17 @@ class Membership(Document):
 
 	@frappe.whitelist()
 	def generate_invoice(self, save=True, with_payment_entry=False):
-		if not (self.paid or self.currency or self.amount):
-			frappe.throw(_("The payment for this membership is not paid. To generate invoice fill the payment details"))
-
-		if self.invoice:
-			frappe.throw(_("An invoice is already linked to this document"))
-
 		member = frappe.get_doc("Member", self.member)
 		if not member.customer:
-			frappe.throw(_("No customer linked to member {0}").format(frappe.bold(self.member)))
-
+			member = frappe.get_doc("Member", self.member)
+			member.make_customer_and_link()
+			member.reload()
+			
 		plan = frappe.get_doc("Membership Type", self.membership_type)
 		settings = frappe.get_doc("Non Profit Settings")
-		self.validate_membership_type_and_settings(plan, settings)
 
-		invoice = make_invoice(self, member, plan, settings)
+		invoice = make_invoice(self, member, plan)
 		self.reload()
-		self.invoice = invoice.name
 
 		if with_payment_entry:
 			self.make_payment_entry(settings, invoice)
@@ -96,6 +90,21 @@ class Membership(Document):
 			self.save()
 
 		return invoice
+
+	@frappe.whitelist()
+	def initiate_payment(self):
+		member = frappe.get_doc("Member", self.member)
+		if not member.customer:
+			member = frappe.get_doc("Member", self.member)
+			member.make_customer_and_link()
+			member.reload()
+			
+		plan = frappe.get_doc("Membership Type", self.membership_type)
+
+		payment_request = make_payment_request(self, member, plan)
+		self.reload()
+
+		return payment_request
 
 	def validate_membership_type_and_settings(self, plan, settings):
 		settings_link = get_link_to_form("Non Profit Settings", "Non Profit Settings")
@@ -166,19 +175,20 @@ class Membership(Document):
 		self.send_acknowlement()
 
 
-def make_invoice(membership, member, plan, settings):
+def make_invoice(membership, member, plan):
 	invoice = frappe.get_doc({
 		"doctype": "Sales Invoice",
 		"customer": member.customer,
-		"debit_to": settings.membership_debit_account,
 		"currency": membership.currency,
-		"company": settings.company,
+		"company": membership.company,
+		"membership": membership.name,
 		"is_pos": 0,
 		"items": [
 			{
 				"item_code": plan.linked_item,
 				"rate": membership.amount,
-				"qty": 1
+				"qty": 1,
+				"membership": membership.name,
 			}
 		]
 	})
@@ -189,6 +199,59 @@ def make_invoice(membership, member, plan, settings):
 	frappe.msgprint(_("Sales Invoice created successfully"))
 
 	return invoice
+
+
+def make_payment_request(membership, member, plan):
+    try:
+        payment_gateway_account = frappe.db.get_value(
+            "Payment Gateway Account",
+            {"is_default": 1, "currency": membership.currency},
+            ["name"]
+        )
+
+        if not payment_gateway_account:
+            frappe.throw(
+                _("Please set up a default Payment Gateway Account for currency {0}")
+                .format(membership.currency)
+            )
+
+        payment_request = frappe.get_doc({
+            "doctype": "Payment Request",
+            "payment_request_type": "Inward",
+            "transaction_date": nowdate(),
+            "party_type": "Customer",
+            "status": "Initiated",
+            "party": member.customer,
+            "reference_doctype": "Membership",
+            "reference_name": membership.name,
+            "currency": membership.currency,
+            "grand_total": membership.amount,
+            "email_to": member.email_id,
+			# "payment_gateway_account": payment_gateway_account,
+            "subject": _("Payment Request for {0} Membership").format(plan.name),
+            "message": _("Please pay {0} {1} to renew your membership.")
+                .format(membership.currency, membership.amount)
+        })
+
+        payment_request.flags.ignore_validate = True
+        payment_request.insert(ignore_permissions=True)
+        payment_request.submit()
+
+        frappe.msgprint(_("Payment Request created successfully"))
+        return payment_request
+
+    except Exception as e:
+        message = "{0}\n\n{1}".format(e, frappe.get_traceback())
+        log = frappe.log_error(
+            _("Error creating payment request for {0}").format(member.name),
+            message
+        )
+        frappe.msgprint(
+            _("Failed to create payment request. Please check the error log: {0}")
+            .format(log.name)
+        )
+        return None
+
 
 
 def get_member_based_on_subscription(subscription_id, email=None, customer_id=None):
