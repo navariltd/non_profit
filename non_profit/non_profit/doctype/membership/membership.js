@@ -32,6 +32,21 @@ frappe.ui.form.on("Membership", {
     });
     if (frm.doc.__islocal) return;
 
+    if (!frm.is_new()) {
+      frm.add_custom_button("Request Payment", () => {
+        frm.call({
+          doc: frm.doc,
+          method: "initiate_payment",
+          args: { save: true },
+          freeze: true,
+          freeze_message: __("Requesting Payment"),
+          callback: function (r) {
+            if (r.invoice) frm.reload_doc();
+          },
+        });
+      });
+    }
+
     !frm.doc.invoice &&
       frm.add_custom_button("Generate Invoice", () => {
         frm.call({
@@ -56,6 +71,22 @@ frappe.ui.form.on("Membership", {
             });
           });
       });
+  },
+
+  membership_type: function (frm) {
+    if (frm.doc.membership_type) {
+      frappe.db.get_value(
+        "Membership Type",
+        frm.doc.membership_type,
+        ["amount", "currency"],
+        (r) => {
+          if (r) {
+            frm.set_value("amount", r.amount);
+            frm.set_value("currency", r.currency);
+          }
+        }
+      );
+    }
   },
 
   onload: function (frm) {
