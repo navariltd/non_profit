@@ -1,35 +1,8 @@
 <template>
   <div>
-    <!-- Volunteer stats and availability -->
     <div class="flex flex-col md:flex-row justify-evenly items-center m-8">
-      <div class="flex justify-center">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
-          <div
-            class="bg-white rounded-lg shadow-lg p-6 text-center border border-gray-200 bg-gradient-to-br from-blue-50 to-blue-100"
-          >
-            <h3 class="text-4xl font-bold text-blue-700 mb-2">
-              {{ volunteerStats.hours }}
-            </h3>
-            <p class="text-gray-600 font-medium">Total Hours</p>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow-lg p-6 text-center border border-gray-200 bg-gradient-to-br from-green-50 to-green-100"
-          >
-            <h3 class="text-4xl font-bold text-green-700 mb-2">
-              {{ volunteerStats.events }}
-            </h3>
-            <p class="text-gray-600 font-medium">Events Attended</p>
-          </div>
-          <div
-            class="bg-white rounded-lg shadow-lg p-6 text-center border border-gray-200 bg-gradient-to-br from-yellow-50 to-yellow-100"
-          >
-            <h3 class="text-4xl font-bold text-yellow-700 mb-2">
-              {{ volunteerStats.badges }}
-            </h3>
-            <p class="text-gray-600 font-medium">Badges Earned</p>
-          </div>
-        </div>
-      </div>
+      <div></div>
+      <div></div>
       <div class="flex items-center space-x-4 mb-6">
         <div class="flex items-center space-x-2 rounded-lg p-2">
           <Button
@@ -57,23 +30,6 @@
             ></span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Current Projects Section -->
-    <div
-      class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
-    >
-      <div
-        class="p-6 border-b border-gray-100 bg-gradient-to-r from-green-50 to-emerald-50"
-      >
-        <h3 class="text-xl font-semibold text-gray-700">Current Projects</h3>
-        <p class="text-gray-600 text-sm mt-1">
-          Your ongoing volunteer commitments
-        </p>
-      </div>
-      <div class="p-6">
-        <Projects />
       </div>
     </div>
 

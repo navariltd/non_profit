@@ -1,5 +1,5 @@
-<template>
-  <Volunteer v-if="roleResource.data.volunteer" />
+<template v-if="user.data">
+  <Volunteer v-if="roleResource.data.employee" />
 
   <Member v-if="roleResource.data.non_profit_member" />
 
@@ -27,14 +27,26 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { inject, onMounted } from "vue";
 import EmptyState from "../components/EmptyState.vue";
 import EventCard from "../components/EventCard.vue";
 import Member from "../components/Member.vue";
 import Volunteer from "../components/Volunteer.vue";
 import { membershipStore } from "../stores/membership";
 import { usersStore } from "../stores/user";
-import { Button } from "frappe-ui";
+import { Button, toast } from "frappe-ui";
 
 const { roleResource } = usersStore();
 const { events } = membershipStore();
+
+const user = inject<any>("$user");
+
+onMounted(() => {
+  if (!user.data) {
+    toast.warning("You must be logged in to view this page.");
+    setTimeout(() => {
+      window.location.href = `account/login?redirect-to=${window.location.pathname}`;
+    }, 500);
+  }
+});
 </script>

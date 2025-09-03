@@ -1,5 +1,6 @@
 <template>
   <div class="flex flex-col md:flex-row gap-4 p-5">
+    <div></div>
     <div
       class="m-auto w-1/4 bg-white rounded-2xl shadow-lg p-6 flex flex-col justify-center items-center text-center border border-gray-100 h-fit"
     >
@@ -32,29 +33,6 @@
       <Button class="mt-6 w-full rounded-xl" :variant="'solid'">
         Renew Membership
       </Button>
-    </div>
-
-    <div
-      class="m-auto w-3/4 bg-white rounded-2xl shadow-lg border border-gray-100 mt-8"
-    >
-      <div class="p-6 border-b border-gray-100">
-        <h3 class="text-xl font-semibold">Payment History</h3>
-      </div>
-      <div class="p-6">
-        <ListView
-          :columns="[
-            { label: 'Date', key: 'date' },
-            { label: 'Type', key: 'type' },
-            { label: 'Amount', key: 'amount' },
-          ]"
-          :rows="paymentHistory"
-          row-key="date"
-        >
-        </ListView>
-        <Button class="mt-4 rounded-xl" :variant="'solid'">
-          View Full History
-        </Button>
-      </div>
     </div>
   </div>
 </template>

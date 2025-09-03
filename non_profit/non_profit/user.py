@@ -57,6 +57,7 @@ def create_user(kwargs):
             "module_profile": (
                 "Member" if kwargs.get("category_member") else "Volunteer"
             ),
+            "default_app": "lms",
         }
     )
 
