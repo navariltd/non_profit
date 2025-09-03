@@ -80,6 +80,7 @@ class VolunteerSignup(Document):
                 "personal_email": self.email,
                 "marital_status": self.marital_status,
                 "blood_group": self.blood_group,
+                "volunteer_signup": self.name
             }
         )
 
