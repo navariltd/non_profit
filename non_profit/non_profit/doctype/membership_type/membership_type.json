@@ -7,9 +7,16 @@
  "engine": "InnoDB",
  "field_order": [
   "membership_type",
-  "amount",
+  "membership_package",
   "razorpay_plan_id",
-  "linked_item"
+  "linked_item",
+  "column_break_tssr",
+  "amount",
+  "currency",
+  "billing_cycle",
+  "age_requirement",
+  "section_break_ilnt",
+  "benefits"
  ],
  "fields": [
   {
@@ -41,13 +48,51 @@
    "label": "Linked Item",
    "options": "Item",
    "unique": 1
+  },
+  {
+   "fieldname": "column_break_tssr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "membership_package",
+   "fieldtype": "Link",
+   "label": "Membership Package",
+   "options": "Membership Package"
+  },
+  {
+   "fieldname": "billing_cycle",
+   "fieldtype": "Select",
+   "label": "Billing Cycle",
+   "options": "\nMonthly\nYearly\nOne Off"
+  },
+  {
+   "fieldname": "section_break_ilnt",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "benefits",
+   "fieldtype": "Table",
+   "label": "Benefits",
+   "options": "Membership Benefit"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
+  },
+  {
+   "fieldname": "age_requirement",
+   "fieldtype": "Data",
+   "label": "Age Requirement"
   }
  ],
  "links": [],
- "modified": "2020-08-05 15:21:43.595745",
+ "modified": "2025-09-03 12:29:20.013549",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Type",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -63,9 +108,10 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "restrict_to_domain": "Non Profit",
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
