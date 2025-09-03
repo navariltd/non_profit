@@ -1,7 +1,7 @@
 <template v-if="user.data">
-  <Volunteer v-if="roleResource.data.employee" />
+  <Volunteer v-if="roleResource.data && roleResource.data.employee" />
 
-  <Member v-if="roleResource.data.non_profit_member" />
+  <Member v-if="roleResource.data && roleResource.data.non_profit_member" />
 
   <hr />
   <div class="flex flex-col gap-2 p-5">
@@ -42,11 +42,16 @@ const { events } = membershipStore();
 const user = inject<any>("$user");
 
 onMounted(() => {
+  const { roleResource } = usersStore();
+
   if (!user.data) {
+
     toast.warning("You must be logged in to view this page.");
     setTimeout(() => {
       window.location.href = `account/login?redirect-to=${window.location.pathname}`;
     }, 500);
+  } else {
+    roleResource.reload();
   }
 });
 </script>
