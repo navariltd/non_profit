@@ -139,7 +139,8 @@ def create_user_for_employee(doc: Document) -> str:
             "last_name": doc.last_name or "",
             "enabled": 1,
             "user_type": "System User",
-            "send_welcome_email": 0
+            "send_welcome_email": 0,
+            "default_app": "non_profit",
         })
         
         user.insert(ignore_permissions=True)
