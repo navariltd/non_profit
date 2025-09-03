@@ -51,7 +51,7 @@ class VolunteerSignup(Document):
                 "gender": self.gender,
                 "enabled": 1,
                 "module_profile": "Volunteer",
-                "default_app": "lms",
+                "default_app": "non_profit",
             }
         )
 
