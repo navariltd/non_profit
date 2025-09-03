@@ -4,6 +4,7 @@
       {{ label }}
       <span class="text-ink-red-3" v-if="required">*</span>
     </label>
+
     <div class="w-full">
       <Combobox v-model="selectedValue" nullable>
         <Popover class="w-full" v-model:show="showOptions">
@@ -54,9 +55,12 @@
                     >
                       <div class="flex flex-col gap-1 p-1">
                         <div class="text-base font-medium text-ink-gray-8">
-                          {{ option.description }}
+                          {{ option.label || option.value }}
                         </div>
-                        <div class="text-sm text-ink-gray-5">
+                        <div
+                          v-if="option.value !== option.label"
+                          class="text-sm text-ink-gray-5"
+                        >
                           {{ option.value }}
                         </div>
                       </div>
@@ -65,14 +69,19 @@
 
                   <div class="h-10"></div>
                   <div
-                    v-if="attrs.onCreate"
+                    v-if="props.allowCreate"
                     class="absolute bottom-2 left-1 w-[99%] pt-2 bg-white border-t"
                   >
                     <Button
                       variant="ghost"
                       class="w-full !justify-start"
-                      :label="__('Create New')"
-                      @click="attrs.onCreate(close)"
+                      :label="`Add New`"
+                      @click="
+                        () => {
+                          close();
+                          showCreateDialog = true;
+                        }
+                      "
                     >
                       <template #prefix>
                         <Plus class="h-4 w-4 stroke-1.5" />
@@ -93,15 +102,19 @@
         :key="value"
         class="flex items-center justify-between break-all bg-surface-gray-2 text-ink-gray-7 word-wrap p-2 rounded-md mr-2"
       >
-        <span class="break-all">
-          {{ value }}
-        </span>
+        <span class="break-all">{{ value }}</span>
         <X
           class="size-4 stroke-1.5 cursor-pointer"
           @click="removeValue(value)"
         />
       </div>
     </div>
+
+    <CreateNewEntryDialog
+      v-model="showCreateDialog"
+      :doctype="props.doctype"
+      @created="(newName) => addValue(newName)"
+    />
   </div>
 </template>
 
@@ -113,33 +126,23 @@ import {
   ComboboxOption,
 } from "@headlessui/vue";
 import { createResource, Popover, Button } from "frappe-ui";
-import { ref, computed, nextTick, useAttrs, watch } from "vue";
+import { ref, computed, nextTick, useAttrs } from "vue";
 import { watchDebounced } from "@vueuse/core";
 import { X, Plus } from "lucide-vue-next";
+import CreateNewEntryDialog from "../Modals/CreateNewEntryDialog.vue";
 
 const props = defineProps({
   label: String,
-  size: {
-    type: String,
-    default: "sm",
-  },
-  doctype: {
-    type: String,
-    required: true,
-  },
-  filters: {
-    type: Object,
-    default: () => ({}),
-  },
-  validate: {
-    type: Function,
-    default: null,
-  },
+  size: { type: String, default: "sm" },
+  doctype: { type: String, required: true },
+  filters: { type: Object, default: () => ({}) },
+  validate: { type: Function, default: null },
   errorMessage: {
     type: Function,
     default: (value) => `${value} is an Invalid value`,
   },
   required: Boolean,
+  allowCreate: { type: Boolean, default: false },
 });
 
 const values = defineModel();
@@ -150,6 +153,7 @@ const error = ref(null);
 const query = ref("");
 const text = ref("");
 const showOptions = ref(false);
+const showCreateDialog = ref(false);
 const emit = defineEmits(["change"]);
 
 const selectedValue = computed({
@@ -179,11 +183,7 @@ const filterOptions = createResource({
   method: "POST",
   cache: [text.value, props.doctype],
   auto: true,
-  params: {
-    txt: text.value,
-    doctype: props.doctype,
-    filters: props.filters,
-  },
+  params: { txt: text.value, doctype: props.doctype, filters: props.filters },
 });
 
 const options = computed(() => {
@@ -195,10 +195,7 @@ const options = computed(() => {
 
 function reload(val) {
   filterOptions.update({
-    params: {
-      txt: val,
-      doctype: props.doctype,
-    },
+    params: { txt: val, doctype: props.doctype },
   });
   filterOptions.reload();
 }
@@ -207,16 +204,15 @@ const addValue = (value) => {
   error.value = null;
   if (value) {
     const splitValues = value.split(",");
-    splitValues.forEach((value) => {
-      value = value.trim();
-      if (value && !values.value?.includes(value)) {
-        if (props.validate && !props.validate(value)) {
-          error.value = props.errorMessage(value);
+    splitValues.forEach((v) => {
+      v = v.trim();
+      if (v && !values.value?.includes(v)) {
+        if (props.validate && !props.validate(v)) {
+          error.value = props.errorMessage(v);
           return;
         }
-        if (!values.value) values.value = [value];
-        else values.value.push(value);
-
+        if (!values.value) values.value = [v];
+        else values.value.push(v);
         emit("change", values.value);
         showOptions.value = false;
       }
@@ -224,21 +220,6 @@ const addValue = (value) => {
     !error.value && (query.value = "");
   }
 };
-
-watch(
-  () => props.filters,
-  (newFilters) => {
-    filterOptions.update({
-      params: {
-        txt: text.value,
-        doctype: props.doctype,
-        filters: newFilters,
-      },
-    });
-    filterOptions.reload();
-  },
-  { deep: true }
-);
 
 const closeDropdown = (closeFunction) => {
   closeFunction();
@@ -276,10 +257,7 @@ defineExpose({ setFocus });
 
 const labelClasses = computed(() => {
   return [
-    {
-      sm: "text-xs",
-      md: "text-base",
-    }[props.size || "sm"],
+    { sm: "text-xs", md: "text-base" }[props.size || "sm"],
     "text-ink-gray-5",
   ];
 });

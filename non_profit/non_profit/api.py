@@ -1,5 +1,7 @@
 import json
 import re
+import random
+import string
 
 import frappe
 from frappe import _, cint, cstr
@@ -12,7 +14,7 @@ from frappe.desk.search import (
 )
 from frappe.model.db_query import get_order_by
 from frappe.utils.data import make_filter_tuple
-
+from frappe.utils.file_manager import save_file
 
 @frappe.whitelist(allow_guest=True)
 def search_widget(
@@ -286,32 +288,163 @@ def get_job_details(job):
 
 
 @frappe.whitelist(allow_guest=True)
-def submit_job_application(
-    job_opening, applicant_name, email, phone, cover_letter, resume=None
-):
+def submit_job_application(job_opening: str, **kwargs) -> dict:
     try:
         company, branch = frappe.db.get_value(
             "Job Opening", job_opening, ["company", "branch"]
         )
 
-        job_application = frappe.get_doc(
-            {
-                "doctype": "Job Applicant",
-                "job_title": job_opening,
-                "applicant_name": applicant_name,
-                "email_id": email,
-                "phone_number": phone,
-                "cover_letter": cover_letter,
-                "status": "Open",
-                "company": company,
-                "branch": branch,
-            }
-        )
+        user_id = frappe.session.user
+        user_doc = None
+        if user_id != "Guest":
+            user_doc = frappe.get_doc("User", user_id)
+            kwargs["surname"] = user_doc.last_name or ""
+            first_name = user_doc.first_name or ""
+            middle_name = user_doc.middle_name or ""
+            kwargs["other_names"] = f"{first_name} {middle_name}".strip()
+            kwargs["email_id"] = user_doc.email or ""
+            kwargs["gender"] = user_doc.gender or ""
+            kwargs["date_of_birth"] = user_doc.birth_date or ""
+            kwargs["phone"] = user_doc.phone or user_doc.mobile_no or ""
+
+        employee_fields_map = {
+            "surname": "last_name",
+            "other_names": "first_name",
+            "branch": "branch",
+            "company": "company",
+            "gender": "gender",
+            "blood_group": "blood_group",
+            "marital_status": "marital_status",
+            "place_of_work": "place_of_work",
+            "date_of_birth": "date_of_birth",
+            "highest_level_of_education": "highest_level_of_education",
+            "mpesa_mobile_phone": "mpesa_mobile_phone",
+            "ward": "ward",
+            "profession": "profession",
+            "reason_to_join": "reason_to_join",
+            "email_id": "personal_email",
+            "phone": "cell_number",
+            "idpassport_number": "id_passport_number",
+            "cover_letter": "bio",
+            "profile_photo": "image",
+        }
+
+        if user_doc:
+            employee = None
+            employee_doc = frappe.db.get_value("Employee", {"user_id": user_id}, "name")
+            if employee_doc:
+                employee = frappe.get_doc("Employee", employee_doc)
+                for app_field, emp_field in employee_fields_map.items():
+                    if hasattr(employee, emp_field) and getattr(employee, emp_field):
+                        kwargs[app_field] = getattr(employee, emp_field)
+        surname = kwargs.pop("surname", "")
+        other_names = kwargs.pop("other_names", "")
+        name_to_use = f"{other_names} {surname}".strip()
+
+        resume = kwargs.pop("resume", None)
+        profile_photo = kwargs.pop("profile_photo", None)
+
+        table_fields = {
+            "disabilities": ("disability", None),
+            "allergies": ("allergy", None),
+            "additional_skills": ("additional_skill", None),
+            "trainings": ("training_program", "Training Program"),
+            "languages": ("language", "Language"),
+        }
+
+        other_languages = kwargs.pop("other_languages", None)
+        table_data = {key: kwargs.pop(key, None) for key in table_fields}
+
+        doc_data = {
+            "doctype": "Job Applicant",
+            "job_title": job_opening,
+            "applicant_name": name_to_use,
+            "status": "Open",
+            "company": company,
+            "branch": branch,
+            **kwargs
+        }
+
+        job_application = frappe.get_doc(doc_data)
+        job_application.insert(ignore_permissions=True)
 
         if resume:
-            job_application.resume_attachment = resume
+            frappe.db.set_value("File", resume, {
+                "attached_to_name": job_application.name,
+                "attached_to_doctype": "Job Applicant",
+                "attached_to_field": "resume_attachment"
+            }, update_modified=False)
 
-        job_application.insert(ignore_permissions=True)
+        if profile_photo:
+            frappe.db.set_value("File", profile_photo, {
+                "attached_to_name": job_application.name,
+                "attached_to_doctype": "Job Applicant",
+                "attached_to_field": "profile_photo"
+            }, update_modified=False)
+
+        def split_items(value):
+            if not value:
+                return []
+            try:
+                parsed = frappe.parse_json(value)
+            except Exception:
+                parsed = value
+
+            if isinstance(parsed, list):
+                items = []
+                for v in parsed:
+                    items.extend(split_items(v))
+                return items
+
+            items = []
+            for part in str(parsed).split("\n"):
+                items.extend([x.strip() for x in part.split(",") if x.strip()])
+            return items
+
+        for key, (fieldname, linked_doctype) in table_fields.items():
+            value = table_data.get(key)
+            if not value:
+                continue
+
+            for item in split_items(value):
+                if linked_doctype and not frappe.get_all(linked_doctype, filters={"name": item}, limit=1):
+                    frappe.get_doc({"doctype": linked_doctype, "name": item}).insert(ignore_permissions=True)
+
+                job_application.append(key, {fieldname or "value": item})
+
+        if other_languages:
+            try:
+                parsed = frappe.parse_json(other_languages)
+            except Exception:
+                parsed = other_languages
+
+            for lang_name in split_items(parsed):
+                existing_lang = frappe.get_all("Language", filters=[["language_name", "like", lang_name]], limit=1)
+                if existing_lang:
+                    lang_doc_name = existing_lang[0].name
+                else:
+                    unique_code = generate_language_code(lang_name)
+                    lang_doc = frappe.get_doc({
+                        "doctype": "Language",
+                        "language_name": lang_name,
+                        "language_code": unique_code
+                    }).insert(ignore_permissions=True)
+                    lang_doc_name = lang_doc.name
+
+                job_application.append("languages", {"language": lang_doc_name})
+        
+        if employee:
+            for key, (fieldname, _) in table_fields.items():
+                if hasattr(employee, key):
+                    child_entries = employee.get(key)
+                    if child_entries:
+                        for entry in child_entries:
+                            skip_fields = ["name", "parent", "parentfield", "parenttype", "idx", "creation", "modified", "owner", "docstatus"]
+                            new_entry_data = {k: v for k, v in entry.as_dict().items() if k not in skip_fields}
+                            if new_entry_data:
+                                job_application.append(key, new_entry_data)
+
+        job_application.save(ignore_permissions=True)
         frappe.db.commit()
 
         return {
@@ -319,12 +452,37 @@ def submit_job_application(
             "message": "Job application submitted successfully",
             "name": job_application.name,
         }
+
     except Exception as e:
+        frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), "Job Application Submission Error")
         return {
             "success": False,
             "message": f"Failed to submit job application: {str(e)}",
         }
+
+
+def generate_language_code(language_name):
+    alpha_only = ''.join([c for c in language_name if c.isalpha()])
+    
+    if not alpha_only:
+        return ''.join(random.choices(string.ascii_lowercase, k=2))
+    
+    for length in range(3, len(alpha_only) + 1):
+        code = alpha_only[:length].lower()
+        if not frappe.db.exists("Language", {"language_code": code}):
+            return code
+    
+    base_code = alpha_only.lower()
+    suffix = 'a'
+    
+    while frappe.db.exists("Language", {"language_code": base_code + suffix}):
+        if suffix[-1] == 'z':
+            suffix = suffix[:-1] + 'aa'
+        else:
+            suffix = suffix[:-1] + chr(ord(suffix[-1]) + 1)
+    
+    return base_code + suffix
 
 
 @frappe.whitelist(allow_guest=True)
@@ -463,6 +621,96 @@ def create_member(name):
     member.insert(ignore_permissions=True)
     return member.name
 
+@frappe.whitelist(allow_guest=True)
+def create_link_doc(data: dict):
+    try:
+        doctype = data.get("doctype")
+        if not doctype:
+            return {"status": "error", "message": "Missing 'doctype' in data"}
+        
+        if not frappe.db.exists("DocType", doctype):
+            return {"status": "error", "message": f"Invalid doctype: {doctype}"}
+
+        doc = frappe.get_doc(data).insert(ignore_permissions=True)
+        frappe.db.commit()
+        return {"status": "success", "name": doc.name}
+
+    except Exception as e:
+        frappe.log_error(message=frappe.get_traceback(), title="Create Link Doc Error")
+        frappe.db.rollback()
+        return {"status": "error", "message": str(e)}
+    
+
+@frappe.whitelist(allow_guest=True)
+def get_doc_info(doctype: str):
+    """
+    Get doctype metadata: fields, labels, and other configurations
+    """
+    try:
+        if not frappe.db.exists("DocType", doctype):
+            frappe.throw(_("Invalid Doctype: {0}").format(doctype))
+
+        meta = frappe.get_meta(doctype)
+        fields = [
+            {
+                "fieldname": f.fieldname,
+                "fieldtype": f.fieldtype,
+                "label": f.label,
+                "options": f.options,
+                "reqd": f.reqd,
+                "hidden": f.hidden,
+                "read_only": f.read_only,
+            }
+            for f in meta.fields
+            if not f.hidden
+        ]
+
+        return {
+            "doctype": doctype,
+            "fields": fields,
+            "title_field": meta.title_field,
+            "module": meta.module,
+            "issingle": meta.issingle,
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "get_doc_info API Error")
+        frappe.throw(_("Error fetching doctype info: {0}").format(str(e)))
+
+
+@frappe.whitelist(allow_guest=True)
+def upload_file():
+    try:
+        if 'file' not in frappe.request.files:
+            frappe.throw(_("No file attached"))
+
+        upload = frappe.request.files['file']
+        filename = frappe.request.form.get("filename") or upload.filename
+        doctype = frappe.request.form.get("doctype")
+        docname = frappe.request.form.get("docname")
+        folder = frappe.request.form.get("folder")
+        is_private = cint(frappe.request.form.get("is_private", 0))
+
+        file_doc = save_file(
+            fname=filename,
+            content=upload.stream.read(),
+            dt=doctype,
+            dn=docname,
+            folder=folder,
+            is_private=is_private,
+        )
+
+        frappe.db.commit()
+        return {
+            "file_url": file_doc.file_url,
+            "name": file_doc.name,
+            "file_name": file_doc.file_name
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), _("Upload File Failed"))
+        frappe.throw(_("Upload failed: {0}").format(str(e)))
+
 
 @frappe.whitelist()
 def fetch_assigned_projects():
@@ -540,8 +788,6 @@ def fetch_assigned_projects():
 
 @frappe.whitelist()
 def accept_assignment(name, accepted=True):
-    print("============= Accepting Assignment =============")
-    print("name", name)
     assignee = frappe.get_doc("Volunteer Deployment Assignee", name, ignore_permissions=True)
     assignee.status = "Accepted" if accepted else "Rejected"
     assignee.save(ignore_permissions=True)
