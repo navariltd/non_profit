@@ -495,6 +495,7 @@ def get_branches():
     return frappe.get_all("Branch", fields=["name", "company"])
 
 
+
 @frappe.whitelist(allow_guest=True)
 def get_user_info():
     if frappe.session.user == "Guest":
@@ -520,17 +521,25 @@ def get_user_info():
     employee_name = employee_company = employee_branch = None
 
     if frappe.db.exists("Employee", {"user_id": user.name, "status": "Active"}):
-        employee_name, employee_company, employee_branch = frappe.db.get_value(
-            "Employee", {"user_id": user.name}, ["name", "company", "branch"]
+        employee = frappe.db.get_value(
+            "Employee",
+            {"user_id": user.name},
+            ["name", "company", "branch"],
+            as_dict=True,
         )
+        if employee:
+            employee_name = employee.get("name")
+            employee_company = employee.get("company")
+            employee_branch = employee.get("branch")
 
     user["non_profit_member"] = "Non Profit Member" in roles
     user["volunteer"] = "Volunteer" in roles
-    user["employee"] = employee_name if employee_name else None
-    user["company"] = employee_company if employee_company else None
-    user["branch"] = employee_branch if employee_name else None
+    user["employee"] = employee_name
+    user["company"] = employee_company
+    user["branch"] = employee_branch
 
     return user
+
 
 
 def check_app_permission():
