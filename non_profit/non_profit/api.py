@@ -710,3 +710,85 @@ def upload_file():
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), _("Upload File Failed"))
         frappe.throw(_("Upload failed: {0}").format(str(e)))
+
+
+@frappe.whitelist()
+def fetch_assigned_projects():
+    user = frappe.db.get_value("User", frappe.session.user, ["name"])
+
+    volunteer = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    if not volunteer:
+        return []
+
+    assignees = frappe.get_all(
+        "Volunteer Deployment Assignee",
+        filters={
+            "volunteer": volunteer,
+            "parenttype": "Volunteer Deployment",
+            "status": "Pending",
+        },
+        fields=["name", "parent"],
+    )
+
+    if not assignees:
+        return []
+
+    projects = []
+    for assignee in assignees:
+        deployment_name = assignee.parent  # parent is the Volunteer Deployment name
+        assignee_name = assignee.name      # childtable row name
+
+        deployment = frappe.get_doc("Volunteer Deployment", deployment_name)
+        if not deployment or not deployment.project:
+            continue
+
+        project = frappe.db.get_value(
+            "Project",
+            deployment.project,
+            [
+                "name",
+                "project_name",
+                "status",
+                "project_type",
+                "is_active",
+                "percent_complete",
+                "priority",
+                "expected_start_date",
+                "expected_end_date",
+                "priority",
+                "notes",
+            ],
+            as_dict=1,
+        )
+        if project:
+            project["deployment_name"] = assignee_name  # Use childtable row name
+            # Add task info if exists
+            if getattr(deployment, "task", None):
+                task = frappe.db.get_value(
+                    "Task",
+                    deployment.task,
+                    [
+                        "name",
+                        "subject",
+                        "status",
+                        "priority",
+                        "exp_start_date",
+                        "exp_end_date",
+                        "project",
+                        "description",
+                    ],
+                    as_dict=1,
+                )
+                project["task"] = task
+            else:
+                project["task"] = None
+            projects.append(project)
+
+    return projects
+
+@frappe.whitelist()
+def accept_assignment(name, accepted=True):
+    assignee = frappe.get_doc("Volunteer Deployment Assignee", name, ignore_permissions=True)
+    assignee.status = "Accepted" if accepted else "Rejected"
+    assignee.save(ignore_permissions=True)
+    frappe.db.commit()
