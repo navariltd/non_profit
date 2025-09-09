@@ -8,10 +8,13 @@
       class="leading-5 w-full md:w-2/5 text-base text-center text-ink-gray-7"
     >
       {{
-        __("There are no {0} currently. Keep an eye out").format(
+        __("There are no {0} currently.").format(
           type?.toLowerCase()
         )
       }}
+      <span v-if="type === 'Membership'">
+        Please select a membership plan to continue.
+      </span>
     </div>
   </div>
 </template>
