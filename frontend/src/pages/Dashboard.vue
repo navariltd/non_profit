@@ -11,7 +11,7 @@
     <Volunteer v-if="roleResource.data && roleResource.data.employee" />
 
     <Member
-      :membership-status="membership.data"
+      :membership-status="currentMembership.data"
       v-if="roleResource.data && roleResource.data.non_profit_member"
     />
   </div>
@@ -51,7 +51,7 @@ import { Button, createResource, toast } from "frappe-ui";
 import Welcome from "../components/Welcome.vue";
 
 const { roleResource } = usersStore();
-const { events } = membershipStore();
+const { events, currentMembership } = membershipStore();
 
 const user = inject<any>("$user");
 
@@ -66,9 +66,5 @@ onMounted(() => {
   } else {
     roleResource.reload();
   }
-});
-const membership = createResource({
-  url: "non_profit.non_profit.api.get_current_membership",
-  auto: true,
 });
 </script>
