@@ -2,7 +2,10 @@
   <div>
     <div>
       <div class="justify-start mb-5 w-full">
-        <Member v-if="membership.data" :membershipStatus="membership.data" />
+        <Member
+          v-if="currentMembership.data"
+          :membershipStatus="currentMembership.data"
+        />
         <EmptyState v-else type="Membership" />
       </div>
     </div>
@@ -114,7 +117,7 @@ import {
 import Member from "../components/Member.vue";
 import EmptyState from "../components/EmptyState.vue";
 
-const { membershipTypes } = membershipStore();
+const { membershipTypes, currentMembership } = membershipStore();
 interface RegionOption {
   label: string;
   value: string;
@@ -140,7 +143,7 @@ const createMembership = createResource({
   url: "non_profit.non_profit.user.create_membership",
   onSuccess(data: any) {
     toast.success("Membership created successfully");
-    membership.reload();
+    currentMembership.reload();
     console.log("Membership created", data);
     registerDialog.value = false;
     cleanUpMembershipForm();
@@ -201,9 +204,4 @@ const submit = () => {
 
   createMembership.submit({ ...membershipForm });
 };
-
-const membership = createResource({
-  url: "non_profit.non_profit.api.get_current_membership",
-  auto: true,
-});
 </script>
