@@ -878,6 +878,9 @@ def get_current_membership():
         as_dict=1,
     )
 
+    if not member:
+        return None
+
     membership = frappe.db.get_value(
         "Membership",
         {"member": member.name},
@@ -885,8 +888,6 @@ def get_current_membership():
         as_dict=1,
     )
 
-    print("==============")
-    print(membership.get("membership_type"))
     amount = frappe.db.get_value(
         "Membership Type",
         membership.get("membership_type"),
