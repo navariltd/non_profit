@@ -1,14 +1,15 @@
 <template v-if="user.data">
-  <div class="flex flex-col items- justify-center h-screen w-screen p-6">
+  <div class="flex flex-col">
     <Welcome
       v-if="
         roleResource.data &&
-        !roleResource.data.employee &&
+        !roleResource.data.is_volunteer &&
         !roleResource.data.non_profit_member
       "
       :name="user.data.full_name"
     />
-    <Volunteer v-if="roleResource.data && roleResource.data.employee" />
+
+    <Volunteer v-if="roleResource.data && roleResource.data.is_volunteer" />
 
     <Member
       :membership-status="currentMembership.data"
@@ -57,6 +58,7 @@ const user = inject<any>("$user");
 
 onMounted(() => {
   const { roleResource } = usersStore();
+  console.log("role data", roleResource.data);
 
   if (!user.data) {
     toast.warning("You must be logged in to view this page.");
