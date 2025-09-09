@@ -32,48 +32,26 @@ export const initialVolunteerForm: VolunteerSignupData = {
   additional_skills: [],
 };
 
-export interface SignUp extends VolunteerSignupData {
-  firstName: string;
-  lastName: string;
-  region: string;
-  branch: string;
+export interface SignUp {
+  first_name: string;
+  last_name: string;
   email: string;
-  password: string;
-  categoryVolunteer: boolean;
-  categoryMember: boolean;
-  membershipType: string;
   gender: string;
-  phone_number: string;
+  phone: string;
 }
 
 export const initialForm: SignUp = {
-  firstName: "",
-  lastName: "",
-  region: "",
-  branch: "",
+  first_name: "",
+  last_name: "",
   email: "",
-  password: "",
-  categoryVolunteer: false,
-  categoryMember: false,
-  membershipType: "",
   gender: "",
-  phone_number: "",
-  ...initialVolunteerForm,
+  phone: "",
 };
 
 export function resetSignUpForm(form: SignUp) {
-  form.firstName = "";
-  form.lastName = "";
-  form.region = "";
-  form.branch = "";
+  form.first_name = "";
+  form.last_name = "";
   form.email = "";
-  form.password = "";
-  form.categoryVolunteer = false;
-  form.categoryMember = false;
-  form.membershipType = "";
   form.gender = "";
-  form.phone_number = "";
-  form.languages = [];
-  form.krcs_trainings = [];
-  form.additional_skills = [];
+  form.phone = "";
 }

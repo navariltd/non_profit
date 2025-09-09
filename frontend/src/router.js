@@ -100,6 +100,12 @@ const routes = [
     component: () => import("@/pages/Projects.vue"),
     meta: { requiresAuth: true },
   },
+  {
+    name: "Membership",
+    path: "/membership",
+    component: () => import("@/pages/Membership.vue"),
+    meta: { requiresAuth: true },
+  },
 ];
 
 let router = createRouter({

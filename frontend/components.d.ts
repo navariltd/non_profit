@@ -82,6 +82,7 @@ declare module 'vue' {
     LMSLogo: typeof import('./src/components/Icons/LMSLogo.vue')['default']
     Member: typeof import('./src/components/Member.vue')['default']
     Members: typeof import('./src/components/Settings/Members.vue')['default']
+    Membership: typeof import('./src/components/Membership.vue')['default']
     MobileLayout: typeof import('./src/components/MobileLayout.vue')['default']
     MultiSelect: typeof import('./src/components/Controls/MultiSelect.vue')['default']
     NoPermission: typeof import('./src/components/NoPermission.vue')['default']
@@ -121,6 +122,7 @@ declare module 'vue' {
     VmmsPortalCard: typeof import('./src/components/VmmsPortalCard.vue')['default']
     Volunteer: typeof import('./src/components/Volunteer.vue')['default']
     VolunteerSignup: typeof import('./src/components/VolunteerSignup.vue')['default']
+    Welcome: typeof import('./src/components/Welcome.vue')['default']
     ZoomAccountModal: typeof import('./src/components/Modals/ZoomAccountModal.vue')['default']
     ZoomSettings: typeof import('./src/components/Settings/ZoomSettings.vue')['default']
   }
