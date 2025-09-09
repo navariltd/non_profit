@@ -1,10 +1,23 @@
 <template v-if="user.data">
-  <Volunteer v-if="roleResource.data && roleResource.data.employee" />
+  <div class="flex flex-col items- justify-center h-screen w-screen p-6">
+    <Welcome
+      v-if="
+        roleResource.data &&
+        !roleResource.data.employee &&
+        !roleResource.data.non_profit_member
+      "
+      :name="user.data.full_name"
+    />
+    <Volunteer v-if="roleResource.data && roleResource.data.employee" />
 
-  <Member v-if="roleResource.data && roleResource.data.non_profit_member" />
+    <Member
+      :membership-status="membership.data"
+      v-if="roleResource.data && roleResource.data.non_profit_member"
+    />
+  </div>
 
   <hr />
-  <div class="flex flex-col gap-2 p-5">
+  <!-- <div class="flex flex-col gap-2 p-5">
     <h1 class="text-xl m-2">Upcoming Events</h1>
 
     <div
@@ -24,7 +37,7 @@
         View All Events
       </Button>
     </router-link>
-  </div>
+  </div> -->
 </template>
 <script lang="ts" setup>
 import { inject, onMounted } from "vue";
@@ -34,7 +47,8 @@ import Member from "../components/Member.vue";
 import Volunteer from "../components/Volunteer.vue";
 import { membershipStore } from "../stores/membership";
 import { usersStore } from "../stores/user";
-import { Button, toast } from "frappe-ui";
+import { Button, createResource, toast } from "frappe-ui";
+import Welcome from "../components/Welcome.vue";
 
 const { roleResource } = usersStore();
 const { events } = membershipStore();
@@ -45,7 +59,6 @@ onMounted(() => {
   const { roleResource } = usersStore();
 
   if (!user.data) {
-
     toast.warning("You must be logged in to view this page.");
     setTimeout(() => {
       window.location.href = `account/login?redirect-to=${window.location.pathname}`;
@@ -53,5 +66,9 @@ onMounted(() => {
   } else {
     roleResource.reload();
   }
+});
+const membership = createResource({
+  url: "non_profit.non_profit.api.get_current_membership",
+  auto: true,
 });
 </script>
