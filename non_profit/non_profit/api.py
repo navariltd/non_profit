@@ -16,6 +16,7 @@ from frappe.model.db_query import get_order_by
 from frappe.utils.data import make_filter_tuple
 from frappe.utils.file_manager import save_file
 
+
 @frappe.whitelist(allow_guest=True)
 def search_widget(
     doctype: str,
@@ -362,25 +363,35 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
             "status": "Open",
             "company": company,
             "branch": branch,
-            **kwargs
+            **kwargs,
         }
 
         job_application = frappe.get_doc(doc_data)
         job_application.insert(ignore_permissions=True)
 
         if resume:
-            frappe.db.set_value("File", resume, {
-                "attached_to_name": job_application.name,
-                "attached_to_doctype": "Job Applicant",
-                "attached_to_field": "resume_attachment"
-            }, update_modified=False)
+            frappe.db.set_value(
+                "File",
+                resume,
+                {
+                    "attached_to_name": job_application.name,
+                    "attached_to_doctype": "Job Applicant",
+                    "attached_to_field": "resume_attachment",
+                },
+                update_modified=False,
+            )
 
         if profile_photo:
-            frappe.db.set_value("File", profile_photo, {
-                "attached_to_name": job_application.name,
-                "attached_to_doctype": "Job Applicant",
-                "attached_to_field": "profile_photo"
-            }, update_modified=False)
+            frappe.db.set_value(
+                "File",
+                profile_photo,
+                {
+                    "attached_to_name": job_application.name,
+                    "attached_to_doctype": "Job Applicant",
+                    "attached_to_field": "profile_photo",
+                },
+                update_modified=False,
+            )
 
         def split_items(value):
             if not value:
@@ -407,8 +418,12 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
                 continue
 
             for item in split_items(value):
-                if linked_doctype and not frappe.get_all(linked_doctype, filters={"name": item}, limit=1):
-                    frappe.get_doc({"doctype": linked_doctype, "name": item}).insert(ignore_permissions=True)
+                if linked_doctype and not frappe.get_all(
+                    linked_doctype, filters={"name": item}, limit=1
+                ):
+                    frappe.get_doc({"doctype": linked_doctype, "name": item}).insert(
+                        ignore_permissions=True
+                    )
 
                 job_application.append(key, {fieldname or "value": item})
 
@@ -419,28 +434,46 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
                 parsed = other_languages
 
             for lang_name in split_items(parsed):
-                existing_lang = frappe.get_all("Language", filters=[["language_name", "like", lang_name]], limit=1)
+                existing_lang = frappe.get_all(
+                    "Language", filters=[["language_name", "like", lang_name]], limit=1
+                )
                 if existing_lang:
                     lang_doc_name = existing_lang[0].name
                 else:
                     unique_code = generate_language_code(lang_name)
-                    lang_doc = frappe.get_doc({
-                        "doctype": "Language",
-                        "language_name": lang_name,
-                        "language_code": unique_code
-                    }).insert(ignore_permissions=True)
+                    lang_doc = frappe.get_doc(
+                        {
+                            "doctype": "Language",
+                            "language_name": lang_name,
+                            "language_code": unique_code,
+                        }
+                    ).insert(ignore_permissions=True)
                     lang_doc_name = lang_doc.name
 
                 job_application.append("languages", {"language": lang_doc_name})
-        
+
         if employee:
             for key, (fieldname, _) in table_fields.items():
                 if hasattr(employee, key):
                     child_entries = employee.get(key)
                     if child_entries:
                         for entry in child_entries:
-                            skip_fields = ["name", "parent", "parentfield", "parenttype", "idx", "creation", "modified", "owner", "docstatus"]
-                            new_entry_data = {k: v for k, v in entry.as_dict().items() if k not in skip_fields}
+                            skip_fields = [
+                                "name",
+                                "parent",
+                                "parentfield",
+                                "parenttype",
+                                "idx",
+                                "creation",
+                                "modified",
+                                "owner",
+                                "docstatus",
+                            ]
+                            new_entry_data = {
+                                k: v
+                                for k, v in entry.as_dict().items()
+                                if k not in skip_fields
+                            }
                             if new_entry_data:
                                 job_application.append(key, new_entry_data)
 
@@ -463,25 +496,25 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
 
 
 def generate_language_code(language_name):
-    alpha_only = ''.join([c for c in language_name if c.isalpha()])
-    
+    alpha_only = "".join([c for c in language_name if c.isalpha()])
+
     if not alpha_only:
-        return ''.join(random.choices(string.ascii_lowercase, k=2))
-    
+        return "".join(random.choices(string.ascii_lowercase, k=2))
+
     for length in range(3, len(alpha_only) + 1):
         code = alpha_only[:length].lower()
         if not frappe.db.exists("Language", {"language_code": code}):
             return code
-    
+
     base_code = alpha_only.lower()
-    suffix = 'a'
-    
+    suffix = "a"
+
     while frappe.db.exists("Language", {"language_code": base_code + suffix}):
-        if suffix[-1] == 'z':
-            suffix = suffix[:-1] + 'aa'
+        if suffix[-1] == "z":
+            suffix = suffix[:-1] + "aa"
         else:
             suffix = suffix[:-1] + chr(ord(suffix[-1]) + 1)
-    
+
     return base_code + suffix
 
 
@@ -493,7 +526,6 @@ def get_regions():
 @frappe.whitelist(allow_guest=True)
 def get_branches():
     return frappe.get_all("Branch", fields=["name", "company"])
-
 
 
 @frappe.whitelist(allow_guest=True)
@@ -515,31 +547,59 @@ def get_user_info():
         ],
         as_dict=1,
     )
+
     roles = frappe.get_roles(user.name)
     user["roles"] = roles
 
     employee_name = employee_company = employee_branch = None
+    employee_is_volunteer = False
 
     if frappe.db.exists("Employee", {"user_id": user.name, "status": "Active"}):
+
         employee = frappe.db.get_value(
             "Employee",
             {"user_id": user.name},
-            ["name", "company", "branch"],
+            ["name", "company", "branch", "is_volunteer"],
             as_dict=True,
         )
         if employee:
+
             employee_name = employee.get("name")
             employee_company = employee.get("company")
             employee_branch = employee.get("branch")
+            employee_is_volunteer = True if employee.get("is_volunteer") else False
 
-    user["non_profit_member"] = "Non Profit Member" in roles
-    user["volunteer"] = "Volunteer" in roles
-    user["employee"] = employee_name
-    user["company"] = employee_company
-    user["branch"] = employee_branch
+        user["non_profit_member"] = "Non Profit Member" in roles
+        user["employee"] = employee_name
+        user["company"] = employee_company
+        user["branch"] = employee_branch
+        user["is_volunteer"] = employee_is_volunteer
+
+    if frappe.db.exists("Member", {"email_id": user.email}):
+        member = frappe.db.get_value(
+            "Member",
+            {"email_id": user.email},
+            ["name", "membership_type"],
+            as_dict=True,
+        )
+        if member:
+            user["member"] = member.get("name")
+            user["membership_type"] = member.get("membership_type")
+            user["non_profit_member"] = "Non Profit Member"
+
+    if frappe.db.exists("Job Applicant", {"email_id": user.email}):
+        applicant = frappe.db.get_value(
+            "Job Applicant",
+            {"email_id": user.email},
+            ["name", "status"],
+            as_dict=True,
+        )
+        if applicant:
+            user["job_applicant"] = applicant.get("name")
+            user["application_status"] = applicant.get("status")
+            user["applied_for"] = applicant.get("job_title")
 
     return user
-
 
 
 def check_app_permission():
@@ -630,13 +690,14 @@ def create_member(name):
     member.insert(ignore_permissions=True)
     return member.name
 
+
 @frappe.whitelist(allow_guest=True)
 def create_link_doc(data: dict):
     try:
         doctype = data.get("doctype")
         if not doctype:
             return {"status": "error", "message": "Missing 'doctype' in data"}
-        
+
         if not frappe.db.exists("DocType", doctype):
             return {"status": "error", "message": f"Invalid doctype: {doctype}"}
 
@@ -648,7 +709,7 @@ def create_link_doc(data: dict):
         frappe.log_error(message=frappe.get_traceback(), title="Create Link Doc Error")
         frappe.db.rollback()
         return {"status": "error", "message": str(e)}
-    
+
 
 @frappe.whitelist(allow_guest=True)
 def get_doc_info(doctype: str):
@@ -690,10 +751,10 @@ def get_doc_info(doctype: str):
 @frappe.whitelist(allow_guest=True)
 def upload_file():
     try:
-        if 'file' not in frappe.request.files:
+        if "file" not in frappe.request.files:
             frappe.throw(_("No file attached"))
 
-        upload = frappe.request.files['file']
+        upload = frappe.request.files["file"]
         filename = frappe.request.form.get("filename") or upload.filename
         doctype = frappe.request.form.get("doctype")
         docname = frappe.request.form.get("docname")
@@ -713,7 +774,7 @@ def upload_file():
         return {
             "file_url": file_doc.file_url,
             "name": file_doc.name,
-            "file_name": file_doc.file_name
+            "file_name": file_doc.file_name,
         }
 
     except Exception as e:
@@ -745,7 +806,7 @@ def fetch_assigned_projects():
     projects = []
     for assignee in assignees:
         deployment_name = assignee.parent  # parent is the Volunteer Deployment name
-        assignee_name = assignee.name      # childtable row name
+        assignee_name = assignee.name  # childtable row name
 
         deployment = frappe.get_doc("Volunteer Deployment", deployment_name)
         if not deployment or not deployment.project:
@@ -795,9 +856,44 @@ def fetch_assigned_projects():
 
     return projects
 
+
 @frappe.whitelist()
 def accept_assignment(name, accepted=True):
-    assignee = frappe.get_doc("Volunteer Deployment Assignee", name, ignore_permissions=True)
+    assignee = frappe.get_doc(
+        "Volunteer Deployment Assignee", name, ignore_permissions=True
+    )
     assignee.status = "Accepted" if accepted else "Rejected"
     assignee.save(ignore_permissions=True)
     frappe.db.commit()
+
+
+@frappe.whitelist(allow_guest=True)
+def get_current_membership():
+    if frappe.session.user == "Guest":
+        return None
+
+    member = frappe.db.get_value(
+        "Member",
+        {"email_id": frappe.session.user},
+        as_dict=1,
+    )
+
+    membership = frappe.db.get_value(
+        "Membership",
+        {"member": member.name},
+        ["name", "membership_type", "from_date", "to_date", "membership_status"],
+        as_dict=1,
+    )
+
+    print("==============")
+    print(membership.get("membership_type"))
+    amount = frappe.db.get_value(
+        "Membership Type",
+        membership.get("membership_type"),
+        ["amount"],
+        as_dict=1,
+    )
+
+    membership["amount"] = amount.get("amount") if amount else 0
+
+    return membership
