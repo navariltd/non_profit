@@ -32,7 +32,7 @@
               type="text"
               placeholder="John"
               label="First Name"
-              v-model="signUpForm.firstName"
+              v-model="signUpForm.first_name"
             />
             <Input
               required
@@ -40,10 +40,10 @@
               type="text"
               placeholder="Doe"
               label="Last Name"
-              v-model="signUpForm.lastName"
+              v-model="signUpForm.last_name"
             />
           </div>
-          <div class="w-full border p-4 rounded-lg bg-white">
+          <!-- <div class="w-full border p-4 rounded-lg bg-white">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex flex-col">
                 <label for="branch" class="text-gray-600 text-sm mb-2"
@@ -71,7 +71,7 @@
                 />
               </div>
             </div>
-          </div>
+          </div> -->
 
           <Input
             required
@@ -87,7 +87,7 @@
             variant="subtle"
             placeholder="+254123456789"
             label="PhoneNumber"
-            v-model="signUpForm.phone_number"
+            v-model="signUpForm.phone"
           />
           <div>
             <label class="text-gray-600 text-sm mb-3">Gender</label>
@@ -99,33 +99,6 @@
               :options="genderOptions"
               placeholder="Female"
             />
-          </div>
-          <div class="flex flex-col space-y-1">
-            <label class="text-sm font-medium">Please select Category</label>
-            <div class="flex space-x-4">
-              <label class="flex items-center space-x-1">
-                <Checkbox
-                  size="sm"
-                  :value="false"
-                  v-model="signUpForm.categoryVolunteer"
-                  label="Volunteer"
-                />
-              </label>
-              <label class="flex items-center space-x-1">
-                <Checkbox
-                  size="sm"
-                  v-model="signUpForm.categoryMember"
-                  label="Member"
-                />
-              </label>
-              <Button
-                v-if="signUpForm.categoryVolunteer"
-                type="button"
-                variant="subtle"
-                @click="openVolunteerModal()"
-                >Add Volunteer Details</Button
-              >
-            </div>
           </div>
         </template>
 
@@ -158,25 +131,6 @@
     </Card>
   </div>
 
-  <Dialog :options="{ size: '4xl' }" v-model="membershipDialog">
-    <template #body-title>
-      <h3 class="text-2xl font-semibold text-ink-gray-9">
-        Select Membership Type
-      </h3>
-    </template>
-    <template #body-content>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <VmmsPortalCard
-          class="cursor-pointer"
-          v-for="membershipType in membershipTypes.data"
-          :key="membershipType.name"
-          :membershipType="membershipType"
-          @click="selectMembership(membershipType.name)"
-        />
-      </div>
-    </template>
-  </Dialog>
-
   <Dialog
     :options="{
       title: 'Successfully Registered',
@@ -189,22 +143,6 @@
     }"
     v-model="signInState"
   />
-
-  <Dialog :options="{ size: '6xl' }" v-model="showVolunteerModal">
-    <template #body-title>
-      <h3 class="text-2xl font-semibold text-ink-gray-9">
-        Additional Details for Volunteer Signup
-      </h3>
-    </template>
-    <template #body-content>
-      <div class="">
-        <VolunteerSignup
-          :initial-data="volunteerDataToSubmit"
-          @volunteer-data-submitted="handleVolunteerDataSubmitted"
-        />
-      </div>
-    </template>
-  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -212,40 +150,22 @@ import Button from "frappe-ui/src/components/Button/Button.vue";
 import { sessionStore } from "../stores/session";
 import Card from "frappe-ui/src/components/Card.vue";
 import Input from "frappe-ui/src/components/Input.vue";
-import { onMounted, reactive, ref, watch } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
-import Checkbox from "frappe-ui/src/components/Checkbox/Checkbox.vue";
 import { createResource, Select } from "frappe-ui";
 import Dialog from "frappe-ui/src/components/Dialog/Dialog.vue";
-import VmmsPortalCard from "../components/VmmsPortalCard.vue";
-import { membershipStore } from "../stores/membership";
-import { useRouter } from "vue-router";
-import Link from "../components/Controls/Link.vue";
-import {
-  SignUp,
-  VolunteerSignupData,
-  initialForm,
-  resetSignUpForm,
-} from "../utils/volunteer";
-import VolunteerSignup from "../components/VolunteerSignup.vue";
+import { SignUp, initialForm, resetSignUpForm } from "../utils/volunteer";
 
-const company = ref("");
-const router = useRouter();
 const isLogin = ref(true);
 const userEmail = ref("");
 const password = ref("");
-const membershipDialog = ref(false);
 const signInState = ref(false);
 interface RegionOption {
   label: string;
   value: string;
   company: string;
 }
-const regionOptions = ref<RegionOption[]>([]);
 const branchOptions = ref<RegionOption[]>([]);
-const volunteerDataToSubmit = ref<VolunteerSignupData | null>(null);
-const showVolunteerModal = ref(false);
-const { membershipTypes } = membershipStore();
 
 const signUpForm = reactive<SignUp>({ ...initialForm });
 
@@ -273,31 +193,20 @@ const branches = createResource({
 onMounted(() => {
   branches.fetch();
 });
-watch(
-  () => signUpForm.branch,
-  (newBranch) => {
-    const selectedBranch = branchOptions.value.find(
-      (b) => b.value === newBranch
-    );
-
-    if (selectedBranch) {
-      signUpForm.region = selectedBranch.company;
-    } else {
-      signUpForm.region = "";
-    }
-  }
-);
 
 const createSignUp = createResource({
-  url: "non_profit.non_profit.user.sign_up",
-  onSuccess(data: any) {
+  url: "non_profit.non_profit.user.create_user",
+  onSuccess() {
     signInState.value = true;
-    console.log("show signup data after success", signUpForm);
     resetSignUpForm(signUpForm);
-    volunteerDataToSubmit.value = null;
     isLogin.value = true;
   },
 });
+
+function isValidPhone(phone: string) {
+  const regex = /^\+254\d{9}$/;
+  return regex.test(phone);
+}
 
 function submit() {
   if (isLogin.value) {
@@ -306,72 +215,14 @@ function submit() {
       pwd: password.value,
     });
   } else {
-    if (!signUpForm.categoryVolunteer && !signUpForm.categoryMember) {
+    if (!isValidPhone(signUpForm.phone)) {
       createSignUp.error =
-        "Please select at least one category (Volunteer or Member).";
+        "Please enter a valid Kenyan phone number.eg. (+254123456789)";
       return;
     }
-
-    if (signUpForm.categoryMember && !signUpForm.membershipType) {
-      createSignUp.error = "Please select a membership type from the dialog.";
-      membershipDialog.value = true;
-      return;
-    }
-
-    if (signUpForm.categoryVolunteer && !volunteerDataToSubmit.value) {
-      createSignUp.error = "Please fill in the additional volunteer details.";
-      setTimeout(() => {
-        showVolunteerModal.value = true;
-      }, 2500);
-      return;
-    }
-
     createSignUp.submit({
-      first_name: signUpForm.firstName,
-      last_name: signUpForm.lastName,
-      region: signUpForm.region,
-      branch: signUpForm.branch,
-      email: signUpForm.email,
-      password: signUpForm.password,
-      category_volunteer: signUpForm.categoryVolunteer,
-      category_member: signUpForm.categoryMember,
-      membership_type: signUpForm.membershipType,
-      gender: signUpForm.gender,
-      phone_number: signUpForm.phone_number,
-      ...(signUpForm.categoryVolunteer ? volunteerDataToSubmit.value : {}),
+      ...signUpForm,
     });
   }
-}
-function selectMembership(membershipType: string) {
-  signUpForm.membershipType = membershipType;
-  membershipDialog.value = false;
-}
-watch(
-  () => signUpForm.categoryMember,
-  (newValue) => {
-    if (newValue) {
-      membershipDialog.value = true;
-    } else {
-      signUpForm.membershipType = "";
-      membershipDialog.value = false;
-    }
-  }
-);
-watch(
-  () => signUpForm.categoryVolunteer,
-  (newValue) => {
-    if (newValue && !volunteerDataToSubmit.value) {
-      showVolunteerModal.value = true;
-    }
-  }
-);
-
-function openVolunteerModal() {
-  showVolunteerModal.value = true;
-}
-
-function handleVolunteerDataSubmitted(data) {
-  volunteerDataToSubmit.value = data;
-  showVolunteerModal.value = false;
 }
 </script>
