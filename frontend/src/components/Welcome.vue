@@ -1,6 +1,6 @@
 <template>
   <div class="">
-    <div class="flex flex-col items- justify-center space-y-4">
+    <div class="flex flex-col justify-center h-screen space-y-4 p-12">
       <h1 class="text-3xl font-bold">Welcome {{ name }}</h1>
       <p class="text-3xl text-gray-600">
         Join us and make a difference. Sign up to become a volunteer or a
@@ -10,7 +10,7 @@
         <Button
           variant="solid"
           icon-right="arrow-right"
-          @click="navigateTo('volunteer')"
+          @click="navigateTo('volunteer/signup')"
           >Sign Up as Volunteer</Button
         >
         <Button
@@ -37,7 +37,6 @@ defineProps({
 });
 
 function navigateTo(path: string) {
-    router.push("/" + path)
-
+  router.push("/" + path);
 }
 </script>
