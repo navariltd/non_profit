@@ -106,6 +106,11 @@ const routes = [
     component: () => import("@/pages/Membership.vue"),
     meta: { requiresAuth: true },
   },
+  {
+    name: "VolunteerSignup",
+    path: "/volunteer/signup",
+    component: () => import("@/pages/VolunteerSignup.vue"),
+  }
 ];
 
 let router = createRouter({
