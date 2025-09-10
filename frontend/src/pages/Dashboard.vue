@@ -4,7 +4,7 @@
       v-if="
         roleResource.data &&
         !roleResource.data.is_volunteer &&
-        !roleResource.data.non_profit_member
+        !roleResource.data.is_member
       "
       :name="user.data.full_name"
     />
@@ -13,7 +13,7 @@
 
     <Member
       :membership-status="currentMembership.data"
-      v-if="roleResource.data && roleResource.data.non_profit_member"
+      v-if="roleResource.data && roleResource.data.is_member"
     />
   </div>
 
@@ -21,8 +21,8 @@
   <div
     class="flex flex-col gap-2 md:p-8 md:w-3/4 mx-auto"
     v-if="
-      (roleResource.data && roleResource.data.is_volunteer) ||
-      (roleResource.data && roleResource.data.non_profit_member)
+      roleResource.data &&
+      (roleResource.data.is_volunteer || roleResource.data.is_member)
     "
   >
     <div class="flex justify-between items-center m-2">
