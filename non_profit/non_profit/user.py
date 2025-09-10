@@ -63,11 +63,19 @@ def create_user(**kwargs):
 
 @frappe.whitelist(allow_guest=True)
 def create_membership(**kwargs):
+
     try:
         frappe.db.begin()
 
+        member = None
+        membership = None
+
         if frappe.db.exists("Member", {"email_id": kwargs.get("email_id")}):
-            frappe.throw("Member already exists with this email")
+            member = frappe.db.get_value("Member", {"email_id": kwargs.get("email_id")}, "name")
+        
+            membership = frappe.db.exists("Membership", {"member": member})
+        if member and membership:
+            frappe.throw("Membership already exists for this member")
 
         member = frappe.get_doc(
             {
@@ -90,7 +98,7 @@ def create_membership(**kwargs):
 
         if kwargs.get("membership_type"):
             doc_name = kwargs.get("membership_type")
-            from_date = datetime.now().date()
+            from_date = frappe.utils.today()
             to_date = add_to_date(from_date, years=1)
 
             membership = frappe.get_doc(
@@ -114,6 +122,7 @@ def create_membership(**kwargs):
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), "Error creating membership")
         frappe.throw("Error creating membership")
+
 
 
 def create_volunteer(kwargs):

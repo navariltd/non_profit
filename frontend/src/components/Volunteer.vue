@@ -1,9 +1,7 @@
 <template>
   <div>
     <!-- Top Buttons -->
-    <div
-      class="flex flex-col md:flex-row justify-end items-center m-6 space-x-4"
-    >
+    <div class="flex flex-row justify-end items-center m-6 space-x-4">
       <Button
         variant="solid"
         size="lg"
@@ -270,7 +268,7 @@ interface Project {
 
 const { roleResource } = usersStore();
 
-const hasNotification = ref(true);
+const hasNotification = ref(false);
 const showNotificationDialog = ref(false);
 const setAvailability = ref(false);
 
@@ -342,7 +340,12 @@ const project = createResource({
   url: "non_profit.non_profit.api.fetch_assigned_projects",
   auto: true,
   onSuccess(data) {
-    assignedProjects.value = Array.isArray(data) ? data : [data];
+    if (data.length) {
+      hasNotification.value = true;
+      assignedProjects.value = Array.isArray(data) ? data : [data];
+    } else {
+      hasNotification.value = false;
+    }
   },
 });
 

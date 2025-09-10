@@ -585,7 +585,8 @@ def get_user_info():
         if member:
             user["member"] = member.get("name")
             user["membership_type"] = member.get("membership_type")
-            user["non_profit_member"] = "Non Profit Member"
+            user["is_member"] = True
+
 
     if frappe.db.exists("Job Applicant", {"email_id": user.email}):
         applicant = frappe.db.get_value(
@@ -617,7 +618,7 @@ def check_app_permission():
 
 @frappe.whitelist()
 def get_events():
-    return frappe.get_all(
+    events = frappe.get_all(
         "Event",
         fields=[
             "name",
@@ -627,8 +628,81 @@ def get_events():
             "starts_on",
             "ends_on",
             "status",
+            "description",
         ],
+        filters=[{"status": "Open"}],
     )
+
+    for event in events:
+        event.description = (
+            frappe.utils.strip_html_tags(event.description) if event.description else ""
+        )
+
+    return events
+
+
+@frappe.whitelist()
+def confirm_event_status():
+    user_info = get_user_info()
+    events = get_events()
+
+    confirmed_events = []
+
+    for event in events:
+        if frappe.db.exists(
+            "Event Participants", {"email": user_info.get("email"), "parent": event.name}
+        ):
+            confirmed_events.append({"event": event, "confirmed": True})
+        else:
+            confirmed_events.append({"event": event, "confirmed": False})
+
+    return confirmed_events
+
+
+@frappe.whitelist()
+def attend_event(**kwargs):
+    try:
+
+        user_info = get_user_info()
+
+        reference_doctype = reference_docname = ""
+
+        if user_info.get("employee"):
+            reference_doctype = "Employee"
+            reference_docname = user_info.get("employee")
+        else:
+            frappe.throw("Only employees can attend events")
+
+        if frappe.db.exists(
+            "Event Participants",
+            {
+                "reference_doctype": reference_doctype,
+                "reference_docname": reference_docname,
+                "parent": kwargs.get("name"),
+                "email": user_info.get("email"),
+            },
+        ):
+            frappe.throw("You are already registered for this event")
+
+        event_participant = frappe.get_doc(
+            {
+                "doctype": "Event Participants",
+                "reference_doctype": reference_doctype,
+                "reference_docname": reference_docname,
+                "email": user_info.get("email"),
+                "parent": kwargs.get("name"),
+                "parentfield": "event_participants",
+                "parenttype": "Event",
+            }
+        )
+
+        event_participant.insert(ignore_permissions=True)
+        frappe.db.commit()
+
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.log_error(frappe.get_traceback(), "Attend Event Error")
+        frappe.throw("Attend Event Error")
 
 
 @frappe.whitelist()

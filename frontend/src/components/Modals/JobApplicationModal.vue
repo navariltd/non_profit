@@ -28,7 +28,7 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div
-            v-if="!hidePersonalInfo && !showOnlyDocsProfile"
+            v-if="!hidePersonalInfo && !showOnlyDocsProfile && !props.showOnlyDocs"
             class="lg:col-span-2"
           >
             <h3 class="text-lg font-bold text-gray-800 mb-4">
@@ -99,7 +99,7 @@
           </div>
 
           <!-- Additional Information -->
-          <div v-if="!showOnlyDocsProfile" class="lg:col-span-2">
+          <div v-if="!props.showOnlyDocsProfile" class="lg:col-span-2">
             <h3 class="text-lg font-bold text-gray-800 mb-4 mt-6">
               Additional Information
             </h3>
@@ -378,6 +378,7 @@ const { roleResource } = usersStore();
 
 const props = defineProps({
   job: { type: String, required: false, default: "" },
+  showOnlyDocs: { type: Boolean, default: false },
 });
 
 const form = ref({
@@ -429,6 +430,8 @@ const opportunityApplication = createResource({
 });
 
 const submitResume = (close) => {
+  console.log("data", form.value, resume.value, profilePhoto.value);
+  
   opportunityApplication.submit(
     {},
     {
