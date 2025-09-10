@@ -585,7 +585,8 @@ def get_user_info():
         if member:
             user["member"] = member.get("name")
             user["membership_type"] = member.get("membership_type")
-            user["non_profit_member"] = "Non Profit Member"
+            user["is_member"] = True
+
 
     if frappe.db.exists("Job Applicant", {"email_id": user.email}):
         applicant = frappe.db.get_value(
@@ -669,6 +670,8 @@ def attend_event(**kwargs):
         if user_info.get("employee"):
             reference_doctype = "Employee"
             reference_docname = user_info.get("employee")
+        else:
+            frappe.throw("Only employees can attend events")
 
         if frappe.db.exists(
             "Event Participants",
