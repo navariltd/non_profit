@@ -69,7 +69,7 @@
       <div class="text-gray-700">
         Confirm you want to attend:
         <span class="font-bold">
-          {{ event.name }}
+          {{ event.subject }}
         </span>
         <div class="text-sm text-gray-600 mt-2 h-16 overflow-hidden">
           {{ event.description }}
