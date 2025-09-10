@@ -114,7 +114,7 @@ import {
   ErrorMessage,
   toast,
 } from "frappe-ui";
-import Member from "../components/Member.vue";
+import Member from "../components/MemberPlan.vue";
 import EmptyState from "../components/EmptyState.vue";
 
 const { membershipTypes, currentMembership } = membershipStore();
@@ -144,13 +144,13 @@ const createMembership = createResource({
   onSuccess(data: any) {
     toast.success("Membership created successfully");
     currentMembership.reload();
-    console.log("Membership created", data);
     registerDialog.value = false;
     cleanUpMembershipForm();
   },
 });
 
 function cleanUpMembershipForm() {
+  registerDialog.value = false;
   membershipForm.membership_type = "";
   membershipForm.amount = 0;
   membershipForm.region = "";
