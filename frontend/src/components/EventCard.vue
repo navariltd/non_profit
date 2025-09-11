@@ -1,66 +1,67 @@
 <template>
   <div
-    class="flex flex-col border border-gray-200 rounded-lg p-4 h-full hover:border-gray-300 hover:shadow-sm transition-all duration-200 bg-white"
+    class="flex flex-col border cursor-pointer border-gray-200 rounded-xl p-5 h-full bg-white hover:border-red-300 hover:shadow-md transition-all duration-300 group"
   >
-    <div class="flex flex-col space-y-3 mb-4 flex-1">
-      <div class="flex items-center justify-between">
-        <div class="text-lg font-semibold text-gray-900 leading-tight">
-          {{ event.name }}
-        </div>
-        <Badge
-          v-if="event.confirmStatus"
-          theme="green"
-          size="sm"
-          variant="solid"
-        >
-          Confirmed
-        </Badge>
-      </div>
-
-      <span class="font-medium text-gray-700 leading-5 text-sm">
-        {{ event.subject }}
-      </span>
-
-      <div class="flex items-center space-x-2 text-sm">
-        <Calendar class="w-3 h-3 flex-shrink-0" />
-        <span>Kick Off</span>
-        <span>{{ event.starts_on }}</span>
-      </div>
-
-      <div class="flex items-center space-x-2 text-sm">
-        <Clock class="w-3 h-3 flex-shrink-0" />
-        <span>Adjourn</span>
-        <span>{{ event.ends_on }}</span>
-      </div>
+    <!-- Event Header -->
+    <div class="flex items-center justify-between mb-3">
+      <h3
+        class="text-lg font-semibold text-gray-900 group-hover:text-red-600 transition-colors"
+      >
+        {{ event.name }}
+      </h3>
+      <Badge
+        v-if="event.confirmStatus"
+        theme="green"
+        size="sm"
+        variant="solid"
+        class="shadow-sm"
+      >
+        Confirmed
+      </Badge>
     </div>
 
-    <div class="flex flex-wrap gap-2 mt-auto pt-3 border-t border-gray-100">
-      <Badge>
-        {{ event.status }}
-      </Badge>
-      <Badge>
-        {{ event.event_category }}
-      </Badge>
-      <Badge>
+    <!-- Event Subject -->
+    <p class="font-medium text-gray-700 leading-5 text-sm mb-3">
+      {{ event.subject }}
+    </p>
+
+    <!-- Dates & Times -->
+    <div class="flex items-center space-x-2 text-sm text-gray-600 mb-1">
+      <Calendar class="w-4 h-4 text-red-500" />
+      <span class="font-medium">Kick Off:</span>
+      <span>{{ event.starts_on }}</span>
+    </div>
+
+    <div class="flex items-center space-x-2 text-sm text-gray-600">
+      <Clock class="w-4 h-4 text-red-500" />
+      <span class="font-medium">Adjourn:</span>
+      <span>{{ event.ends_on }}</span>
+    </div>
+
+    <!-- Tags -->
+    <div
+      class="flex flex-wrap gap-2 mt-auto pt-4 border-t border-gray-100 text-xs"
+    >
+      <Badge class="bg-red-50 text-red-700 border border-red-200">
         {{ event.event_type }}
       </Badge>
     </div>
 
-    <Button
-      :variant="'solid'"
-      :ref_for="true"
-      theme="gray"
-      size="sm"
-      label="Button"
-      :loading="false"
-      :disabled="false"
-      tooltip="Hover for more!"
-      class="m-3"
-      @click="attendModal = true"
-    >
-      View
-    </Button>
+    <!-- Action Button -->
+    <div class="mt-4">
+      <Button
+        variant="solid"
+        theme="red"
+        size="sm"
+        class="w-full rounded-lg"
+        @click="attendModal = true"
+      >
+        View Event
+      </Button>
+    </div>
   </div>
+
+  <!-- Modal -->
   <AttendEventModal
     v-model="attendModal"
     :event="event"

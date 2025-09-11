@@ -53,7 +53,7 @@
           Confirm Attendance
         </Button>
       </div>
-      <ErrorMessage v-if="confirmEvent.error" :error="confirmEvent.error" />
+      <ErrorMessage :message="confirmEvent.error"  class="text-center mt-2 border border-red-400 rounded-md p-2" />
     </template>
   </Dialog>
 </template>
