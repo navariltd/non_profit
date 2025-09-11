@@ -61,55 +61,19 @@
       View
     </Button>
   </div>
-  <Dialog v-model="attendModal">
-    <template #body-title>
-      <h3 class="text-2xl font-semibold text-ink-gray-9">Confirm Attendance</h3>
-    </template>
-    <template #body-content>
-      <div class="text-gray-700">
-        Confirm you want to attend:
-        <span class="font-bold">
-          {{ event.subject }}
-        </span>
-        <div class="text-sm text-gray-600 mt-2 h-16 overflow-hidden">
-          {{ event.description }}
-        </div>
-      </div>
-    </template>
-    <template #actions>
-      <div class="flex space-x-2 justify-end">
-        <Button variant="outline" theme="red" @click="closeModal">
-          Cancel
-        </Button>
-        <Button
-          v-if="!event.confirmStatus"
-          variant="solid"
-          @click="submit(event)"
-          :loading="confirmEvent.loading"
-        >
-          Confirm
-        </Button>
-      </div>
-      <ErrorMessage
-        class="mt-3 text-center border border-red-600 rounded-lg p-2"
-        :message="confirmEvent.error"
-      />
-    </template>
-  </Dialog>
+  <AttendEventModal
+    v-model="attendModal"
+    :event="event"
+    @confirmed="handleConfirmed"
+  />
 </template>
 
 <script lang="ts" setup>
-import {
-  Badge,
-  Button,
-  createResource,
-  Dialog,
-  ErrorMessage,
-  toast,
-} from "frappe-ui";
+import { Badge, Button, toast } from "frappe-ui";
 import { Calendar, Clock } from "lucide-vue-next";
 import { inject, onMounted, ref } from "vue";
 import { membershipStore } from "../stores/membership";
+import AttendEventModal from "./Modals/AttendEventModal.vue";
 
 const attendModal = ref(false);
 const { events } = membershipStore();
@@ -127,29 +91,17 @@ export interface Event {
   status: string;
   description: string;
   confirmStatus?: boolean;
+  color?: string;
 }
 
 defineProps<{
   event: Event;
 }>();
 
-const confirmEvent = createResource({
-  url: "non_profit.non_profit.api.attend_event",
-  onSuccess(data) {
-    attendModal.value = false;
-    if (reloadConfirmStatus) {
-      reloadConfirmStatus();
-    }
-    toast.success("You have successfully registered for the event");
-  },
-});
-
-function submit(event: Event) {
-  confirmEvent.submit({ ...event });
-}
-
-function closeModal() {
-  attendModal.value = false;
-  confirmEvent.reset();
+function handleConfirmed() {
+  if (reloadConfirmStatus) {
+    reloadConfirmStatus();
+  }
+  toast.success("You successfully registered for the event");
 }
 </script>
