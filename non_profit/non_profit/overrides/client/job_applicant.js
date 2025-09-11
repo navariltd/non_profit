@@ -1,4 +1,4 @@
-frappe.ui.form.on("Job Opening", {
+frappe.ui.form.on("Job Applicant", {
   refresh: function (frm) {
     if (frm.fields_dict.branch && frm.fields_dict.company) {
       frm.set_query("branch", function (doc) {
@@ -10,6 +10,27 @@ frappe.ui.form.on("Job Opening", {
           };
         }
       });
+    }
+
+    if (frm.doc.status === "Accepted" && frm.doc.is_volunteer == 1) {
+      frappe.db
+        .get_value("Employee", { job_applicant: frm.doc.name }, "name")
+        .then((r) => {
+          if (r && !r.message.name) {
+            frm.add_custom_button(
+              __("Create Employee"),
+              () => {
+                frappe.route_options = {
+                  job_applicant: frm.doc.name,
+                  company: frm.doc.company,
+                  branch: frm.doc.branch,
+                };
+                frappe.new_doc("Employee");
+              },
+              __("Create")
+            );
+          }
+        });
     }
   },
 
