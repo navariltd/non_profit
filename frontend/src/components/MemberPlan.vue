@@ -1,18 +1,23 @@
 <template>
-  <div class="flex flex-col md:flex-row gap-4 p-15">
-    <div
+  <div class="flex flex-col md:flex-row gap-6 p-6 border">
+    <!-- Current Membership Card -->
+    <Card
       v-if="membershipStatus"
-      class="flex flex-col bg-white border border-gray-200 rounded-xl p-6 h-full shadow-sm hover:shadow-md hover:border-gray-300 transition-all duration-200"
+      class="flex flex-col -1/4 rounded-2xl p-6 h-full shadow-sm hover:shadow-md transition-all duration-300 group"
     >
+      <!-- Header -->
       <div class="mb-4">
-        <h2 class="text-xl font-semibold text-gray-900 leading-tight">
+        <h2
+          class="text-xl font-semibold text-gray-900 group-hover:text-red-600 transition-colors"
+        >
           Current Membership Plan
         </h2>
       </div>
 
+      <!-- Membership Info -->
       <div class="mb-4">
-        <div class="bg-gray-50 rounded-lg p-4 border border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-800 mb-1">
+        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">
             {{ membershipStatus.membership_type }}
           </h3>
 
@@ -20,17 +25,13 @@
             <span class="text-sm text-gray-500">Status:</span>
             <Badge
               :variant="'subtle'"
-              :ref_for="true"
               :theme="
                 getMembershipStatusTheme(
-                  membershipStatus.membership_status
-                    ? membershipStatus.membership_status
-                    : ''
+                  membershipStatus.membership_status || ''
                 )
               "
               size="lg"
-              label="Badge"
-              class="border"
+              class="border border-red-200 text-red-700 bg-red-50"
             >
               {{ membershipStatus.membership_status }}
             </Badge>
@@ -38,8 +39,9 @@
         </div>
       </div>
 
+      <!-- Details -->
       <div
-        class="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 text-sm text-gray-600 mb-4"
+        class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm text-gray-600 mb-6"
       >
         <div class="flex flex-col">
           <span class="text-gray-500">Start Date</span>
@@ -55,39 +57,26 @@
         </div>
         <div class="flex flex-col sm:col-span-2">
           <span class="text-gray-500">Amount</span>
-          <span class="font-semibold text-gray-900 text-lg">{{
-            membershipStatus.amount
-          }}</span>
+          <span class="font-semibold text-gray-900 text-lg">
+            KES {{ membershipStatus.amount }}
+          </span>
         </div>
       </div>
 
       <!-- Action Button -->
       <div class="mt-auto">
-        <Button :variant="'solid'" class="w-full"> Renew Membership </Button>
+        <Button :variant="'solid'" theme="red" class="w-full">
+          Renew Membership
+        </Button>
       </div>
-    </div>
+    </Card>
 
-    <router-link
-      v-if="!membershipStatus"
-      :to="{ name: 'Membership' }"
-      class="w-full md:w-1/3"
-    >
-      <div
-        class="flex flex-col bg-white border border-gray-200 rounded-xl p-6 h-full shadow-sm"
-      >
-        <div class="text-center text-gray-500">
-          <h3 class="text-lg font-medium text-gray-900 mb-2">
-            No Active Membership
-          </h3>
-          <p class="text-sm">Click to Subscribe to a membership plan to get started.</p>
-        </div>
-      </div>
-    </router-link>
+ 
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Badge } from "frappe-ui";
+import { Badge, Card } from "frappe-ui";
 import Button from "frappe-ui/src/components/Button/Button.vue";
 import { RouterLink } from "vue-router";
 

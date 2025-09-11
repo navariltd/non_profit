@@ -1,24 +1,43 @@
 <template>
-  <div class="">
-    <div class="flex flex-col justify-center h-screen space-y-4 p-12">
-      <h1 class="text-3xl font-bold">Welcome {{ name }}</h1>
-      <p class="text-3xl text-gray-600">
-        Join us and make a difference. Sign up to become a volunteer or a
-        member.
-      </p>
-      <div class="flex flex-row gap-4 mt-6">
-        <Button
-          variant="solid"
-          icon-right="arrow-right"
-          @click="navigateTo('volunteer/signup')"
-          >Sign Up as Volunteer</Button
+  <div class="h-screen bg-gray-50 flex items-center justify-center">
+    <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 p-10">
+      <div class="flex flex-col justify-center space-y-6 text-left">
+        <h1
+          class="text-3xl md:text-6xl font-extrabold text-red-600 leading-tight"
         >
-        <Button
-          variant="solid"
-          icon-right="arrow-right"
-          @click="navigateTo('membership')"
-          >Sign Up as Member
-        </Button>
+          Kenya Red Cross <br />
+          <span class="text-gray-800">Society</span>
+        </h1>
+        <p class="text-lg text-gray-600 max-w-lg">
+          Together, we can
+          <span class="font-semibold text-red-500">save lives</span>, support
+          communities, and create lasting impact. Become a
+          <span class="text-red-500 font-semibold">volunteer</span> or
+          <span class="text-red-500 font-semibold">member</span> today.
+        </p>
+      </div>
+
+      <div class="flex flex-col items-center justify-center space-y-6">
+        <div class="space-y-4 w-full max-w-sm">
+          <Button
+            variant="solid"
+            theme="red"
+            icon-right="arrow-right"
+            class="w-full py-4 rounded-xl shadow-lg text-lg font-medium"
+            @click="navigateTo('volunteer/signup')"
+          >
+            Sign Up as Volunteer
+          </Button>
+          <Button
+            variant="outline"
+            theme="red"
+            icon-right="arrow-right"
+            class="w-full py-4 rounded-xl shadow-md text-lg font-medium"
+            @click="navigateTo('membership')"
+          >
+            Sign Up as Member
+          </Button>
+        </div>
       </div>
     </div>
   </div>
@@ -27,14 +46,6 @@
 <script lang="ts" setup>
 import { Button } from "frappe-ui";
 import router from "../router";
-
-defineProps({
-  name: {
-    type: String,
-    required: false,
-    default: "User",
-  },
-});
 
 function navigateTo(path: string) {
   router.push("/" + path);

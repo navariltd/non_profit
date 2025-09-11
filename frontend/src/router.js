@@ -10,10 +10,6 @@ const routes = [
       name: "Dashboard",
     },
   },
-  {
-    name: "Dashboard",
-    component: () => import("@/pages/Dashboard.vue"),
-  },
 
   {
     path: "/dashboard",
@@ -110,7 +106,7 @@ const routes = [
     name: "VolunteerSignup",
     path: "/volunteer/signup",
     component: () => import("@/pages/VolunteerSignup.vue"),
-  }
+  },
 ];
 
 let router = createRouter({

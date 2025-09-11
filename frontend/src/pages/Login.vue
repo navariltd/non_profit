@@ -1,8 +1,9 @@
 <template>
-  <div class="flex min-h-screen items-center justify-center">
+  <div class="flex min-h-screen items-center justify-center bg-gray-50">
     <Card
       :title="isLogin ? 'Login VMMS Portal' : 'Sign Up VMMS Portal'"
       :class="isLogin ? 'w-full max-w-md' : 'w-full max-w-2xl'"
+      class="border-2 border-gray-100 shadow-md rounded-2xl"
     >
       <form class="flex flex-col space-y-4 w-full" @submit.prevent="submit">
         <template v-if="isLogin">
@@ -43,35 +44,6 @@
               v-model="signUpForm.last_name"
             />
           </div>
-          <!-- <div class="w-full border p-4 rounded-lg bg-white">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="flex flex-col">
-                <label for="branch" class="text-gray-600 text-sm mb-2"
-                  >Branch/County</label
-                >
-                <Link
-                  id="branch"
-                  doctype="Branch"
-                  v-model="signUpForm.branch"
-                  placeholder="Branch"
-                  class="w-full"
-                />
-              </div>
-              <div class="flex flex-col">
-                <label for="region" class="text-gray-600 text-sm mb-2"
-                  >Region</label
-                >
-                <Input
-                  id="region"
-                  doctype="Company"
-                  v-model="signUpForm.region"
-                  placeholder="Region"
-                  class="w-full"
-                  readonly
-                />
-              </div>
-            </div>
-          </div> -->
 
           <Input
             required
@@ -86,18 +58,18 @@
             type="text"
             variant="subtle"
             placeholder="+254123456789"
-            label="PhoneNumber"
+            label="Phone Number"
             v-model="signUpForm.phone"
           />
-          <div>
-            <label class="text-gray-600 text-sm mb-3">Gender</label>
 
+          <div>
+            <label class="text-gray-700 text-sm mb-2 block">Gender</label>
             <Select
               required
               v-model="signUpForm.gender"
-              class=""
               :options="genderOptions"
-              placeholder="Female"
+              placeholder="Select Gender"
+              class="focus:ring-2 focus:ring-red-500"
             />
           </div>
         </template>
@@ -106,6 +78,7 @@
           :loading="isLogin ? session.login.loading : createSignUp.loading"
           variant="solid"
           type="submit"
+          theme="red"
         >
           {{ isLogin ? "Login" : "Sign Up" }}
         </Button>
@@ -121,7 +94,7 @@
         <span v-if="isLogin">Don’t have an account? </span>
         <span v-else>Already have an account? </span>
         <Button
-          class="text-blue-600 hover:underline"
+          class="text-red-600 hover:underline font-medium"
           @click="isLogin = !isLogin"
           type="button"
         >
@@ -137,8 +110,8 @@
       message: 'Await communication via email from RedCross',
       size: 'lg',
       icon: {
-        name: 'alert-triangle',
-        appearance: 'warning',
+        name: 'check-circle',
+        appearance: 'success',
       },
     }"
     v-model="signInState"

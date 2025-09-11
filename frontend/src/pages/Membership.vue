@@ -32,74 +32,97 @@
       <EmptyState v-else type="" />
     </div>
   </div>
-  <Dialog v-model="registerDialog">
+  <Dialog v-model="registerDialog" class="">
     <template #body-title>
-      <h3 class="text-2xl font-semibold">Register as a Member</h3>
+      <h3 class="text-2xl font-bold text-gray-900">
+        Register as a <span class="text-red-600">Member</span>
+      </h3>
     </template>
+
     <template #body-content>
-      <form action="" @submit.prevent="submit" class="space-y-4">
-        <div class="space-y-4">
-          <p class="text-gray-700">
-            Please fill in the details below to register as a member.
-          </p>
-          <div class="w-full border p-4 rounded-lg bg-white">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="flex flex-col">
-                <label for="branch" class="text-gray-600 text-sm mb-2"
-                  >Branch/County</label
-                >
-                <Link
-                  required
-                  id="branch"
-                  doctype="Branch"
-                  v-model="membershipForm.branch"
-                  placeholder="Branch"
-                  class="w-full"
-                />
-              </div>
-              <div class="flex flex-col">
-                <label for="region" class="text-gray-600 text-sm mb-2"
-                  >Region</label
-                >
-                <Input
-                  id="region"
-                  doctype="Company"
-                  v-model="membershipForm.region"
-                  placeholder="Region"
-                  class="w-full"
-                  readonly
-                />
-              </div>
+      <form @submit.prevent="submit" class="space-y-6">
+        <p class="text-gray-600">
+          Please fill in the details below to complete your membership
+          registration.
+        </p>
+
+        <div class="bg-white border rounded-lg p-4 shadow-sm">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col">
+              <label
+                for="branch"
+                class="text-sm font-medium text-gray-700 mb-1"
+              >
+                Branch/County
+              </label>
+              <Link
+                required
+                id="branch"
+                doctype="Branch"
+                v-model="membershipForm.branch"
+                placeholder="Select Branch"
+                class="w-full"
+              />
+            </div>
+            <div class="flex flex-col">
+              <label
+                for="region"
+                class="text-sm font-medium text-gray-700 mb-1"
+              >
+                Region
+              </label>
+              <Input
+                id="region"
+                doctype="Company"
+                v-model="membershipForm.region"
+                placeholder="Region"
+                class="w-full"
+                readonly
+              />
             </div>
           </div>
-          <div class="bg-blue-50 p-4 rounded-lg">
-            <p class="">
-              Register for membership: {{ membershipForm.membership_type }}
-            </p>
-            <p class="">Amount: {{ membershipForm.amount }}</p>
-          </div>
         </div>
-        <div class="flex justify-end mt-3 gap-2">
+
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p class="font-medium text-gray-800">
+            Membership Type:
+            <span class="text-red-600">{{
+              membershipForm.membership_type
+            }}</span>
+          </p>
+          <p class="text-gray-700">
+            Amount:
+            <span class="font-semibold">KES {{ membershipForm.amount }}</span>
+          </p>
+        </div>
+
+        <ErrorMessage
+          v-if="createMembership.error"
+          class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm"
+          :message="createMembership.error"
+        />
+
+        <div class="flex justify-end gap-3 pt-2">
           <Button
             variant="outline"
             theme="red"
+            class="rounded-lg px-5"
             @click="cleanUpMembershipForm()"
           >
             Cancel
           </Button>
-          <Button variant="solid" :loading="createMembership.loading">
+          <Button
+            variant="solid"
+            theme="red"
+            :loading="createMembership.loading"
+            class="rounded-lg px-6"
+          >
             Register
           </Button>
         </div>
-
-        <div class="">
-          <ErrorMessage
-            class="mt-2 text-center border rounded-md p-1 border-red-500"
-            :message="createMembership.error"
-          />
-        </div>
       </form>
     </template>
+
     <template #actions="{ close }"> </template>
   </Dialog>
 </template>
