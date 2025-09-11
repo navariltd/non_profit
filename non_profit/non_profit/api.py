@@ -629,6 +629,7 @@ def get_events():
             "ends_on",
             "status",
             "description",
+            "color"
         ],
         filters=[{"status": "Open"}],
     )
