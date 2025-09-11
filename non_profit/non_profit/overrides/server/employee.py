@@ -21,9 +21,9 @@ def after_insert(doc: Document, method: str) -> None:
             if update_fields_from_applicant(doc):
                 needs_save = True
         
-        if doc.volunteer_signup:
-            if update_fields_from_volunteer_signup(doc):
-                needs_save = True
+        # if doc.volunteer_signup:
+        #     if update_fields_from_volunteer_signup(doc):
+        #         needs_save = True
         
         if needs_save:
             doc.save(ignore_permissions=True)
@@ -34,66 +34,66 @@ def after_insert(doc: Document, method: str) -> None:
         frappe.throw(_("Error processing employee creation: {0}").format(str(e)))
 
 
-def update_fields_from_volunteer_signup(doc: Document) -> bool:
-    """
-    Update employee fields from linked Volunteer Signup document
-    Only updates if the employee field is empty
-    Returns True if any fields were updated
-    """
-    try:
-        volunteer_signup = frappe.get_doc("Volunteer Signup", doc.volunteer_signup)
-        updated = False
+# def update_fields_from_volunteer_signup(doc: Document) -> bool:
+#     """
+#     Update employee fields from linked Volunteer Signup document
+#     Only updates if the employee field is empty
+#     Returns True if any fields were updated
+#     """
+#     try:
+#         volunteer_signup = frappe.get_doc("Volunteer Signup", doc.volunteer_signup)
+#         updated = False
         
-        field_mapping = {
-            "status": "status",
-            "surname": "last_name",
-            "other_names": "first_name",
-            "email": "personal_email",
-            "phone_number": "cell_number",
-            "mobile_money_number": "mpesa_mobile_phone",
-            "profile_photo": "image",
-            "gender": "gender",
-            "date_of_birth": "date_of_birth",
-            "idpassport": "id_passport_number",
-            "countybranch": "branch",
-            "region": "region",
-            "ward": "ward",
-            "marital_status": "marital_status",
-            "education": "highest_level_of_education",
-            "profession": "profession",
-            "place_of_work": "place_of_work",
-            "reason_to_join": "reason_to_join",
-            "blood_group": "blood_group"
-        }
+#         field_mapping = {
+#             "status": "status",
+#             "surname": "last_name",
+#             "other_names": "first_name",
+#             "email": "personal_email",
+#             "phone_number": "cell_number",
+#             "mobile_money_number": "mpesa_mobile_phone",
+#             "profile_photo": "image",
+#             "gender": "gender",
+#             "date_of_birth": "date_of_birth",
+#             "idpassport": "id_passport_number",
+#             "countybranch": "branch",
+#             "region": "region",
+#             "ward": "ward",
+#             "marital_status": "marital_status",
+#             "education": "highest_level_of_education",
+#             "profession": "profession",
+#             "place_of_work": "place_of_work",
+#             "reason_to_join": "reason_to_join",
+#             "blood_group": "blood_group"
+#         }
         
-        for signup_field, employee_field in field_mapping.items():
-            if (hasattr(volunteer_signup, signup_field) and 
-                volunteer_signup.get(signup_field) and 
-                not doc.get(employee_field)):
-                doc.set(employee_field, volunteer_signup.get(signup_field))
-                updated = True
+#         for signup_field, employee_field in field_mapping.items():
+#             if (hasattr(volunteer_signup, signup_field) and 
+#                 volunteer_signup.get(signup_field) and 
+#                 not doc.get(employee_field)):
+#                 doc.set(employee_field, volunteer_signup.get(signup_field))
+#                 updated = True
         
-        table_fields_mapping = {
-            "disabilities": "disabilities",
-            "languages": "languages",
-            "additional_skills": "additional_skills",
-            "trainings": "trainings",
-            "relevant_documents": "relevant_documents"
-        }
+#         table_fields_mapping = {
+#             "disabilities": "disabilities",
+#             "languages": "languages",
+#             "additional_skills": "additional_skills",
+#             "trainings": "trainings",
+#             "relevant_documents": "relevant_documents"
+#         }
         
-        for signup_table, employee_table in table_fields_mapping.items():
-            if (hasattr(volunteer_signup, signup_table) and 
-                volunteer_signup.get(signup_table) and 
-                not doc.get(employee_table)):
+#         for signup_table, employee_table in table_fields_mapping.items():
+#             if (hasattr(volunteer_signup, signup_table) and 
+#                 volunteer_signup.get(signup_table) and 
+#                 not doc.get(employee_table)):
                 
-                if copy_table_data(volunteer_signup, doc, signup_table, employee_table):
-                    updated = True
+#                 if copy_table_data(volunteer_signup, doc, signup_table, employee_table):
+#                     updated = True
                 
-        return updated
+#         return updated
                 
-    except Exception as e:
-        frappe.log_error(f"Error updating from volunteer signup {doc.volunteer_signup}", f"{str(e)}")
-        return False
+#     except Exception as e:
+#         frappe.log_error(f"Error updating from volunteer signup {doc.volunteer_signup}", f"{str(e)}")
+#         return False
 
 
 def copy_table_data(source_doc, target_doc, source_table, target_table):
