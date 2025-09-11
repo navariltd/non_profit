@@ -1,12 +1,15 @@
 <template v-if="user.data">
   <div class="flex flex-col">
+    <h1 class="text-3xl font-bold px-4 mt-5">
+      Welcome, {{ user.data.full_name }}
+    </h1>
+
     <Welcome
       v-if="
         roleResource.data &&
         !roleResource.data.is_volunteer &&
         !roleResource.data.is_member
       "
-      :name="user.data.full_name"
     />
 
     <Volunteer v-if="roleResource.data && roleResource.data.is_volunteer" />
@@ -27,6 +30,9 @@
   >
     <div class="flex justify-between items-center m-2">
       <h1 class="text-xl m-2">Upcoming Events</h1>
+      <Button variant="solid" theme="red" @click="toggleEventViews">
+        {{ toggleEventView ? "List" : "Calendar" }} View</Button
+      >
       <router-link :to="{ name: 'Events' }">
         <Button variant="subtle" size="lg" theme="blue">
           View All Events
@@ -38,8 +44,13 @@
       v-if="events.data && events.data.length > 0"
       class="p-2 grid grid-cols-1 lg:grid-cols-3 gap-4"
     >
-      <EventCard v-for="event in events.data.slice(0, 3)" :event="event" />
+      <EventCard
+        v-if="!toggleEventView"
+        v-for="event in events.data.slice(0, 3)"
+        :event="event"
+      />
     </div>
+    <EventCalendar v-if="toggleEventView" :event="events.data" />
 
     <EmptyState
       v-if="events.data && events.data.length === 0"
@@ -48,7 +59,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { inject, onMounted, provide, toRaw, watch } from "vue";
+import { inject, onMounted, provide, ref, toRaw, watch } from "vue";
 import EmptyState from "../components/EmptyState.vue";
 import EventCard, { Event } from "../components/EventCard.vue";
 import Member from "../components/MemberPlan.vue";
@@ -57,9 +68,11 @@ import { membershipStore } from "../stores/membership";
 import { usersStore } from "../stores/user";
 import { Button, createResource, toast } from "frappe-ui";
 import Welcome from "../components/Welcome.vue";
+import EventCalendar from "../components/EventCalendar.vue";
 
 const { roleResource } = usersStore();
 const { events, currentMembership } = membershipStore();
+const toggleEventView = ref(false);
 
 const user = inject<any>("$user");
 
@@ -92,6 +105,10 @@ const confirmEventStatus = createResource({
     }
   },
 });
+
+function toggleEventViews() {
+  toggleEventView.value = !toggleEventView.value;
+}
 
 provide("reloadConfirmStatus", () => confirmEventStatus.reload());
 </script>
