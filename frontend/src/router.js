@@ -92,7 +92,7 @@ const routes = [
   },
   {
     name: "Projects",
-    path: "/projects",
+    path: "/projects/:status",
     component: () => import("@/pages/Projects.vue"),
     meta: { requiresAuth: true },
   },
