@@ -10,10 +10,6 @@ const routes = [
       name: "Dashboard",
     },
   },
-  {
-    name: "Dashboard",
-    component: () => import("@/pages/Dashboard.vue"),
-  },
 
   {
     path: "/dashboard",
