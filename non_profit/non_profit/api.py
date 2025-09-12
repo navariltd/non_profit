@@ -459,9 +459,6 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
 
         email_id = kwargs.get("email_id")
         if email_id and job_opening and frappe.db.exists("Job Applicant", {"job_title": job_opening, "email_id": email_id}):
-        if email_id and frappe.db.exists(
-            "Job Applicant", {"job_title": job_opening, "email_id": email_id}
-        ):
             return {
                 "success": False,
                 "message": "You have already applied for this position.",
