@@ -91,7 +91,7 @@ onMounted(() => {
   if (!user.data) {
     toast.warning("You must be logged in to view this page.");
     setTimeout(() => {
-      router.push("/account/login");
+      router.push("/login");
     }, 500);
   } else {
     roleResource.reload();

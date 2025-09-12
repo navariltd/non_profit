@@ -128,6 +128,11 @@ import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue
 import { createResource, Select } from "frappe-ui";
 import Dialog from "frappe-ui/src/components/Dialog/Dialog.vue";
 import { SignUp, initialForm, resetSignUpForm } from "../utils/volunteer";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
+
+const router = useRouter();
 
 const isLogin = ref(true);
 const userEmail = ref("");
@@ -183,10 +188,21 @@ function isValidPhone(phone: string) {
 
 function submit() {
   if (isLogin.value) {
-    session.login.submit({
-      usr: userEmail.value,
-      pwd: password.value,
-    });
+    session.login.submit(
+      { usr: userEmail.value, pwd: password.value },
+
+      {
+        onSuccess: () => {
+          const redirectTo = route.query["redirect-to"] as string;
+
+          if (redirectTo) {
+            router.push(redirectTo);
+          } else {
+            router.push({ name: "Dashboard" });
+          }
+        },
+      }
+    );
   } else {
     if (!isValidPhone(signUpForm.phone)) {
       createSignUp.error =
