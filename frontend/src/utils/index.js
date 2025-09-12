@@ -417,22 +417,34 @@ export function getSidebarLinks() {
       activeFor: ["Dashboard"],
     },
     {
-      label: "Courses",
-      icon: "BookOpen",
-      to: "Courses",
-      activeFor: [
-        "Courses",
-        "CourseDetail",
-        "Lesson",
-        "CourseForm",
-        "LessonForm",
-      ],
-    },
-    {
       label: "Jobs",
       icon: "Briefcase",
       to: "Jobs",
-      activeFor: ["Jobs", "JobDetail"],
+      activeFor: ["Jobs", "JobDetail", "JobForm", "NewJobApplication"],
+    },
+    {
+      label: "Applications",
+      icon: "FileText",
+      to: "JobApplication",
+      activeFor: ["JobApplication", "JobApplicationDetail"],
+    },
+    {
+      label: "Projects",
+      icon: "FolderKanban",
+      to: "Projects",
+      activeFor: ["Projects"],
+    },
+    {
+      label: "Events",
+      icon: "Calendar",
+      to: "Events",
+      activeFor: ["Events"],
+    },
+    {
+      label: "Membership",
+      icon: "Users",
+      to: "Membership",
+      activeFor: ["Membership"],
     },
   ];
 }

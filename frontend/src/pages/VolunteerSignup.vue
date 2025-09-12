@@ -2,9 +2,6 @@
   <div class="p-6">
     <h1 class="text-2xl font-bold mb-4">Volunteer Signup</h1>
 
-    <!-- Button to open modal -->
-    <Button @click="showModal = true"> Apply for Volunteer Position </Button>
-
     <!-- Child component -->
     <JobApplicationModal
       v-model="showModal"

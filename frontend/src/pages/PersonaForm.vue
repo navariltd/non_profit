@@ -2,7 +2,7 @@
   <div class="flex h-screen overflow-hidden sm:bg-gray-50">
     <div class="relative h-full z-10 mx-auto sm:w-max pt-40">
       <div class="mx-auto flex items-center justify-center space-x-2">
-        <LMSLogo class="size-7" />
+        <VMMSLogo class="size-7" />
         <span
           class="select-none text-xl font-semibold tracking-tight text-gray-900"
         >
@@ -54,7 +54,7 @@
   </div>
 </template>
 <script setup>
-import LMSLogo from "@/components/Icons/LMSLogo.vue";
+import VMMSLogo from "@/components/Icons/VMMSLogo.vue";
 import { Button, call, FormControl, usePageMeta } from "frappe-ui";
 import { computed, inject, reactive } from "vue";
 import { useRouter } from "vue-router";
