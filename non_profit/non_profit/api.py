@@ -16,6 +16,8 @@ from frappe.model.db_query import get_order_by
 from frappe.utils.data import make_filter_tuple
 from frappe.utils.file_manager import save_file
 
+from frappe.query_builder import DocType
+
 
 @frappe.whitelist(allow_guest=True)
 def search_widget(
@@ -587,7 +589,6 @@ def get_user_info():
             user["membership_type"] = member.get("membership_type")
             user["is_member"] = True
 
-
     if frappe.db.exists("Job Applicant", {"email_id": user.email}):
         applicant = frappe.db.get_value(
             "Job Applicant",
@@ -629,7 +630,7 @@ def get_events():
             "ends_on",
             "status",
             "description",
-            "color"
+            "color",
         ],
         filters=[{"status": "Open"}],
     )
@@ -651,7 +652,8 @@ def confirm_event_status():
 
     for event in events:
         if frappe.db.exists(
-            "Event Participants", {"email": user_info.get("email"), "parent": event.name}
+            "Event Participants",
+            {"email": user_info.get("email"), "parent": event.name},
         ):
             confirmed_events.append({"event": event, "confirmed": True})
         else:
@@ -973,3 +975,97 @@ def get_current_membership():
     membership["amount"] = amount.get("amount") if amount else 0
 
     return membership
+
+
+def get_current_volunteer():
+    user = frappe.session.user
+
+    volunteer = frappe.db.get_value("Employee", {"user_id": user}, "name")
+
+    return volunteer
+
+
+@frappe.whitelist()
+def get_dashboard_stats():
+
+    volunteer = get_current_volunteer()
+
+    project_stats = {}
+
+    total_projects_deployed = frappe.db.count(
+        "Volunteer Deployment Assignee", {"volunteer": volunteer}
+    )
+    pending_projects = frappe.db.count(
+        "Volunteer Deployment Assignee", {"volunteer": volunteer, "status": "Pending"}
+    )
+    accepted_projects = frappe.db.count(
+        "Volunteer Deployment Assignee", {"volunteer": volunteer, "status": "Accepted"}
+    )
+    rejected_projects = frappe.db.count(
+        "Volunteer Deployment Assignee", {"volunteer": volunteer, "status": "Rejected"}
+    )
+
+    project_stats["total_projects_deployed"] = total_projects_deployed
+    project_stats["pending_projects"] = pending_projects
+    project_stats["accepted_projects"] = accepted_projects
+    project_stats["rejected_projects"] = rejected_projects
+
+    return project_stats
+
+
+@frappe.whitelist()
+def get_all_deployed_projects(**kwargs):
+
+    volunteer = get_current_volunteer()
+
+    accepted_filters = {"status": "Accepted"}
+    rejected_filters = {"status": "Rejected"}
+
+    deployments = frappe.get_all(
+        "Volunteer Deployment Assignee",
+        (
+            {"volunteer": volunteer} | accepted_filters
+            if kwargs.get("accepted")
+            else {} | rejected_filters if kwargs.get("rejected") else {}
+        ),
+        ["parent"],
+    )
+
+    project = None
+    projects = []
+    projects_details = []
+
+    for deployment in deployments:
+
+        project = frappe.db.get_value(
+            "Volunteer Deployment", deployment.parent, "project", as_dict=True
+        )
+
+        if project:
+            projects.append(project)
+
+    for project in projects:
+        project_details = frappe.db.get_value(
+            "Project",
+            project.project,
+            [
+                "name",
+                "project_name",
+                "status",
+                "project_type",
+                "is_active",
+                "percent_complete",
+                "priority",
+                "expected_start_date",
+                "expected_end_date",
+                "priority",
+                "notes",
+            ],
+            as_dict=True,
+        )
+        if project_details:
+            print("----project_details----")
+            print(project_details)
+            projects_details.append(project_details)
+
+    return projects_details
