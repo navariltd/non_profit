@@ -15,6 +15,7 @@ from frappe.desk.search import (
 from frappe.model.db_query import get_order_by
 from frappe.utils.data import make_filter_tuple
 from frappe.utils.file_manager import save_file
+from datetime import datetime
 
 
 @frappe.whitelist(allow_guest=True)
@@ -200,11 +201,34 @@ def get_membership_types():
 
 @frappe.whitelist(allow_guest=True)
 def get_job_openings(filters=None, orFilters=None):
+    
     if not filters:
         filters = {}
     filters["publish"] = 1
+    
+    requested_status = filters.pop("status", None)
+    
+    today = frappe.utils.nowdate()
+    current_datetime = datetime.now()
+    
+    if requested_status == "Open":
+        filters["status"] = "Open"
+        filters["closes_on"] = [">", today]  
+        filters["posted_on"] = ["<=", current_datetime]  
+    elif requested_status == "Closed":
+        filters["status"] = "Closed"
+    elif requested_status == "Upcoming":
+        filters["status"] = "Open"
+        filters["posted_on"] = [">", current_datetime]  
+    elif requested_status == "Ending Soon":
+        filters["status"] = "Open"
+        filters["closes_on"] = ["between", [today, frappe.utils.add_days(today, 7)]]  
+    elif requested_status == "Recently Posted":
+        filters["status"] = "Open"
+        filters["posted_on"] = ["between", [datetime.fromtimestamp(current_datetime.timestamp() - 7*86400), current_datetime]]  
+    
     jobs = frappe.get_all(
-        "Job Opening",
+        "Job Opening", 
         filters=filters,
         or_filters=orFilters,
         fields=[
@@ -228,7 +252,7 @@ def get_job_openings(filters=None, orFilters=None):
         order_by="creation desc",
     )
 
-    for job in jobs:
+    for job in jobs:        
         job.description = (
             frappe.utils.strip_html_tags(job.description) if job.description else ""
         )
@@ -287,7 +311,52 @@ def get_job_details(job):
 
     return job_details
 
+@frappe.whitelist(allow_guest=True)
+def update_job_application(id: str, **kwargs) -> dict:
+    try:
+        application = frappe.get_doc("Job Applicant", id)
+        if not application:
+            return {"error": "Application not found"}
+        
+        resume = kwargs.pop("resume", None)
+        profile_photo = kwargs.pop("profile_photo", None)
+        if resume:
+            resume_doc = frappe.get_doc("File", resume)
+            application.resume_attachment = resume_doc.file_name
+            frappe.db.set_value(
+                "File",
+                resume,
+                {
+                    "attached_to_name": application.name,
+                    "attached_to_doctype": "Job Applicant",
+                    "attached_to_field": "resume_attachment",
+                },
+                update_modified=False,
+            )
 
+        if profile_photo:
+            profile_photo = frappe.get_doc("File", profile_photo)
+            application.profile_photo = profile_photo.file_name
+            frappe.db.set_value(
+                "File",
+                profile_photo,
+                {
+                    "attached_to_name": application.name,
+                    "attached_to_doctype": "Job Applicant",
+                    "attached_to_field": "profile_photo",
+                },
+                update_modified=False,
+            )
+
+        for key, value in kwargs.items():
+            setattr(application, key, value)
+
+        application.save()
+        frappe.db.commit()
+        return {"message": "Application updated successfully"}
+    except Exception as e:
+        return {"error": str(e)}
+    
 @frappe.whitelist(allow_guest=True)
 def submit_job_application(job_opening: str, **kwargs) -> dict:
     try:
@@ -296,6 +365,7 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
         )
 
         user_id = frappe.session.user
+        
         user_doc = None
         if user_id != "Guest":
             user_doc = frappe.get_doc("User", user_id)
@@ -308,6 +378,12 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
             kwargs["date_of_birth"] = user_doc.birth_date or ""
             kwargs["phone"] = user_doc.phone or user_doc.mobile_no or ""
 
+        email_id = kwargs.get("email_id")
+        if email_id and frappe.db.exists("Job Applicant", {"job_title": job_opening, "email_id": email_id}):
+            return {
+                "success": False,
+                "message": "You have already applied for this position."
+            }
         employee_fields_map = {
             "surname": "last_name",
             "other_names": "first_name",
@@ -330,8 +406,8 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
             "profile_photo": "image",
         }
 
+        employee = None
         if user_doc:
-            employee = None
             employee_doc = frappe.db.get_value("Employee", {"user_id": user_id}, "name")
             if employee_doc:
                 employee = frappe.get_doc("Employee", employee_doc)
@@ -370,6 +446,8 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
         job_application.insert(ignore_permissions=True)
 
         if resume:
+            resume_doc = frappe.get_doc("File", resume)
+            job_application.resume_attachment = resume_doc.file_name
             frappe.db.set_value(
                 "File",
                 resume,
@@ -382,6 +460,8 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
             )
 
         if profile_photo:
+            profile_photo = frappe.get_doc("File", profile_photo)
+            job_application.profile_photo = profile_photo.file_name
             frappe.db.set_value(
                 "File",
                 profile_photo,
@@ -972,3 +1052,39 @@ def get_current_membership():
     membership["amount"] = amount.get("amount") if amount else 0
 
     return membership
+
+@frappe.whitelist()
+def fetch_applications(email: str):
+    """
+    Fetch all job applications (Job Applicant) for a given email,
+    along with related Job Opening details.
+    """
+    if not email:
+        frappe.throw(_("Email is required to fetch job applications."))
+
+    applicants = frappe.get_all(
+        "Job Applicant",
+        filters={"email_id": email},
+        fields=[
+            "name",
+            "applicant_name",
+            "designation",
+            "job_title",
+            "status",
+            "company",
+            "branch",
+            "cover_letter",  
+            "creation",
+            "modified",
+        ],
+        order_by="creation desc",
+    )
+
+    if not applicants:
+        return []
+
+    for app in applicants:
+        job_opening = frappe.get_doc("Job Opening", app.get("job_title")).as_dict()
+        app["job_opening_details"] = job_opening
+
+    return applicants
