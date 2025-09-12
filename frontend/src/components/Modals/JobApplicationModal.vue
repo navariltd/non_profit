@@ -344,7 +344,7 @@
           </div>
         </div>
 
-        <div v-if="!showOnlyDocsProfile">
+        <div>
           <FormControl
             v-model="form.cover_letter"
             :label="__('Cover Letter')"

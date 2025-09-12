@@ -124,6 +124,7 @@
   {
    "fieldname": "invoice",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Invoice",
    "options": "Sales Invoice"
   },
@@ -158,11 +159,23 @@
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-08-22 11:55:27.933881",
+ "links": [
+  {
+   "group": "Invoices",
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "membership"
+  },
+  {
+   "group": "Payment Request",
+   "link_doctype": "Payment Request",
+   "link_fieldname": "reference_name"
+  }
+ ],
+ "modified": "2025-09-03 13:23:07.806987",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
