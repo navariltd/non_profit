@@ -92,6 +92,7 @@ declare module 'vue' {
     NotPermitted: typeof import('./src/components/NotPermitted.vue')['default']
     PageModal: typeof import('./src/components/Modals/PageModal.vue')['default']
     PaymentSettings: typeof import('./src/components/Settings/PaymentSettings.vue')['default']
+    PendingApproval: typeof import('./src/components/PendingApproval.vue')['default']
     Play: typeof import('./src/components/Icons/Play.vue')['default']
     ProgressBar: typeof import('./src/components/ProgressBar.vue')['default']
     ProjectCard: typeof import('./src/components/ProjectCard.vue')['default']

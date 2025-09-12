@@ -257,34 +257,40 @@ def get_membership_types():
 
 @frappe.whitelist(allow_guest=True)
 def get_job_openings(filters=None, orFilters=None):
-    
+
     if not filters:
         filters = {}
     filters["publish"] = 1
-    
+
     requested_status = filters.pop("status", None)
-    
+
     today = frappe.utils.nowdate()
     current_datetime = datetime.now()
-    
+
     if requested_status == "Open":
         filters["status"] = "Open"
-        filters["closes_on"] = [">", today]  
-        filters["posted_on"] = ["<=", current_datetime]  
+        filters["closes_on"] = [">", today]
+        filters["posted_on"] = ["<=", current_datetime]
     elif requested_status == "Closed":
         filters["status"] = "Closed"
     elif requested_status == "Upcoming":
         filters["status"] = "Open"
-        filters["posted_on"] = [">", current_datetime]  
+        filters["posted_on"] = [">", current_datetime]
     elif requested_status == "Ending Soon":
         filters["status"] = "Open"
-        filters["closes_on"] = ["between", [today, frappe.utils.add_days(today, 7)]]  
+        filters["closes_on"] = ["between", [today, frappe.utils.add_days(today, 7)]]
     elif requested_status == "Recently Posted":
         filters["status"] = "Open"
-        filters["posted_on"] = ["between", [datetime.fromtimestamp(current_datetime.timestamp() - 7*86400), current_datetime]]  
-    
+        filters["posted_on"] = [
+            "between",
+            [
+                datetime.fromtimestamp(current_datetime.timestamp() - 7 * 86400),
+                current_datetime,
+            ],
+        ]
+
     jobs = frappe.get_all(
-        "Job Opening", 
+        "Job Opening",
         filters=filters,
         or_filters=orFilters,
         fields=[
@@ -308,7 +314,7 @@ def get_job_openings(filters=None, orFilters=None):
         order_by="creation desc",
     )
 
-    for job in jobs:        
+    for job in jobs:
         job.description = (
             frappe.utils.strip_html_tags(job.description) if job.description else ""
         )
@@ -367,13 +373,14 @@ def get_job_details(job):
 
     return job_details
 
+
 @frappe.whitelist(allow_guest=True)
 def update_job_application(id: str, **kwargs) -> dict:
     try:
         application = frappe.get_doc("Job Applicant", id)
         if not application:
             return {"error": "Application not found"}
-        
+
         resume = kwargs.pop("resume", None)
         profile_photo = kwargs.pop("profile_photo", None)
         if resume:
@@ -414,6 +421,8 @@ def update_job_application(id: str, **kwargs) -> dict:
         return {"error": str(e)}
     
     
+
+
 @frappe.whitelist(allow_guest=True)
 def submit_job_application(job_opening: str = None, id: str = None, **kwargs) -> dict:
     try:
@@ -435,7 +444,7 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             frappe.throw("Company is required")
 
         user_id = frappe.session.user
-        
+
         user_doc = None
         if user_id != "Guest":
             user_doc = frappe.get_doc("User", user_id)
@@ -450,9 +459,12 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
 
         email_id = kwargs.get("email_id")
         if email_id and job_opening and frappe.db.exists("Job Applicant", {"job_title": job_opening, "email_id": email_id}):
+        if email_id and frappe.db.exists(
+            "Job Applicant", {"job_title": job_opening, "email_id": email_id}
+        ):
             return {
                 "success": False,
-                "message": "You have already applied for this position."
+                "message": "You have already applied for this position.",
             }
         employee_fields_map = {
             "surname": "last_name",
@@ -702,6 +714,16 @@ def get_user_info():
 
     roles = frappe.get_roles(user.name)
     user["roles"] = roles
+
+    job_applicant = frappe.db.get_value(
+        "Job Applicant", {"email_id": user.email}, ["name", "status"], as_dict=True
+    )
+
+    if job_applicant and job_applicant.get("status") == "Open":
+        user["is_pending_approval"] = True
+    else:
+        user["is_pending_approval"] = False
+
 
     employee_name = employee_company = employee_branch = None
     employee_is_volunteer = False
@@ -1126,6 +1148,7 @@ def get_current_membership():
 
     return membership
 
+
 @frappe.whitelist()
 def fetch_applications(email: str):
     """
@@ -1146,7 +1169,7 @@ def fetch_applications(email: str):
             "status",
             "company",
             "branch",
-            "cover_letter",  
+            "cover_letter",
             "creation",
             "modified",
         ],

@@ -1,5 +1,5 @@
 <template>
-  <div class="h-screen bg-gray-50 flex items-center justify-center">
+  <div v-if="!roleResource.data.is_pending_approval" class="h-screen bg-gray-50 flex items-center justify-center">
     <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 p-10">
       <div class="flex flex-col justify-center space-y-6 text-left">
         <h1
@@ -41,11 +41,18 @@
       </div>
     </div>
   </div>
+  <PendingApproval v-else-if="roleResource.data.is_pending_approval" />
 </template>
 
 <script lang="ts" setup>
 import { Button } from "frappe-ui";
 import router from "../router";
+import { inject } from "vue";
+import PendingApproval from "./PendingApproval.vue";
+import { usersStore } from "../stores/user";
+
+const { roleResource } = usersStore();
+const user = inject<any>("$user");
 
 function navigateTo(path: string) {
   router.push("/" + path);
