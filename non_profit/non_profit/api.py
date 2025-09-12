@@ -646,7 +646,6 @@ def get_user_info():
     job_applicant = frappe.db.get_value(
         "Job Applicant", {"email_id": user.email}, ["name", "status"], as_dict=True
     )
-    print("----job_applicant----", job_applicant)
 
     if job_applicant and job_applicant.get("status") == "Open":
         user["is_pending_approval"] = True
