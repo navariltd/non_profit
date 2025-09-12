@@ -32,7 +32,7 @@ router.beforeEach((to, from, next) => {
     to.query.fromLesson ||
     to.path === "/persona" ||
     to.path === "/welcome" ||
-    to.path === "/account/login"
+    to.path === "/login"
   ) {
     noSidebar.value = true;
   } else {

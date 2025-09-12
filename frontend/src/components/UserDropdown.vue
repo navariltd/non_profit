@@ -11,12 +11,7 @@
               : 'hover:bg-surface-gray-3 px-2 w-52'
         "
       >
-        <img
-          v-if="branding.data?.banner_image"
-          :src="branding.data?.banner_image.file_url"
-          class="w-8 h-8 rounded flex-shrink-0"
-        />
-        <LMSLogo v-else class="w-8 h-8 rounded flex-shrink-0" />
+        <VMMSLogo class="w-8 h-8 rounded flex-shrink-0" />
         <div
           class="flex flex-1 flex-col text-left duration-300 ease-in-out"
           :class="
@@ -26,14 +21,7 @@
           "
         >
           <div class="text-base font-medium text-ink-gray-9 leading-none">
-            <span
-              v-if="
-                branding.data?.app_name && branding.data?.app_name != 'Frappe'
-              "
-            >
-              {{ branding.data?.app_name }}
-            </span>
-            <span v-else> VMMS </span>
+            <span> VMMS Portal </span>
           </div>
           <div
             v-if="userResource.data"
@@ -62,7 +50,7 @@
 </template>
 
 <script setup>
-import LMSLogo from "@/components/Icons/LMSLogo.vue";
+import VMMSLogo from "@/components/Icons/VMMSLogo.vue";
 import { sessionStore } from "@/stores/session";
 import { Dropdown } from "frappe-ui";
 import Apps from "@/components/Apps.vue";
@@ -138,13 +126,13 @@ const userDropdownOptions = computed(() => {
             return isLoggedIn;
           },
         },
-        {
-          icon: theme.value === "light" ? Moon : Sun,
-          label: "Toggle Theme",
-          onClick: () => {
-            toggleTheme();
-          },
-        },
+        // {
+        //   icon: theme.value === "light" ? Moon : Sun,
+        //   label: "Toggle Theme",
+        //   onClick: () => {
+        //     toggleTheme();
+        //   },
+        // },
         {
           component: markRaw(Apps),
           condition: () => {
@@ -156,16 +144,16 @@ const userDropdownOptions = computed(() => {
             else return false;
           },
         },
-        {
-          icon: Settings,
-          label: "Settings",
-          onClick: () => {
-            settingsStore.isSettingsOpen = true;
-          },
-          condition: () => {
-            return userResource.data?.is_moderator;
-          },
-        },
+        // {
+        //   icon: Settings,
+        //   label: "Settings",
+        //   onClick: () => {
+        //     settingsStore.isSettingsOpen = true;
+        //   },
+        //   condition: () => {
+        //     return userResource.data?.is_moderator;
+        //   },
+        // },
         {
           icon: FrappeCloudIcon,
           label: "Login to Frappe Cloud",

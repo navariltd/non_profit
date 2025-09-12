@@ -17,8 +17,62 @@ from frappe.utils.data import make_filter_tuple
 from frappe.utils.file_manager import save_file
 from datetime import datetime
 
-from frappe.query_builder import DocType
 
+@frappe.whitelist(allow_guest=True)
+def get_list(doctype, fields=None, filters=None, order_by=None, limit_start=0, limit_page_length=20):
+    """
+    Override standard get_list to allow fetching lists with ignore_permissions=True
+    """
+    if not doctype:
+        frappe.throw(_("Doctype is required"))
+
+    if isinstance(fields, str):
+        fields = json.loads(fields)
+
+    if isinstance(filters, str):
+        filters = json.loads(filters)
+
+    if isinstance(order_by, str) and order_by == "null":
+        order_by = None
+
+    results = frappe.get_list(
+        doctype=doctype,
+        fields=fields,
+        filters=filters,
+        order_by=order_by,
+        start=limit_start,
+        page_length=limit_page_length,
+        ignore_permissions=True
+    )
+    
+    return results
+
+
+@frappe.whitelist(allow_guest=True)
+def search_doctype(
+    doctype: str,
+    name: str | None = None,
+    filters: str | None | dict | list = None,
+):
+    """
+    Search for a doctype by name or filters.
+    If name is provided, it will return the document with that name.
+    If filters are provided, it will return documents matching those filters.
+    """
+    if not doctype:
+        frappe.throw(_("Doctype is required"))
+
+    if not frappe.db.exists("DocType", doctype):
+        frappe.throw(_("Invalid Doctype: {0}").format(doctype))
+
+    if name:
+        return frappe.get_doc(doctype, name)
+
+    if isinstance(filters, str):
+        filters = json.loads(filters)
+
+    return frappe.get_all(doctype, filters=filters, as_list=False)
+  
 
 @frappe.whitelist(allow_guest=True)
 def search_widget(
@@ -359,12 +413,26 @@ def update_job_application(id: str, **kwargs) -> dict:
     except Exception as e:
         return {"error": str(e)}
     
+    
 @frappe.whitelist(allow_guest=True)
-def submit_job_application(job_opening: str, **kwargs) -> dict:
+def submit_job_application(job_opening: str = None, id: str = None, **kwargs) -> dict:
     try:
-        company, branch = frappe.db.get_value(
+        if id and frappe.db.exists("Job Applicant", id):
+            return update_job_application(id, **kwargs)
+        
+        company = kwargs.get("company")
+        branch = kwargs.get("branch")
+        
+        if job_opening:
+            job_opening_data = frappe.db.get_value(
             "Job Opening", job_opening, ["company", "branch"]
-        )
+            )
+            if job_opening_data:
+                company = job_opening_data[0] or company
+                branch = job_opening_data[1] or branch
+        
+        if not company:
+            frappe.throw("Company is required")
 
         user_id = frappe.session.user
         
@@ -381,7 +449,7 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
             kwargs["phone"] = user_doc.phone or user_doc.mobile_no or ""
 
         email_id = kwargs.get("email_id")
-        if email_id and frappe.db.exists("Job Applicant", {"job_title": job_opening, "email_id": email_id}):
+        if email_id and job_opening and frappe.db.exists("Job Applicant", {"job_title": job_opening, "email_id": email_id}):
             return {
                 "success": False,
                 "message": "You have already applied for this position."
@@ -436,13 +504,15 @@ def submit_job_application(job_opening: str, **kwargs) -> dict:
 
         doc_data = {
             "doctype": "Job Applicant",
-            "job_title": job_opening,
             "applicant_name": name_to_use,
             "status": "Open",
             "company": company,
             "branch": branch,
             **kwargs,
         }
+
+        if job_opening:
+            doc_data["job_title"] = job_opening
 
         job_application = frappe.get_doc(doc_data)
         job_application.insert(ignore_permissions=True)
