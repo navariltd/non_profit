@@ -386,7 +386,7 @@ const jobApplication = createResource({
   },
 });
 const opportunityApplication = createResource({
-  url: "non_profit.non_profit.api.update_job_application",
+  url: "non_profit.non_profit.api.submit_job_application",
   makeParams() {
     const params = {
       ...form.value,
