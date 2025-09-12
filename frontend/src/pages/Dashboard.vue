@@ -11,7 +11,10 @@
           v-if="!roleResource.data.is_volunteer && !roleResource.data.is_member"
         />
 
-        <Volunteer v-else-if="roleResource.data.is_volunteer" />
+        <Volunteer
+          v-else-if="roleResource.data.is_volunteer"
+          v-bind="dashboardStats.data"
+        />
 
         <Member
           :membership-status="currentMembership.data"
@@ -20,8 +23,6 @@
       </div>
     </div>
 
-    <hr />
-    <!-- Upcoming events section only for members or volunteers -->
     <div
       class="flex flex-col gap-2 md:p-8 md:w-3/4 mx-auto"
       v-if="
@@ -29,11 +30,15 @@
         (roleResource.data.is_volunteer || roleResource.data.is_member)
       "
     >
-      <div class="flex justify-between items-center m-2">
-        <h1 class="text-xl m-2">Upcoming Events</h1>
-        <Button variant="solid" theme="red" @click="toggleEventViews">
-          {{ toggleEventView ? "List" : "Calendar" }} View
-        </Button>
+      <div class="flex items-center justify-between m-2 p-2">
+        <h1 class="text-xl font-semibold text-gray-900">Upcoming Events</h1>
+
+        <div class="flex justify-center flex-1">
+          <Button variant="solid" theme="red" @click="toggleEventViews">
+            {{ toggleEventView ? "List" : "Calendar" }} View
+          </Button>
+        </div>
+
         <router-link :to="{ name: 'Events' }">
           <Button
             variant="subtle"
@@ -99,12 +104,9 @@ onMounted(() => {
   }
 });
 
-// Watch role data to debug if needed
 watch(
   () => roleResource.data,
-  (val) => {
-    console.log("Role data:", val);
-  },
+  (val) => {},
   { immediate: true }
 );
 
@@ -128,5 +130,9 @@ function toggleEventViews() {
   toggleEventView.value = !toggleEventView.value;
 }
 
+const dashboardStats = createResource({
+  url: "non_profit.non_profit.api.get_dashboard_stats",
+  auto: true,
+});
 provide("reloadConfirmStatus", () => confirmEventStatus.reload());
 </script>
