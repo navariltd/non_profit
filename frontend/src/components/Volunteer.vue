@@ -5,7 +5,7 @@
       <Button
         variant="solid"
         size="lg"
-        theme="blue"
+        theme="red"
         @click="setAvailability = true"
         class="rounded-xl shadow-md"
       >
@@ -225,6 +225,73 @@
       </template>
     </Dialog>
   </div>
+
+  <div class="px-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-8">
+      <router-link :to="{ name: 'Projects', params: { status: 'all' } }">
+        <div
+          class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+        >
+          <h4
+            class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
+          >
+            Total Projects
+          </h4>
+          <div class="text-3xl font-bold text-gray-900 mb-1">
+            {{ props.total_projects_deployed || 0 }}
+          </div>
+          <div class="text-xs text-gray-500">All assigned projects</div>
+        </div>
+      </router-link>
+
+      <div
+        @click="showNotificationDialog = true"
+        class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+      >
+        <h4
+          class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
+        >
+          Pending
+        </h4>
+        <div class="text-3xl font-bold text-amber-600 mb-1">
+          {{ props.pending_projects || 0 }}
+        </div>
+        <div class="text-xs text-gray-500">Awaiting response</div>
+      </div>
+
+      <router-link :to="{ name: 'Projects', params: { status: 'accepted' } }">
+        <div
+          class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+        >
+          <h4
+            class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
+          >
+            Accepted
+          </h4>
+          <div class="text-3xl font-bold text-green-600 mb-1">
+            {{ props.accepted_projects || 0 }}
+          </div>
+          <div class="text-xs text-gray-500">Ongoing assignments</div>
+        </div>
+      </router-link>
+
+      <router-link :to="{ name: 'Projects', params: { status: 'rejected' } }">
+        <div
+          class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+        >
+          <h4
+            class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
+          >
+            Rejected
+          </h4>
+          <div class="text-3xl font-bold text-red-600 mb-1">
+            {{ props.rejected_projects || 0 }}
+          </div>
+          <div class="text-xs text-gray-500">Declined assignments</div>
+        </div>
+      </router-link>
+    </div>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -236,6 +303,7 @@ import {
   DateTimePicker,
   ErrorMessage,
   Badge,
+  Card,
 } from "frappe-ui";
 import { Bell } from "lucide-vue-next";
 import { usersStore } from "../stores/user";
@@ -266,6 +334,13 @@ interface Project {
   task?: Task;
 }
 
+const props = defineProps<{
+  total_projects_deployed: number;
+  pending_projects: number;
+  accepted_projects: number;
+  rejected_projects: number;
+}>();
+
 const { roleResource } = usersStore();
 
 const hasNotification = ref(false);
@@ -283,15 +358,13 @@ const availabilityslot = reactive({
   ends_on: "",
 });
 
-// API resource for assignment decisions
 const assignmentDecision = createResource({
   url: "non_profit.non_profit.api.accept_assignment",
   makeParams(values) {
-    return values; // we'll pass { name, accepted }
+    return values; 
   },
 });
 
-// Accept a project
 const acceptAssignment = (project: Project) => {
   assignmentDecision.submit(
     { name: project.deployment_name, accepted: true },
@@ -309,7 +382,6 @@ const acceptAssignment = (project: Project) => {
   );
 };
 
-// Reject a project
 const rejectAssignment = (project: Project) => {
   assignmentDecision.submit(
     { name: project.deployment_name, accepted: false },
@@ -327,7 +399,6 @@ const rejectAssignment = (project: Project) => {
   );
 };
 
-// Resource for creating availability slots
 const newSlot = createResource({
   url: "non_profit.non_profit.api.create_availability_slot",
   makeParams(values) {
@@ -335,7 +406,6 @@ const newSlot = createResource({
   },
 });
 
-// Resource for fetching assigned projects
 const project = createResource({
   url: "non_profit.non_profit.api.fetch_assigned_projects",
   auto: true,
@@ -349,7 +419,6 @@ const project = createResource({
   },
 });
 
-// Create availability slot
 const createSlot = () => {
   newSlot.submit(
     { doctype: "Volunteer Availability Slot", ...availabilityslot },

@@ -96,7 +96,6 @@ declare module 'vue' {
     Play: typeof import('./src/components/Icons/Play.vue')['default']
     ProgressBar: typeof import('./src/components/ProgressBar.vue')['default']
     ProjectCard: typeof import('./src/components/ProjectCard.vue')['default']
-    Projects: typeof import('./src/components/Projects.vue')['default']
     Question: typeof import('./src/components/Modals/Question.vue')['default']
     Quiz: typeof import('./src/components/Quiz.vue')['default']
     QuizBlock: typeof import('./src/components/QuizBlock.vue')['default']
