@@ -85,6 +85,7 @@ import { Button, createResource, toast } from "frappe-ui";
 import Welcome from "../components/Welcome.vue";
 import EventCalendar from "../components/EventCalendar.vue";
 import router from "../router";
+import PendingApproval from "../components/PendingApproval.vue";
 
 const { roleResource } = usersStore();
 const { events, currentMembership } = membershipStore();
@@ -96,7 +97,7 @@ onMounted(() => {
   if (!user.data) {
     toast.warning("You must be logged in to view this page.");
     setTimeout(() => {
-      router.push("/account/login");
+      router.push("/login");
     }, 500);
   } else {
     roleResource.reload();

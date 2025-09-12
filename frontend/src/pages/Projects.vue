@@ -36,7 +36,7 @@ onMounted(() => {
   if (!user.data) {
     toast.warning("You must be logged in to view this page");
     setTimeout(() => {
-      window.location.href = "/account/login";
+      window.location.href = "/login";
     }, 500);
   }
 });
