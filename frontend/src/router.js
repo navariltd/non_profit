@@ -75,7 +75,7 @@ const routes = [
   },
   {
     name: "Login",
-    path: "/account/login",
+    path: "/login",
     component: () => import("@/pages/Login.vue"),
   },
   {
@@ -106,6 +106,24 @@ const routes = [
     name: "VolunteerSignup",
     path: "/volunteer/signup",
     component: () => import("@/pages/VolunteerSignup.vue"),
+  },
+  {
+    name: "NewJobApplication",
+    path: "/opportunities/:job/apply",
+    component: () => import("@/pages/NewJobApplication.vue"),
+    props: true,
+  },
+  {
+    name: "JobApplication",
+    path: "/applications",
+    component: () => import("@/pages/JobApplication.vue"),
+    props: true,
+  },
+  {
+    name: "JobApplicationDetail",
+    path: "/applications/:id",
+    component: () => import("@/pages/JobApplicationDetail.vue"),
+    props: true,
   },
 ];
 

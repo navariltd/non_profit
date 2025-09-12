@@ -31,6 +31,7 @@
     "apexcharts": "^4.3.0",
     "chart.js": "^4.4.1",
     "codemirror": "^6.0.1",
+    "date-fns": "^4.1.0",
     "dayjs": "^1.11.6",
     "feather-icons": "^4.29.2",
     "frappe-ui": "^0.1.149",

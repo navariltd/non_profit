@@ -86,6 +86,7 @@ declare module 'vue' {
     Members: typeof import('./src/components/Settings/Members.vue')['default']
     MobileLayout: typeof import('./src/components/MobileLayout.vue')['default']
     MultiSelect: typeof import('./src/components/Controls/MultiSelect.vue')['default']
+    MultiSelectList: typeof import('./src/components/Controls/MultiSelectList.vue')['default']
     NoPermission: typeof import('./src/components/NoPermission.vue')['default']
     NoSidebarLayout: typeof import('./src/components/NoSidebarLayout.vue')['default']
     Notes: typeof import('./src/components/Notes/Notes.vue')['default']
