@@ -1157,7 +1157,7 @@ def fetch_applications(email: str):
 
     applicants = frappe.get_all(
         "Job Applicant",
-        filters={"email_id": email},
+        filters={"email_id": email, "job_title": ("!=", None)},
         fields=[
             "name",
             "applicant_name",
@@ -1177,7 +1177,7 @@ def fetch_applications(email: str):
         return []
 
     for app in applicants:
-        job_opening = frappe.get_doc("Job Opening", app.get("job_title")).as_dict()
+        job_opening = frappe.get_doc("Job Opening", app.get("job_title")).as_dict() if app.get("job_title") else {}
         app["job_opening_details"] = job_opening
 
     return applicants
