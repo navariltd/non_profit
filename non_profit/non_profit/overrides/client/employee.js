@@ -105,7 +105,7 @@ function fetchJobApplicantDetails(frm) {
       phone_number: "cell_number",
       idpassport_number: "id_passport_number",
       cover_letter: "bio",
-      profile_photo: "image",
+      // profile_photo: "image",
     };
 
     const table_fields = [

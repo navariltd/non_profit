@@ -186,7 +186,7 @@ def update_fields_from_applicant(doc: Document) -> bool:
             "phone_number": "cell_number",
             "idpassport_number": "id_passport_number",
             "cover_letter": "bio",
-            "profile_photo": "image"
+            # "profile_photo": "image"
         }
         
         for applicant_field, employee_field in field_mapping.items():
