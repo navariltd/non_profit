@@ -71,7 +71,7 @@
       </div>
     </Card>
 
- 
+    
   </div>
 </template>
 
