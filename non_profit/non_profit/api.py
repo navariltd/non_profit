@@ -305,7 +305,6 @@ def get_job_openings(filters=None, orFilters=None):
             "posted_on",
             "closes_on",
             "closed_on",
-            "branch",
             "designation",
             "vacancies",
             "location",
@@ -339,7 +338,6 @@ def get_job_details(job):
             "posted_on",
             "closes_on",
             "closed_on",
-            "branch",
             "designation",
             "vacancies",
             "location",
@@ -435,15 +433,13 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             return update_job_application(id, **kwargs)
 
         company = kwargs.get("company")
-        branch = kwargs.get("branch")
 
         if job_opening:
             job_opening_data = frappe.db.get_value(
-                "Job Opening", job_opening, ["company", "branch"]
+                "Job Opening", job_opening, ["company"]
             )
             if job_opening_data:
                 company = job_opening_data[0] or company
-                branch = job_opening_data[1] or branch
 
         if not company:
             frappe.throw("Company is required")
@@ -477,7 +473,6 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
         employee_fields_map = {
             "surname": "last_name",
             "other_names": "first_name",
-            "branch": "branch",
             "company": "company",
             "gender": "gender",
             "blood_group": "blood_group",
@@ -527,7 +522,6 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             "applicant_name": name_to_use,
             "status": "Open",
             "company": company,
-            "branch": branch,
             **kwargs,
         }
 
@@ -735,7 +729,7 @@ def get_user_info():
     else:
         user["is_pending_approval"] = False
 
-    employee_name = employee_company = employee_branch = None
+    employee_name = employee_company = None
     employee_is_volunteer = False
 
     if frappe.db.exists("Employee", {"user_id": user.name, "status": "Active"}):
@@ -743,20 +737,18 @@ def get_user_info():
         employee = frappe.db.get_value(
             "Employee",
             {"user_id": user.name},
-            ["name", "company", "branch", "is_volunteer"],
+            ["name", "company", "is_volunteer"],
             as_dict=True,
         )
         if employee:
 
             employee_name = employee.get("name")
             employee_company = employee.get("company")
-            employee_branch = employee.get("branch")
             employee_is_volunteer = True if employee.get("is_volunteer") else False
 
         user["non_profit_member"] = "Non Profit Member" in roles
         user["employee"] = employee_name
         user["company"] = employee_company
-        user["branch"] = employee_branch
         user["is_volunteer"] = employee_is_volunteer
 
     if frappe.db.exists("Member", {"email_id": user.email}):
@@ -1178,7 +1170,6 @@ def fetch_applications(email: str):
             "job_title",
             "status",
             "company",
-            "branch",
             "cover_letter",
             "creation",
             "modified",
