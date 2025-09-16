@@ -51,7 +51,7 @@ def create_user(**kwargs):
                 "phone": kwargs.get("phone"),
                 "gender": kwargs.get("gender"),
                 "enabled": 1,
-                "default_app": "lms",
+                "default_app": "non_profit",
             }
         )
 
