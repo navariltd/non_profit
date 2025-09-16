@@ -5,27 +5,6 @@ from frappe.utils.password import update_password
 
 
 @frappe.whitelist(allow_guest=True)
-def sign_up(**kwargs):
-
-    frappe.db.begin()
-
-    try:
-
-        if kwargs.get("category_member"):
-            user = create_user(kwargs)
-
-        if kwargs.get("category_volunteer"):
-            create_volunteer(kwargs)
-
-        frappe.db.commit()
-
-    except Exception as e:
-        frappe.db.rollback()
-        frappe.log_error(frappe.get_traceback(), "Sign Up Error")
-        frappe.throw(str(e))
-
-
-@frappe.whitelist(allow_guest=True)
 def create_user(**kwargs):
 
     try:
@@ -92,8 +71,6 @@ def create_membership(**kwargs):
         member.insert(ignore_permissions=True)
 
         user = frappe.get_doc("User", {"email": member.email_id})
-        user.role_profile_name = "Member"
-        user.module_profile = "Member"
 
         user.save(ignore_permissions=True)
 

@@ -352,7 +352,6 @@ const assignedProjects = ref<Project[]>([]);
 const availabilityslot = reactive({
   employee: roleResource.data.employee,
   company: roleResource.data.company,
-  branch: roleResource.data.branch,
   user: roleResource.data.name,
   starts_on: "",
   ends_on: "",
@@ -361,7 +360,7 @@ const availabilityslot = reactive({
 const assignmentDecision = createResource({
   url: "non_profit.non_profit.api.accept_assignment",
   makeParams(values) {
-    return values; 
+    return values;
   },
 });
 

@@ -63,9 +63,7 @@
                 </span>
               </div>
               <p class="text-red-700 font-medium">{{ app.company }}</p>
-              <p v-if="app.branch" class="text-gray-500 text-sm">
-                {{ app.branch }}
-              </p>
+
               <p v-if="app.designation" class="text-gray-500 text-sm">
                 <strong>Designation:</strong> {{ app.designation }}
               </p>

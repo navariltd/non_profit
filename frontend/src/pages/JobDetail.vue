@@ -81,12 +81,6 @@
               </h1>
               <div class="text-lg font-medium text-red-600">
                 {{ job.data.company }}
-                <span
-                  v-if="job.data.branch"
-                  class="text-gray-500 ml-2 text-base"
-                >
-                  • {{ job.data.branch }}
-                </span>
               </div>
               <div
                 v-if="job.data.location || job.data.country"
