@@ -52,6 +52,8 @@ def create_user(**kwargs):
                 "gender": kwargs.get("gender"),
                 "enabled": 1,
                 "default_app": "non_profit",
+                "module_profile": "Member",
+                "role_profile_name": "Member",
             }
         )
 
