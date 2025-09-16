@@ -47,39 +47,18 @@
         </p>
 
         <div class="bg-white border rounded-lg p-4 shadow-sm">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="flex flex-col">
-              <label
-                for="branch"
-                class="text-sm font-medium text-gray-700 mb-1"
-              >
-                Branch/County
-              </label>
-              <Link
-                required
-                id="branch"
-                doctype="Branch"
-                v-model="membershipForm.branch"
-                placeholder="Select Branch"
-                class="w-full"
-              />
-            </div>
-            <div class="flex flex-col">
-              <label
-                for="region"
-                class="text-sm font-medium text-gray-700 mb-1"
-              >
-                Region
-              </label>
-              <Input
-                id="region"
-                doctype="Company"
-                v-model="membershipForm.region"
-                placeholder="Region"
-                class="w-full"
-                readonly
-              />
-            </div>
+          <div class="flex w-full flex-col">
+            <label for="branch" class="text-sm font-medium text-gray-700 mb-1">
+              Branch/County
+            </label>
+            <Link
+              required
+              id="branch"
+              doctype="Company"
+              v-model="membershipForm.branch"
+              placeholder="Select Branch"
+              class="w-full"
+            />
           </div>
         </div>
 
