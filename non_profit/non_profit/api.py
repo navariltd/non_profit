@@ -439,7 +439,7 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
                 "Job Opening", job_opening, ["company"]
             )
             if job_opening_data:
-                company = job_opening_data[0] or company
+                company = job_opening_data or company
 
         if not company:
             frappe.throw("Company is required")

@@ -99,19 +99,10 @@
             <MultiSelectList
               doctype="Company"
               v-model="companies"
-              :label="__('Region')"
+              :label="__('Branch / Region')"
               class="w-full"
               @change="updateJobs"
               :cols="2"
-            />
-            <MultiSelectList
-              doctype="Branch"
-              v-model="branches"
-              :label="__('Branch')"
-              :filters="branchFilters"
-              class="w-full"
-              @change="updateJobs"
-              :cols="3"
             />
           </div>
         </div>
@@ -171,7 +162,6 @@ const designation = ref(null);
 const department = ref(null);
 const searchQuery = ref("");
 const companies = ref([]);
-const branches = ref([]);
 const showFilters = ref(false);
 const filters = ref({});
 const orFilters = ref({});
@@ -216,8 +206,6 @@ const updateFilters = () => {
   else delete filters.value.department;
   if (companies.value?.length) filters.value.company = ["in", companies.value];
   else delete filters.value.company;
-  if (branches.value?.length) filters.value.branch = ["in", branches.value];
-  else delete filters.value.branch;
   if (searchQuery.value) {
     orFilters.value = {
       job_title: ["like", `%${searchQuery.value}%`],
@@ -227,13 +215,8 @@ const updateFilters = () => {
   } else orFilters.value = {};
 };
 
-const branchFilters = computed(() =>
-  companies.value?.length ? { company: ["in", companies.value] } : {}
-);
-
 const clearFilters = () => {
   companies.value = [];
-  branches.value = [];
   jobType.value = null;
   designation.value = null;
   department.value = null;
@@ -243,10 +226,8 @@ const clearFilters = () => {
 
 watch([jobType, designation, department, currentTab], updateJobs);
 watch(companies, () => {
-  branches.value = [];
   updateJobs();
 });
-watch(branches, updateJobs);
 watch(jobs, () => (jobCount.value = jobs.data?.length || 0));
 
 usePageMeta(() => ({ title: __("Jobs"), icon: brand.favicon }));

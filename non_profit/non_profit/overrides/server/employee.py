@@ -128,10 +128,10 @@ def create_user_for_employee(doc: Document) -> str:
     """
     existing_user = frappe.db.get_value("User", {"email": doc.personal_email}, "name")
     
+    user = None    
     if existing_user:
-        return existing_user
-    
-    try:
+        user = frappe.get_doc("User", existing_user)
+    else:            
         user = frappe.get_doc({
             "doctype": "User",
             "email": doc.personal_email,
@@ -142,9 +142,8 @@ def create_user_for_employee(doc: Document) -> str:
             "send_welcome_email": 0,
             "default_app": "non_profit",
         })
-        
         user.insert(ignore_permissions=True)
-        
+    try:
         user.role_profile_name = "Volunteer"
         user.module_profile = "Volunteer"
         user.save(ignore_permissions=True)
