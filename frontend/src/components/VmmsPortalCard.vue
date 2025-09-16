@@ -1,39 +1,56 @@
 <template>
-  <div
-    class="bg-white cursor-pointer rounded-xl border border-gray-200 hover:border-red-400 p-6 transition-all duration-200 hover:shadow-lg"
+  <Card
+    class="flex flex-col w-full rounded-2xl p-6 h-full shadow-sm hover:shadow-md transition-all duration-300 group cursor-pointer"
   >
-    <!-- Badge + Status -->
-    <div class="flex items-center justify-between mb-3">
-      <span
-        class="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700"
-      >
-        {{ membershipType.name }}
-      </span>
+    <!-- Membership Info -->
+    <div class="mb-4">
+      <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">
+          {{ membershipType.membership_type }}
+        </h3>
+
+        <div class="flex items-center gap-2">
+          <span class="text-sm text-gray-500">Category:</span>
+          <Badge
+            variant="subtle"
+            size="lg"
+            class="border border-red-200 text-red-700 bg-red-50"
+          >
+            {{ membershipType.name }}
+          </Badge>
+        </div>
+      </div>
     </div>
 
-    <!-- Title -->
-    <h3 class="text-lg font-semibold text-gray-900 mb-2">
-      {{ membershipType.membership_type }}
-    </h3>
+    <!-- Details -->
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm text-gray-600 mb-6"
+    >
+      <div class="flex flex-col sm:col-span-2">
+        <span class="text-gray-500">Amount</span>
+        <span class="font-semibold text-gray-900 text-lg">
+          KES {{ membershipType.amount }} <span class="text-sm">/year</span>
+        </span>
+      </div>
 
-    <!-- Price -->
-    <div class="flex items-baseline mb-4">
-      <span class="text-2xl font-bold text-gray-900">
-        KES {{ membershipType.amount }}
-      </span>
-      <span class="ml-1 text-sm text-gray-500">/year</span>
+      <div class="flex flex-col sm:col-span-2">
+        <span class="text-gray-500">Features</span>
+        <ul class="list-disc list-inside text-gray-700 space-y-1 mt-1">
+          <li>Full membership access</li>
+          <li>All benefits included</li>
+        </ul>
+      </div>
     </div>
 
-    <!-- Features -->
-    <ul class="space-y-1 text-sm text-gray-600 mb-6">
-      <li>✓ Full membership access</li>
-      <li>✓ All benefits included</li>
-    </ul>
-  </div>
+    <!-- Action Button -->
+    <div class="mt-auto">
+      <Button variant="solid" theme="red" class="w-full"> Select Plan </Button>
+    </div>
+  </Card>
 </template>
 
 <script lang="ts" setup>
-import { Badge } from "frappe-ui";
+import { Badge, Card, Button } from "frappe-ui";
 
 interface MembershipType {
   name: string;
