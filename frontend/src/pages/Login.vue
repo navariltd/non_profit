@@ -138,12 +138,6 @@ const isLogin = ref(false);
 const userEmail = ref("");
 const password = ref("");
 const signInState = ref(false);
-interface RegionOption {
-  label: string;
-  value: string;
-  company: string;
-}
-const branchOptions = ref<RegionOption[]>([]);
 
 const signUpForm = reactive<SignUp>({ ...initialForm });
 
@@ -157,19 +151,6 @@ const genderOptions = [
 const branches = createResource({
   url: "non_profit.non_profit.api.get_branches",
   auto: true,
-  onSuccess(data: any) {
-    branchOptions.value = data.map((branch) => {
-      return {
-        label: branch.name,
-        value: branch.name,
-        company: branch.company,
-      };
-    });
-  },
-});
-
-onMounted(() => {
-  branches.fetch();
 });
 
 const createSignUp = createResource({

@@ -64,7 +64,7 @@ def create_membership(**kwargs):
                 "member_name": kwargs.get("member_name"),
                 "email_id": kwargs.get("email_id"),
                 "membership_type": kwargs.get("membership_type"),
-                "custom_company": kwargs.get("region"),
+                "custom_company": kwargs.get("branch"),
                 "pan_number": kwargs.get("phone_number"),
             }
         )
@@ -84,7 +84,7 @@ def create_membership(**kwargs):
                     "doctype": "Membership",
                     "member": member.name,
                     "membership_type": doc_name,
-                    "company": kwargs.get("region"),
+                    "company": kwargs.get("branch"),
                     "membership_status": "Pending",
                     "from_date": from_date,
                     "to_date": to_date,

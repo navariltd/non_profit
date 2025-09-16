@@ -684,14 +684,13 @@ def generate_language_code(language_name):
     return base_code + suffix
 
 
-@frappe.whitelist(allow_guest=True)
-def get_regions():
-    return frappe.get_all("Company", filters={"is_group": 0})
+
 
 
 @frappe.whitelist(allow_guest=True)
 def get_branches():
-    return frappe.get_all("Branch", fields=["name", "company"])
+    return frappe.get_all("Company", filters={"is_group": 0})
+
 
 
 @frappe.whitelist(allow_guest=True)
