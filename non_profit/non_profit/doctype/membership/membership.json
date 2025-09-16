@@ -11,6 +11,7 @@
   "membership_type",
   "column_break_3",
   "company",
+  "branch",
   "membership_status",
   "membership_validity_section",
   "from_date",
@@ -137,7 +138,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "label": "Company / Branch",
+   "label": "Company",
    "options": "Company",
    "reqd": 1
   },
@@ -148,6 +149,12 @@
   {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -163,7 +170,7 @@
    "link_fieldname": "reference_name"
   }
  ],
- "modified": "2025-09-16 11:51:28.435597",
+ "modified": "2025-09-16 12:57:41.723776",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",
