@@ -19,7 +19,14 @@ from datetime import datetime
 
 
 @frappe.whitelist(allow_guest=True)
-def get_list(doctype, fields=None, filters=None, order_by=None, limit_start=0, limit_page_length=20):
+def get_list(
+    doctype,
+    fields=None,
+    filters=None,
+    order_by=None,
+    limit_start=0,
+    limit_page_length=20,
+):
     """
     Override standard get_list to allow fetching lists with ignore_permissions=True
     """
@@ -42,9 +49,9 @@ def get_list(doctype, fields=None, filters=None, order_by=None, limit_start=0, l
         order_by=order_by,
         start=limit_start,
         page_length=limit_page_length,
-        ignore_permissions=True
+        ignore_permissions=True,
     )
-    
+
     return results
 
 
@@ -72,7 +79,7 @@ def search_doctype(
         filters = json.loads(filters)
 
     return frappe.get_all(doctype, filters=filters, as_list=False)
-  
+
 
 @frappe.whitelist(allow_guest=True)
 def search_widget(
@@ -419,8 +426,6 @@ def update_job_application(id: str, **kwargs) -> dict:
         return {"message": "Application updated successfully"}
     except Exception as e:
         return {"error": str(e)}
-    
-    
 
 
 @frappe.whitelist(allow_guest=True)
@@ -428,18 +433,18 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
     try:
         if id and frappe.db.exists("Job Applicant", id):
             return update_job_application(id, **kwargs)
-        
+
         company = kwargs.get("company")
         branch = kwargs.get("branch")
-        
+
         if job_opening:
             job_opening_data = frappe.db.get_value(
-            "Job Opening", job_opening, ["company", "branch"]
+                "Job Opening", job_opening, ["company", "branch"]
             )
             if job_opening_data:
                 company = job_opening_data[0] or company
                 branch = job_opening_data[1] or branch
-        
+
         if not company:
             frappe.throw("Company is required")
 
@@ -458,7 +463,13 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             kwargs["phone"] = user_doc.phone or user_doc.mobile_no or ""
 
         email_id = kwargs.get("email_id")
-        if email_id and job_opening and frappe.db.exists("Job Applicant", {"job_title": job_opening, "email_id": email_id}):
+        if (
+            email_id
+            and job_opening
+            and frappe.db.exists(
+                "Job Applicant", {"job_title": job_opening, "email_id": email_id}
+            )
+        ):
             return {
                 "success": False,
                 "message": "You have already applied for this position.",
@@ -713,14 +724,16 @@ def get_user_info():
     user["roles"] = roles
 
     job_applicant = frappe.db.get_value(
-        "Job Applicant", {"email_id": user.email}, ["name", "status"], as_dict=True
+        "Job Applicant",
+        {"email_id": user.email, "is_volunteer": 1},
+        ["name", "status"],
+        as_dict=True,
     )
 
     if job_applicant and job_applicant.get("status") == "Open":
         user["is_pending_approval"] = True
     else:
         user["is_pending_approval"] = False
-
 
     employee_name = employee_company = employee_branch = None
     employee_is_volunteer = False
@@ -1177,7 +1190,11 @@ def fetch_applications(email: str):
         return []
 
     for app in applicants:
-        job_opening = frappe.get_doc("Job Opening", app.get("job_title")).as_dict() if app.get("job_title") else {}
+        job_opening = (
+            frappe.get_doc("Job Opening", app.get("job_title")).as_dict()
+            if app.get("job_title")
+            else {}
+        )
         app["job_opening_details"] = job_opening
 
     return applicants

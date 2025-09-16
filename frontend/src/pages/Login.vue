@@ -134,7 +134,7 @@ const route = useRoute();
 
 const router = useRouter();
 
-const isLogin = ref(true);
+const isLogin = ref(false);
 const userEmail = ref("");
 const password = ref("");
 const signInState = ref(false);
