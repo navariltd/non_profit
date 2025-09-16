@@ -13,7 +13,7 @@
             </h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Link
-                v-model="form.branch"
+                v-model="form.company"
                 :label="__('Branch')"
                 doctype="Company"
                 :required="true"
