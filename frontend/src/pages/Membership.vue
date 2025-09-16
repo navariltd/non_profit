@@ -127,19 +127,7 @@ interface RegionOption {
 }
 const branchOptions = ref<RegionOption[]>([]);
 const user = inject<any>("$user");
-const branches = createResource({
-  url: "non_profit.non_profit.api.get_branches",
-  auto: true,
-  onSuccess(data: any) {
-    branchOptions.value = data.map((branch) => {
-      return {
-        label: branch.name,
-        value: branch.name,
-        company: branch.company,
-      };
-    });
-  },
-});
+
 
 const createMembership = createResource({
   url: "non_profit.non_profit.user.create_membership",
@@ -155,7 +143,6 @@ function cleanUpMembershipForm() {
   registerDialog.value = false;
   membershipForm.membership_type = "";
   membershipForm.amount = 0;
-  membershipForm.region = "";
   membershipForm.branch = "";
   createMembership.error = "";
 }
@@ -164,7 +151,6 @@ const registerDialog = ref(false);
 const membershipForm = reactive({
   membership_type: "",
   amount: 0,
-  region: "",
   branch: "",
   member_name: user.data ? user.data.full_name : "",
   email_id: user.data ? user.data.email : "",
@@ -176,27 +162,8 @@ function selectMembershipType(membershipType: any) {
   registerDialog.value = true;
 }
 
-onMounted(() => {
-  branches.fetch();
-});
-watch(
-  () => membershipForm.branch,
-  (newBranch) => {
-    const selectedBranch = branchOptions.value.find(
-      (b) => b.value === newBranch
-    );
 
-    if (selectedBranch) {
-      membershipForm.region = selectedBranch.company;
-    } else {
-      membershipForm.region = "";
-    }
 
-    if (newBranch) {
-      createMembership.error = "";
-    }
-  }
-);
 
 const submit = () => {
   if (!membershipForm.branch) {
