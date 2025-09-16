@@ -8,13 +8,6 @@
         {{ job.job_title }}
       </h2>
       <div class="mt-2 flex flex-col gap-1">
-        <div v-if="job.branch" class="flex items-center gap-1 mb-2">
-          <span
-            class="text-sm font-semibold bg-red-100 text-red-800 px-3 py-1 rounded-full border border-red-200 shadow-sm"
-          >
-            {{ job.branch }}
-          </span>
-        </div>
         <div v-if="job.department" class="flex items-center gap-1">
           <span
             class="text-sm text-gray-700 bg-gray-100 px-3 py-1 rounded-full border border-gray-200"

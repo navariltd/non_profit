@@ -15,16 +15,8 @@
               <Link
                 v-model="form.branch"
                 :label="__('Branch')"
-                doctype="Branch"
+                doctype="Company"
                 :required="true"
-                @update:modelValue="onBranchSelect"
-              />
-              <FormControl
-                v-model="form.company"
-                :label="__('Region')"
-                type="text"
-                :disabled="true"
-                placeholder="Auto-filled from branch"
               />
             </div>
           </section>
@@ -304,7 +296,6 @@ const applicationId = ref(null);
 
 const form = ref({
   company: "",
-  branch: "",
   surname: "",
   other_names: "",
   email_id: "",
@@ -408,7 +399,6 @@ function submitResume() {
     {},
     {
       validate() {
-        if (!form.value.branch) return "Branch is required";
         if (!form.value.company) return "Company is required";
         if (!hidePersonalInfo.value) {
           if (!form.value.surname) return "Surname is required";
@@ -449,38 +439,4 @@ watch(
   },
   { immediate: true }
 );
-
-const company = createResource({
-  url: "non_profit.non_profit.api.search_doctype",
-  method: "POST",
-  auto: false,
-  makeParams() {
-    return {
-      doctype: "Branch",
-      name: form.value.branch,
-    };
-  },
-  transform: (data) => {
-    if (data && data.length > 0) {
-      form.value.company = data[0].description || "";
-      return data[0];
-    }
-    return null;
-  },
-});
-
-async function onBranchSelect(branchName) {
-  if (!branchName) {
-    form.value.company = "";
-    return;
-  }
-
-  form.value.branch = branchName;
-
-  await company.submit();
-
-  if (company.data?.company) {
-    form.value.company = company.data.company;
-  }
-}
 </script>
