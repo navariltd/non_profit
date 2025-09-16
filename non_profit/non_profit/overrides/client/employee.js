@@ -98,6 +98,20 @@ function fetchJobApplicantDetails(frm) {
       }
     );
 
+    if (
+      job_applicant.applicant_name &&
+      !frm.doc.first_name &&
+      !frm.doc.last_name
+    ) {
+      const parts = job_applicant.applicant_name.trim().split(" ");
+      if (parts.length > 1) {
+        update_fields.first_name = parts.slice(0, -1).join(" ");
+        update_fields.last_name = parts.slice(-1).join(" ");
+      } else {
+        update_fields.first_name = parts[0];
+      }
+    }
+
     if (Object.keys(update_fields).length > 0) {
       frm.set_value(update_fields);
     }
