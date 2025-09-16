@@ -3,22 +3,6 @@
 
 frappe.ui.form.on("Volunteer Deployment", {
   refresh(frm) {
-    frm.set_query("branch", function (doc) {
-      if (!doc.company) {
-        return {
-          filters: {
-            name: ["in", []],
-          },
-        };
-      }
-
-      return {
-        filters: {
-          company: doc.company,
-        },
-      };
-    });
-
     if (frm.doc.docstatus === 0 && !frm.is_new()) {
       frm
         .add_custom_button(__("Fetch Available Volunteers"), function () {
@@ -41,7 +25,7 @@ frappe.ui.form.on("Volunteer Deployment", {
           filters: {
             is_volunteer: 1,
             status: "Active",
-            branch: doc.branch,
+            company: doc.company,
             name: ["not in", selectedVolunteers],
           },
         };
@@ -64,14 +48,12 @@ frappe.ui.form.on("Volunteer Deployment", {
     frappe.db
       .get_value("Project", frm.doc.project, [
         "company",
-        "branch",
         "expected_start_date",
         "expected_end_date",
       ])
       .then((r) => {
         if (r && r.message) {
           frm.set_value("company", r.message.company || "");
-          frm.set_value("branch", r.message.branch || "");
           frm.set_value(
             "expected_start_date",
             r.message.expected_start_date || ""
@@ -94,17 +76,12 @@ frappe.ui.form.on("Volunteer Deployment", {
       frappe.msgprint(__("Please select a Company first"));
       return;
     }
-    if (!frm.doc.branch) {
-      frappe.msgprint(__("Please select a Branch first"));
-      return;
-    }
 
     frappe.call({
       method:
         "non_profit.non_profit.doctype.volunteer_deployment.volunteer_deployment.get_available_volunteers",
       args: {
         company: frm.doc.company,
-        branch: frm.doc.branch,
         deployment: frm.doc.name,
       },
       callback: function (r) {
@@ -225,7 +202,7 @@ function set_volunteer_query(frm) {
     return {
       filters: {
         name: ["not in", used],
-        branch: frm.doc.branch,
+        company: frm.doc.company,
         is_volunteer: 1,
         status: "Active",
       },

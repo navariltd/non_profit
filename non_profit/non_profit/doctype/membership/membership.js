@@ -15,21 +15,6 @@ frappe.ui.form.on("Membership", {
   },
 
   refresh: function (frm) {
-    frm.set_query("branch", function (doc) {
-      if (!doc.company) {
-        return {
-          filters: {
-            name: ["in", []],
-          },
-        };
-      }
-
-      return {
-        filters: {
-          company: doc.company,
-        },
-      };
-    });
     if (frm.doc.__islocal) return;
 
     if (!frm.is_new()) {

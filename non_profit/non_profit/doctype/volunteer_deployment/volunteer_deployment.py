@@ -39,17 +39,17 @@ class VolunteerDeployment(Document):
             employee = frappe.db.get_value(
                 "Employee",
                 row.volunteer,
-                ["branch", "status", "is_volunteer"],
+                ["company", "status", "is_volunteer"],
                 as_dict=True,
             )
 
             if not employee:
                 frappe.throw(_("Employee {0} not found.").format(row.volunteer))
 
-            if employee.branch != self.branch:
+            if employee.company != self.company:
                 frappe.throw(
-                    _("Volunteer {0} is from branch {1}, but this deployment is for branch {2}.")
-                    .format(row.volunteer, employee.branch, self.branch)
+                    _("Volunteer {0} is from company {1}, but this deployment is for company {2}.")
+                    .format(row.volunteer, employee.company, self.company)
                 )
 
             if employee.status != "Active":
@@ -184,7 +184,7 @@ class VolunteerDeployment(Document):
 
 
 @frappe.whitelist()
-def get_available_volunteers(company, branch, deployment=None, expected_start_date=None):
+def get_available_volunteers(company, deployment=None, expected_start_date=None):
 
     required_skills = []
     if deployment:
@@ -198,7 +198,6 @@ def get_available_volunteers(company, branch, deployment=None, expected_start_da
         "Employee",
         filters={
             "company": company,
-            "branch": branch,
             "is_volunteer": 1,
             "status": "Active"
         },
@@ -215,7 +214,6 @@ def get_available_volunteers(company, branch, deployment=None, expected_start_da
                 filters={
                     "employee": emp.get("employee"),
                     "company": company,
-                    "branch": branch,
                     "starts_on": ["<=", expected_start_date],
                     "ends_on": [">=", expected_start_date],
                 },

@@ -86,7 +86,6 @@ def create_membership(**kwargs):
                 "email_id": kwargs.get("email_id"),
                 "membership_type": kwargs.get("membership_type"),
                 "custom_company": kwargs.get("region"),
-                "custom_branch": kwargs.get("branch"),
                 "pan_number": kwargs.get("phone_number"),
             }
         )
@@ -109,7 +108,6 @@ def create_membership(**kwargs):
                     "member": member.name,
                     "membership_type": doc_name,
                     "company": kwargs.get("region"),
-                    "branch": kwargs.get("branch"),
                     "membership_status": "Pending",
                     "from_date": from_date,
                     "to_date": to_date,
@@ -126,54 +124,3 @@ def create_membership(**kwargs):
         frappe.throw("Error creating membership")
 
 
-
-def create_volunteer(kwargs):
-
-    if frappe.db.exists("User", {"email": kwargs.get("email")}):
-        frappe.throw("User already exists with this email")
-
-    # Prepare child table data for array fields
-    trainings_data = [{"training_program": "test"}]
-
-    additional_skills_data = [
-        {"additional_skill": skill} for skill in kwargs.get("additional_skills", [])
-    ]
-
-    # allergies_data = [{"allergies": allergy} for allergy in kwargs.get("allergies", [])]
-
-    disabilities_data = [
-        {"disability": disability} for disability in kwargs.get("disabilities", [])
-    ]
-
-    languages = [{"language": language} for language in kwargs.get("languages", [])]
-
-    volunteer_signup = frappe.get_doc(
-        {
-            "doctype": "Volunteer Signup",
-            "status": "Pending",
-            "surname": kwargs.get("last_name"),
-            "other_names": kwargs.get("first_name"),
-            "email": kwargs.get("email"),
-            "phone_number": kwargs.get("phone_number"),
-            "mobile_money_number": kwargs.get("mobile_money_number"),
-            "gender": kwargs.get("gender"),
-            "date_of_birth": kwargs.get("date_of_birth"),
-            "idpassport": kwargs.get("idpassport"),
-            "region": kwargs.get("region"),
-            "countybranch": kwargs.get("branch"),
-            "marital_status": kwargs.get("marital_status"),
-            "education": kwargs.get("education"),
-            "place_of_work": kwargs.get("place_of_work"),
-            "profession": kwargs.get("profession"),
-            "reason_to_join": kwargs.get("reason_to_join"),
-            "blood_group": kwargs.get("blood_group"),
-            "docstatus": 0,
-            "trainings": trainings_data,
-            "additional_skills": additional_skills_data,
-            # "allergies": allergies_data,
-            "disabilities": disabilities_data,
-            "languages": languages,
-        }
-    )
-
-    volunteer_signup.insert(ignore_permissions=True)

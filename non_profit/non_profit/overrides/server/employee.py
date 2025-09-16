@@ -168,7 +168,6 @@ def update_fields_from_applicant(doc: Document) -> bool:
         updated = False
         
         field_mapping = {
-            "branch": "branch",
             "company": "company",
             "gender": "gender",
             "blood_group": "blood_group",

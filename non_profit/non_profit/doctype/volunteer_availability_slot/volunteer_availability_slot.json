@@ -9,7 +9,6 @@
   "employee_name",
   "column_break_qzcu",
   "company",
-  "branch",
   "section_break_euex",
   "starts_on",
   "column_break_vsrb",
@@ -47,14 +46,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "employee.branch",
-   "fieldname": "branch",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Branch",
-   "options": "Branch"
-  },
-  {
    "fieldname": "column_break_qzcu",
    "fieldtype": "Column Break"
   },
@@ -63,7 +54,7 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Company",
+   "label": "Company / Branch",
    "options": "Company"
   },
   {
@@ -77,7 +68,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-28 12:41:40.734453",
+ "modified": "2025-09-16 12:04:49.725046",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Availability Slot",

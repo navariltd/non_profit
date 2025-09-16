@@ -11,7 +11,6 @@
   "deployment_criteria",
   "column_break_qbmp",
   "company",
-  "branch",
   "section_break_bckw",
   "expected_start_date",
   "column_break_uyxh",
@@ -55,20 +54,8 @@
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Company",
+   "label": "Company / Branch",
    "options": "Company",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "project.branch",
-   "fieldname": "branch",
-   "fieldtype": "Link",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Branch",
-   "options": "Branch",
    "reqd": 1
   },
   {
@@ -147,8 +134,7 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Project",
-   "options": "Project",
-   "reqd": 1
+   "options": "Project"
   },
   {
    "fieldname": "deployment_criteria",
@@ -177,7 +163,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-02 09:23:02.176692",
+ "modified": "2025-09-16 11:49:50.231049",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Deployment",
