@@ -26,9 +26,16 @@ export const usersStore = defineStore("lms-users", () => {
     cache: ["roles"],
   });
 
+  const presentSlots = createResource({
+    url: "non_profit.non_profit.api.get_availability_slots",
+    cache: "availability_slots",
+    auto: true,
+  });
+
   return {
     userResource,
     allUsers,
     roleResource,
+    presentSlots,
   };
 });
