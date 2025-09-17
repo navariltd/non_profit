@@ -34,8 +34,6 @@
           }"
           :events="calendarSlots"
         />
-
-        {{ calendarSlots }}
       </div>
     </template>
     <template #actions>
@@ -131,7 +129,7 @@ function getDatesBetween(start: string, end: string) {
   const last = new Date(end);
 
   while (current <= last) {
-    dates.push(new Date(current).toISOString().slice(0, 10)); 
+    dates.push(new Date(current).toISOString().slice(0, 10));
     current.setDate(current.getDate() + 1);
   }
 
@@ -150,10 +148,10 @@ const calendarSlots = computed(() => {
       return {
         title: "Available",
         id: `${slot.name}-${day}`,
-        fromDate: `${day} ${startTime}`, 
-        toDate: `${day} ${endTime}`, 
-        fromTime: `${day} ${startTime}`, 
-        toTime: `${day} ${endTime}`, 
+        fromDate: `${day} ${startTime}`,
+        toDate: `${day} ${endTime}`,
+        fromTime: `${day} ${startTime}`,
+        toTime: `${day} ${endTime}`,
         color: "green",
       };
     });
