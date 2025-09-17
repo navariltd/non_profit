@@ -123,6 +123,13 @@ watch(
     }
   }
 );
+watch(setAvailability, (isOpen) => {
+  if (!isOpen) {
+    availabilityslot.starts_on = "";
+    availabilityslot.ends_on = "";
+    newSlot.error = "";
+  }
+});
 function getDatesBetween(start: string, end: string) {
   const dates: string[] = [];
   let current = new Date(start);
