@@ -209,7 +209,7 @@
    "fieldname": "department",
    "fieldtype": "Table MultiSelect",
    "label": "Department",
-   "options": "Designation Item"
+   "options": "Department Item"
   },
   {
    "fieldname": "personnel_type",
