@@ -43,11 +43,11 @@ frappe.ui.form.on("Contract", {
 
   set_task_filter(frm) {
     frm.set_query("task", () => {
-      return {
-        filters: {
-          project: frm.doc.project || "",
-        },
-      };
+      const filters = {};
+      if (frm.doc.project) {
+        filters.project = frm.doc.project;
+      }
+      return { filters };
     });
   },
 });
