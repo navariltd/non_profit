@@ -11,6 +11,7 @@
   "deployment_criteria",
   "column_break_qbmp",
   "company",
+  "status",
   "location",
   "require_contract_before_deployment",
   "section_break_bckw",
@@ -234,13 +235,21 @@
    "fieldname": "require_contract_before_deployment",
    "fieldtype": "Check",
    "label": "Require Contract Before Deployment"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nPending Acceptance\nLimit Reached\nDeployed\nCompleted",
+   "reqd": 1,
+   "default": "Draft"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-18 09:10:39.816682",
+ "modified": "2025-09-18 10:29:34.172688",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Deployment",
