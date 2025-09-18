@@ -1,31 +1,43 @@
 <template>
   <div>
     <!-- Top Buttons -->
-    <div class="flex flex-row justify-end items-center m-6 space-x-4">
-      <Button
-        variant="solid"
-        size="lg"
-        theme="red"
-        @click="setAvailability = true"
-        class="rounded-xl shadow-md"
-      >
-        Set Availability
-      </Button>
-
-      <!-- Notification Bell -->
+    <div class="flex flex-row justify-end items-center m-6 md:space-x-4">
       <div
-        class="relative cursor-pointer"
-        @click="showNotificationDialog = true"
+        v-if="presentSlots.data && presentSlots.data.length === 0"
+        class="flex items-center justify-center"
       >
-        <div
-          class="relative inline-block"
-          :class="{ 'animate-bounce': hasNotification }"
+        <p
+          class="text-sm border border-blue-600 p-1 bg-blue-100 rounded-lg text-blue-600 font-medium"
         >
-          <Bell class="h-7 w-7 text-gray-700" />
-          <span
-            v-if="hasNotification"
-            class="absolute -top-1 -right-1 block h-3 w-3 rounded-full bg-red-600 ring-2 ring-white"
-          ></span>
+          Action Required: Please set your availability to be deployed.
+        </p>
+      </div>
+      <div class="flex flex-row space-x-4 items-center">
+        <Button
+          variant="solid"
+          size="lg"
+          theme="red"
+          @click="setAvailability = true"
+          class="rounded-xl shadow-md"
+        >
+          Set Availability
+        </Button>
+
+        <!-- Notification Bell -->
+        <div
+          class="relative cursor-pointer"
+          @click="showNotificationDialog = true"
+        >
+          <div
+            class="relative inline-block"
+            :class="{ 'animate-bounce': hasNotification }"
+          >
+            <Bell class="h-7 w-7 text-gray-700" />
+            <span
+              v-if="hasNotification"
+              class="absolute -top-1 -right-1 block h-3 w-3 rounded-full bg-red-600 ring-2 ring-white"
+            ></span>
+          </div>
         </div>
       </div>
     </div>
@@ -188,42 +200,6 @@
     </Dialog>
 
     <!-- Availability Dialog -->
-    <Dialog v-model="setAvailability">
-      <template #body-title>
-        <h3 class="text-xl font-bold text-gray-900">
-          Choose Available Timeslots
-        </h3>
-      </template>
-      <template #body-content>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-2">
-          <DateTimePicker
-            v-model="availabilityslot.starts_on"
-            variant="subtle"
-            placeholder="From"
-            label="From"
-          />
-          <DateTimePicker
-            v-model="availabilityslot.ends_on"
-            variant="subtle"
-            placeholder="To"
-            label="To"
-          />
-        </div>
-      </template>
-      <template #actions>
-        <Button
-          v-if="availabilityslot.starts_on && availabilityslot.ends_on"
-          variant="solid"
-          theme="blue"
-          :loading="newSlot.loading"
-          @click="createSlot"
-          class="rounded-xl shadow-md"
-        >
-          Confirm Slots
-        </Button>
-        <ErrorMessage :message="newSlot.error" />
-      </template>
-    </Dialog>
   </div>
 
   <div class="px-10">
@@ -292,20 +268,15 @@
       </router-link>
     </div>
   </div>
+
+  <Availability @success="updateAvailability" v-model="setAvailability" />
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref } from "vue";
-import {
-  Dialog,
-  Button,
-  createResource,
-  DateTimePicker,
-  ErrorMessage,
-  Badge,
-  Card,
-} from "frappe-ui";
-import { Bell } from "lucide-vue-next";
+import { ref } from "vue";
+import { Dialog, Button, createResource, Badge, toast } from "frappe-ui";
+import { Bell, LucideCalendar } from "lucide-vue-next";
+import Availability from "./Modals/Availability.vue";
 import { usersStore } from "../stores/user";
 
 interface Task {
@@ -341,21 +312,13 @@ const props = defineProps<{
   rejected_projects: number;
 }>();
 
-const { roleResource } = usersStore();
-
 const hasNotification = ref(false);
 const showNotificationDialog = ref(false);
 const setAvailability = ref(false);
 
 const assignedProjects = ref<Project[]>([]);
 
-const availabilityslot = reactive({
-  employee: roleResource.data.employee,
-  company: roleResource.data.company,
-  user: roleResource.data.name,
-  starts_on: "",
-  ends_on: "",
-});
+const { presentSlots } = usersStore();
 
 const assignmentDecision = createResource({
   url: "non_profit.non_profit.api.accept_assignment",
@@ -398,41 +361,6 @@ const rejectAssignment = (project: Project) => {
   );
 };
 
-const newSlot = createResource({
-  url: "non_profit.non_profit.api.create_availability_slot",
-  makeParams(values) {
-    return { slot_data: values };
-  },
-});
-
-const project = createResource({
-  url: "non_profit.non_profit.api.fetch_assigned_projects",
-  auto: true,
-  onSuccess(data) {
-    if (data.length) {
-      hasNotification.value = true;
-      assignedProjects.value = Array.isArray(data) ? data : [data];
-    } else {
-      hasNotification.value = false;
-    }
-  },
-});
-
-const createSlot = () => {
-  newSlot.submit(
-    { doctype: "Volunteer Availability Slot", ...availabilityslot },
-    {
-      onSuccess(data) {
-        setAvailability.value = false;
-        console.log("submitted", data);
-      },
-      onError(err) {
-        console.log("err", err);
-      },
-    }
-  );
-};
-
 // Priority theme
 function priorityTheme(priority: string) {
   switch (priority) {
@@ -445,5 +373,11 @@ function priorityTheme(priority: string) {
     default:
       return "gray";
   }
+}
+
+function updateAvailability() {
+  setAvailability.value = false;
+  presentSlots.reload();
+  toast.success("Availability updated successfully");
 }
 </script>

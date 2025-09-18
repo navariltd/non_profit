@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Calendar, createResource, toast } from "frappe-ui";
+import { Calendar, toast } from "frappe-ui";
 import { Event } from "./EventCard.vue";
 import { computed, inject, ref } from "vue";
 import AttendEventModal from "./Modals/AttendEventModal.vue";

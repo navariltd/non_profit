@@ -684,13 +684,9 @@ def generate_language_code(language_name):
     return base_code + suffix
 
 
-
-
-
 @frappe.whitelist(allow_guest=True)
 def get_branches():
     return frappe.get_all("Company", filters={"is_group": 0})
-
 
 
 @frappe.whitelist(allow_guest=True)
@@ -903,18 +899,58 @@ def get_projects():
 def create_availability_slot(slot_data):
 
     try:
+        # Prevent duplicate slots
+        if frappe.db.exists(
+            "Volunteer Availability Slot",
+            {
+                "employee": slot_data.get("employee"),
+                "starts_on": slot_data.get("starts_on"),
+                "ends_on": slot_data.get("ends_on"),
+            },
+        ):
+            frappe.throw("You have already created this availability slot")
+
+        employee = slot_data.get("employee")
+        starts_on = slot_data.get("starts_on")
+        ends_on = slot_data.get("ends_on")
+
+        conflict_slots = frappe.db.get_all(
+            "Volunteer Availability Slot",
+            filters={
+                "employee": employee,
+                "starts_on": ["<", ends_on],
+                "ends_on": [">", starts_on],
+            },
+            fields=["name", "starts_on", "ends_on"],
+        )
+        if conflict_slots:
+            frappe.throw(
+                "This slot conflicts with an existing availability slot. Please choose a different time range and check Calendar for existing slots.",
+            )
 
         doc = frappe.get_doc({"doctype": "Volunteer Availability Slot", **slot_data})
 
         doc.insert(ignore_permissions=True)
 
         frappe.db.commit()
-        return {"success": True, "name": doc.name, "data": doc.as_dict()}
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Availability Slot Creation Error")
 
         frappe.throw("Availability Slot Creation Error")
+
+
+@frappe.whitelist()
+def get_availability_slots():
+    user = get_user_info().get("employee")
+
+    slots = frappe.db.get_all(
+        "Volunteer Availability Slot",
+        filters={"employee": user},
+        fields=["name","starts_on", "ends_on"],
+    )
+
+    return slots
 
 
 @frappe.whitelist()

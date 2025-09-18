@@ -20,6 +20,7 @@ declare module 'vue' {
     AttendEventModal: typeof import('./src/components/Modals/AttendEventModal.vue')['default']
     AudioBlock: typeof import('./src/components/AudioBlock.vue')['default']
     Autocomplete: typeof import('./src/components/Controls/Autocomplete.vue')['default']
+    Availability: typeof import('./src/components/Modals/Availability.vue')['default']
     BadgeAssignmentForm: typeof import('./src/components/Settings/BadgeAssignmentForm.vue')['default']
     BadgeAssignments: typeof import('./src/components/Settings/BadgeAssignments.vue')['default']
     BadgeForm: typeof import('./src/components/Settings/BadgeForm.vue')['default']
