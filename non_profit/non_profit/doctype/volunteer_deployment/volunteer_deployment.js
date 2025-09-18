@@ -10,6 +10,7 @@ frappe.ui.form.on("Volunteer Deployment", {
         })
         .addClass("btn-primary");
     }
+    frm.events.set_task_filter(frm);
     frm.fields_dict["volunteers"].grid.get_field("volunteer").get_query =
       function (doc, cdt, cdn) {
         const row = locals[cdt][cdn];
@@ -35,30 +36,46 @@ frappe.ui.form.on("Volunteer Deployment", {
   task(frm) {
     if (!frm.doc.task) return;
 
-    frappe.db.get_value("Task", frm.doc.task, "project").then((r) => {
-      if (r && r.message && r.message.project) {
-        frm.set_value("project", r.message.project);
-      }
-    });
+    frappe.db
+      .get_value("Task", frm.doc.task, [
+        "company",
+        "exp_start_date",
+        "exp_end_date",
+        "description",
+        "project",
+      ])
+      .then((r) => {
+        if (r && r.message) {
+          if (r.message.company) frm.set_value("company", r.message.company);
+          if (r.message.exp_start_date)
+            frm.set_value("expected_start_date", r.message.exp_start_date);
+          if (r.message.exp_end_date)
+            frm.set_value("expected_end_date", r.message.exp_end_date);
+          if (r.message.description)
+            frm.set_value("notes", r.message.description);
+          if (r.message.project) frm.set_value("project", r.message.project);
+        }
+      });
   },
 
   project(frm) {
     if (!frm.doc.project) return;
-
+    frm.events.set_task_filter(frm);
     frappe.db
       .get_value("Project", frm.doc.project, [
         "company",
         "expected_start_date",
         "expected_end_date",
+        "notes",
       ])
       .then((r) => {
         if (r && r.message) {
-          frm.set_value("company", r.message.company || "");
-          frm.set_value(
-            "expected_start_date",
-            r.message.expected_start_date || ""
-          );
-          frm.set_value("expected_end_date", r.message.expected_end_date || "");
+          if (r.message.company) frm.set_value("company", r.message.company);
+          if (r.message.expected_start_date)
+            frm.set_value("expected_start_date", r.message.expected_start_date);
+          if (r.message.expected_end_date)
+            frm.set_value("expected_end_date", r.message.expected_end_date);
+          if (r.message.notes) frm.set_value("notes", r.message.notes);
         }
       });
   },
@@ -69,6 +86,16 @@ frappe.ui.form.on("Volunteer Deployment", {
 
   fetch_available_volunteers(frm) {
     frm.events.fetch_volunteers(frm);
+  },
+
+  set_task_filter(frm) {
+    frm.set_query("task", function () {
+      return {
+        filters: {
+          project: frm.doc.project || "",
+        },
+      };
+    });
   },
 
   fetch_volunteers: function (frm) {

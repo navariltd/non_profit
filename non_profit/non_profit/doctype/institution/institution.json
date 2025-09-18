@@ -2,27 +2,43 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "prompt",
- "creation": "2025-08-22 09:44:01.366391",
+ "creation": "2025-09-18 08:40:27.114737",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "criteria"
+  "address_and_contact_section",
+  "address_html",
+  "column_break_ntpz",
+  "contact_html"
  ],
  "fields": [
   {
-   "fieldname": "criteria",
-   "fieldtype": "Table",
-   "label": "Criteria",
-   "options": "Volunteer Deployment Criteria Item"
+   "fieldname": "address_and_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Address & Contact"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address HTML"
+  },
+  {
+   "fieldname": "column_break_ntpz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_html",
+   "fieldtype": "HTML",
+   "label": "Contact HTML"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-18 08:55:40.934714",
+ "modified": "2025-09-18 08:47:24.977968",
  "modified_by": "Administrator",
  "module": "Non Profit",
- "name": "Volunteer Deployment Criteria",
+ "name": "Institution",
  "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [

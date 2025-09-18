@@ -11,21 +11,32 @@
   "deployment_criteria",
   "column_break_qbmp",
   "company",
+  "location",
+  "require_contract_before_deployment",
   "section_break_bckw",
   "expected_start_date",
   "column_break_uyxh",
   "expected_end_date",
   "section_break_odux",
-  "required_skills",
+  "notification_channels",
   "column_break_jvby",
   "number_of_volunteers_required",
   "fetch_available_volunteers",
+  "section_break_kcdf",
+  "designation",
+  "department",
+  "personnel_type",
+  "column_break_jhih",
+  "required_skills",
+  "courses",
+  "licences",
   "section_break_rmvn",
-  "remarks",
+  "notes",
   "section_break_r6sf",
   "amended_from",
   "volunteers_tab",
-  "volunteers"
+  "volunteers",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -61,13 +72,13 @@
   {
    "fieldname": "volunteers_tab",
    "fieldtype": "Tab Break",
-   "label": "Volunteers"
+   "label": "Personnel"
   },
   {
    "allow_on_submit": 1,
    "fieldname": "volunteers",
    "fieldtype": "Table",
-   "label": "Volunteers",
+   "label": "Personnel",
    "options": "Volunteer Deployment Assignee"
   },
   {
@@ -98,13 +109,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_rmvn",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "remarks",
-   "fieldtype": "Text Editor",
-   "label": "Remarks"
+   "fieldtype": "Section Break",
+   "label": "Notes"
   },
   {
    "fieldname": "section_break_odux",
@@ -134,13 +142,14 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Project",
-   "options": "Project"
+   "options": "Project",
+   "reqd": 1
   },
   {
+   "default": "Availability",
    "fieldname": "deployment_criteria",
    "fieldtype": "Link",
    "label": "Deployment Criteria",
-   "link_filters": "[[\"Volunteer Deployment Criteria\",\"docstatus\",\"=\",\"1\"]]",
    "options": "Volunteer Deployment Criteria"
   },
   {
@@ -156,14 +165,82 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Task",
-   "options": "Task"
+   "options": "Task",
+   "search_index": 1
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location",
+   "reqd": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text Editor",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "notification_channels",
+   "fieldtype": "Table MultiSelect",
+   "label": "Notification Channels",
+   "options": "Notification Channel Item"
+  },
+  {
+   "fieldname": "section_break_kcdf",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Table MultiSelect",
+   "label": "Designation",
+   "options": "Designation Item"
+  },
+  {
+   "fieldname": "column_break_jhih",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Table MultiSelect",
+   "label": "Department",
+   "options": "Designation Item"
+  },
+  {
+   "fieldname": "personnel_type",
+   "fieldtype": "Table MultiSelect",
+   "label": "Personnel Type",
+   "options": "Employment Type Item"
+  },
+  {
+   "fieldname": "courses",
+   "fieldtype": "Table MultiSelect",
+   "label": "Courses",
+   "options": "Related Courses"
+  },
+  {
+   "fieldname": "licences",
+   "fieldtype": "Table MultiSelect",
+   "label": "Licences",
+   "options": "Personnel Licence Item"
+  },
+  {
+   "default": "1",
+   "fieldname": "require_contract_before_deployment",
+   "fieldtype": "Check",
+   "label": "Require Contract Before Deployment"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-16 11:49:50.231049",
+ "modified": "2025-09-18 09:10:39.816682",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Deployment",

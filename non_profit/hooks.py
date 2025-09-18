@@ -40,7 +40,7 @@ doctype_js = {
     "Job Opening": "non_profit/overrides/client/job_opening.js",
     "Employee Onboarding": "non_profit/overrides/client/employee_onboarding.js",
     "Employee": "non_profit/overrides/client/employee.js",
-    "Job Applicant": "non_profit/overrides/client/job_applicant.js",    
+    "Job Applicant": "non_profit/overrides/client/job_applicant.js",
 }
 
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
@@ -230,6 +230,8 @@ fixtures = [
         ],
     },
     {"doctype": "Volunteer Status"},
+    {"doctype": "Volunteer Deployment Criteria"},
+    {"doctype": "Translation"},
     {
         "doctype": "Role",
         "filters": [
