@@ -241,7 +241,8 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Draft\nPending Acceptance\nLimit Reached\nDeployed\nCompleted",
-   "reqd": 1
+   "reqd": 1,
+   "default": "Draft"
   }
  ],
  "grid_page_length": 50,
