@@ -63,8 +63,7 @@
 
         <div class="text-sm text-gray-600 bg-gray-50 p-3 rounded">
           <strong>Single Day:</strong> Select a specific date and set your
-          available hours for that day. Check "All Day" if you're available for
-          the entire day.
+          available hours for that day.
         </div>
       </div>
 
