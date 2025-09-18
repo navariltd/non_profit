@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class VolunteerDeploymentAssignee(Document):
+class PersonnelDeployment(Document):
 	pass
