@@ -899,7 +899,7 @@ def get_projects():
 def create_availability_slot(slot_data):
 
     try:
-        # Prevent duplicate slots
+
         if frappe.db.exists(
             "Volunteer Availability Slot",
             {
@@ -947,7 +947,7 @@ def get_availability_slots():
     slots = frappe.db.get_all(
         "Volunteer Availability Slot",
         filters={"employee": user},
-        fields=["name","starts_on", "ends_on"],
+        fields=["name", "starts_on", "ends_on"],
     )
 
     return slots

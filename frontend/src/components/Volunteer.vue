@@ -376,7 +376,6 @@ function priorityTheme(priority: string) {
 }
 
 function updateAvailability() {
-  setAvailability.value = false;
   presentSlots.reload();
   toast.success("Availability updated successfully");
 }
