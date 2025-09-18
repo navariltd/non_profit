@@ -41,6 +41,7 @@ doctype_js = {
     "Employee Onboarding": "non_profit/overrides/client/employee_onboarding.js",
     "Employee": "non_profit/overrides/client/employee.js",
     "Job Applicant": "non_profit/overrides/client/job_applicant.js",
+    "Contract": "non_profit/overrides/client/contract.js",
 }
 
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
