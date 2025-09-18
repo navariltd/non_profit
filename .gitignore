@@ -8,3 +8,4 @@ __pycache__
 node_modules/
 non_profit/public/frontend/
 non_profit/www/vmms-portal.html
+.vscode/

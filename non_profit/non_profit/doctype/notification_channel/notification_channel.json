@@ -2,27 +2,25 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "prompt",
- "creation": "2025-08-22 09:44:01.366391",
+ "creation": "2025-09-18 08:09:32.310739",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "criteria"
+  "section_break_waro"
  ],
  "fields": [
   {
-   "fieldname": "criteria",
-   "fieldtype": "Table",
-   "label": "Criteria",
-   "options": "Volunteer Deployment Criteria Item"
+   "fieldname": "section_break_waro",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-18 08:55:40.934714",
+ "modified": "2025-09-18 08:09:42.508969",
  "modified_by": "Administrator",
  "module": "Non Profit",
- "name": "Volunteer Deployment Criteria",
+ "name": "Notification Channel",
  "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
