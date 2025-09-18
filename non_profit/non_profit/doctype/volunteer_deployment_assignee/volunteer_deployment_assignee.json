@@ -9,7 +9,8 @@
   "volunteer",
   "volunteer_name",
   "column_break_qbmp",
-  "status"
+  "status",
+  "contract_signed"
  ],
  "fields": [
   {
@@ -36,7 +37,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Pending\nRequest Sent\nAccepted\nRejected\nApproved\nContract Pending\nContract Signed\nDeployed\nCompleted\nCancelled",
+   "options": "Pending\nRequest Sent\nAccepted\nRejected\nApproved\nDeployed\nCompleted",
    "reqd": 1
   },
   {
@@ -49,13 +50,23 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Volunteer Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "contract_signed",
+   "fieldtype": "Check",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Contract Signed"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-18 09:14:12.787976",
+ "modified": "2025-09-18 10:31:05.255501",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Deployment Assignee",
