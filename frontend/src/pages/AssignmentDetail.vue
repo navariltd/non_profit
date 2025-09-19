@@ -218,17 +218,17 @@
                 Important: Please review the official project documents before
                 you decide.
               </p>
-              <ul class="list-disc list-inside text-sm text-gray-700">
-                <li>
-                  <a
-                    href="/files/contract.pdf"
-                    target="_blank"
-                    class="text-red-600 hover:underline"
-                  >
-                    Download Contract
-                  </a>
-                </li>
-              </ul>
+
+              <div class="flex justify-center">
+                <Button
+                  @click="downloadContract(projectDetail.data.contract.name)"
+                  :loading="loading"
+                  theme="red"
+                  variant="solid"
+                >
+                  Download Contract
+                </Button>
+              </div>
             </div>
 
             <p class="text-sm text-gray-500 italic mb-6">
@@ -252,6 +252,7 @@
             </div>
 
             <ErrorMessage :message="assignmentDecision.error" class="mt-4" />
+            <ErrorMessage :message="downloadError" class="mt-4" />
           </div>
         </div>
       </div>
@@ -282,7 +283,7 @@
           theme="red"
           variant="solid"
           :loading="assignmentDecision.loading"
-          @click="acceptAssignment(projectDetail.data.name)"
+          @click="acceptAssignment(projectDetail.data.name, projectDetail.data.contract.name)"
         >
           Confirm
         </Button>
@@ -308,6 +309,8 @@ import { useRoute } from "vue-router";
 const route = useRoute();
 const user = inject<any>("$user");
 const acceptDialog = ref(false);
+const downloadError = ref("");
+const loading = ref(false);
 
 onMounted(() => {
   if (!user.data) {
@@ -375,8 +378,8 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const acceptAssignment = (deploymentAssignment: string) => {
-  assignmentDecision.submit({ name: deploymentAssignment, accepted: true });
+const acceptAssignment = (deploymentAssignment: string, contractName: string) => {
+  assignmentDecision.submit({ name: deploymentAssignment, accepted: true, contract_name: contractName });
 };
 
 const rejectAssignment = (deploymentAssignment: string) => {
@@ -394,4 +397,47 @@ const assignmentDecision = createResource({
     projectDetail.reload();
   },
 });
+
+const downloadContract = (contractName: string) => {
+  loading.value = true;
+
+  let headers = { "X-Frappe-Site-Name": window.location.hostname };
+  if (window.csrf_token) {
+    headers["X-Frappe-CSRF-Token"] = window.csrf_token;
+  }
+
+  fetch("/api/method/hrms.api._download_pdf", {
+    method: "POST",
+    headers,
+    body: new URLSearchParams({
+      doctype: "Contract",
+      docname: contractName,
+    }),
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.blob();
+      } else {
+        downloadError.value = "Failed to download PDF";
+      }
+    })
+    .then((blob) => {
+      if (!blob) return;
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `${contractName}.pdf`;
+      link.click();
+
+      setTimeout(() => {
+        window.URL.revokeObjectURL(blobUrl);
+      }, 3000);
+    })
+    .catch((error) => {
+      downloadError.value = `Failed to download PDF: ${error.message}`;
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+};
 </script>

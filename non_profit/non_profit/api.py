@@ -1237,9 +1237,13 @@ def get_assignment_details(assignment_name):
 
 
 @frappe.whitelist()
-def accept_assignment(name, accepted=True):
+def accept_assignment(name, accepted=True, contract_name=None):
 
     try:
+
+        if frappe.db.exists("Contract", contract_name):
+            frappe.db.set_value("Contract", contract_name, {"is_signed": 1})
+
         assignee = frappe.get_doc(
             "Personnel Deployment Assignment", name, ignore_permissions=True
         )
