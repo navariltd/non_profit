@@ -125,6 +125,12 @@ const routes = [
     component: () => import("@/pages/JobApplicationDetail.vue"),
     props: true,
   },
+  {
+    name: "AssignmentDetail",
+    path: "/assignment/:id",
+    component: () => import("@/pages/AssignmentDetail.vue"),
+    props: true,
+  },
 ];
 
 let router = createRouter({

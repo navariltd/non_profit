@@ -43,144 +43,60 @@
     </div>
 
     <!-- Notification Dialog -->
-    <Dialog :options="{ size: '7xl' }" v-model="showNotificationDialog">
+    <Dialog :options="{ size: 'lg' }" v-model="showNotificationDialog">
       <template #body-title>
-        <h3 class="text-2xl font-bold text-gray-900">New Project Assignment</h3>
+        <div class="flex items-center justify-between">
+          <h3 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
+            <div
+              class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center"
+            >
+              <Bell class="h-5 w-5 text-red-600" />
+            </div>
+            New Project Assignment
+          </h3>
+
+          <Badge variant="outline" theme="red" class="ml-2">
+            {{ assignedProjects.length }} new
+          </Badge>
+        </div>
       </template>
 
       <template #body-content>
-        <!-- Projects Available -->
-        <div v-if="assignedProjects.length" class="space-y-6">
-          <p class="text-lg text-gray-700">
-            You have been assigned to the following project(s):
-          </p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div
-              v-for="project in assignedProjects"
-              :key="project.name"
-              class="bg-white rounded-2xl shadow-md border border-gray-200 p-6"
-            >
-              <!-- Project Header -->
-              <div class="flex items-center justify-between border-b pb-3 mb-4">
-                <div>
-                  <h4 class="text-xl font-semibold text-gray-900">
+        <div v-if="assignedProjects.length" class="space-y-3">
+          <div
+            v-for="project in assignedProjects"
+            :key="project.name"
+            class="bg-gradient-to-r from-white to-gray-50 rounded-xl shadow-sm border border-gray-100 p-6"
+          >
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <h4 class="text-lg font-semibold text-gray-900">
                     {{ project.project_name }}
                   </h4>
-                  <p class="text-sm text-gray-500">Code: {{ project.name }}</p>
+                  <Badge
+                    :theme="priorityTheme(project.priority)"
+                    class="px-2.5 py-0.5 text-xs rounded-full font-medium"
+                  >
+                    {{ project.priority }}
+                  </Badge>
                 </div>
-                <Badge :theme="priorityTheme(project.priority)">
-                  {{ project.priority }}
-                </Badge>
-              </div>
-
-              <!-- Project Info -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-                <p>
-                  <span class="font-semibold">Deployment:</span>
-                  {{ project.deployment_name }}
-                </p>
-                <p>
-                  <span class="font-semibold">Status:</span>
-                  {{ project.status }}
-                </p>
-                <p>
-                  <span class="font-semibold">Type:</span>
-                  {{ project.project_type }}
-                </p>
-                <p>
-                  <span class="font-semibold">Active:</span>
-                  {{ project.is_active }}
-                </p>
-                <p>
-                  <span class="font-semibold">Start Date:</span>
-                  {{ project.expected_start_date }}
-                </p>
-                <p>
-                  <span class="font-semibold">End Date:</span>
-                  {{ project.expected_end_date }}
-                </p>
-                <p>
-                  <span class="font-semibold">Completion:</span>
-                  {{ project.percent_complete }}%
+                <p
+                  class="text-sm text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded inline-block"
+                >
+                  {{ project.name }}
                 </p>
               </div>
 
-              <!-- Notes -->
-              <div v-if="project.notes" class="mt-4">
-                <h5 class="font-semibold text-gray-800 mb-2">Notes:</h5>
-                <div
-                  class="prose prose-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200"
-                  v-html="project.notes"
-                ></div>
-              </div>
-
-              <!-- Task Info -->
-              <div
-                v-if="project.task"
-                class="mt-6 bg-gray-50 p-4 rounded-lg border"
+              <router-link
+                :to="{
+                  name: 'AssignmentDetail',
+                  params: { id: project.name },
+                }"
+                class="ml-4"
               >
-                <h5 class="text-lg font-semibold text-gray-900">
-                  Assigned Task
-                </h5>
-                <div
-                  class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-gray-700 mt-2"
-                >
-                  <p>
-                    <span class="font-semibold">Task:</span>
-                    {{ project.task.name }}
-                  </p>
-                  <p>
-                    <span class="font-semibold">Subject:</span>
-                    {{ project.task.subject }}
-                  </p>
-                  <p>
-                    <span class="font-semibold">Status:</span>
-                    {{ project.task.status }}
-                  </p>
-                  <p>
-                    <span class="font-semibold">Priority:</span>
-                    {{ project.task.priority }}
-                  </p>
-                  <p>
-                    <span class="font-semibold">Start:</span>
-                    {{ project.task.exp_start_date || "N/A" }}
-                  </p>
-                  <p>
-                    <span class="font-semibold">End:</span>
-                    {{ project.task.exp_end_date || "N/A" }}
-                  </p>
-                </div>
-
-                <!-- Task Description -->
-                <div v-if="project.task.description" class="mt-3">
-                  <h6 class="font-semibold text-gray-800">Description:</h6>
-                  <div
-                    class="prose prose-sm text-gray-700 bg-white p-3 rounded-lg border"
-                    v-html="project.task.description"
-                  ></div>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="flex justify-end space-x-3 mt-6">
-                <Button
-                  variant="outline"
-                  theme="red"
-                  @click="rejectAssignment(project)"
-                  class="rounded-xl px-5"
-                >
-                  Reject
-                </Button>
-                <Button
-                  variant="solid"
-                  theme="green"
-                  @click="acceptAssignment(project)"
-                  class="rounded-xl shadow px-5"
-                >
-                  Accept
-                </Button>
-              </div>
+                <Button variant="solid" theme="red"> View Details </Button>
+              </router-link>
             </div>
           </div>
         </div>
@@ -188,12 +104,17 @@
         <!-- Empty State -->
         <div
           v-else
-          class="flex flex-col items-center justify-center text-center py-16 text-gray-500"
+          class="flex flex-col items-center justify-center text-center py-16"
         >
-          <Bell class="h-12 w-12 mb-3 text-gray-400" />
-          <p class="text-lg font-medium">No new notifications</p>
-          <p class="text-sm text-gray-400">
-            You're all caught up! We'll notify you when new assignments arrive.
+          <div
+            class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4"
+          >
+            <Bell class="h-8 w-8 text-gray-400" />
+          </div>
+          <h4 class="text-lg font-medium text-gray-900 mb-2">All caught up!</h4>
+          <p class="text-sm text-gray-500 max-w-sm">
+            No new project assignments at the moment. We'll notify you when new
+            ones arrive.
           </p>
         </div>
       </template>
@@ -317,6 +238,15 @@ const showNotificationDialog = ref(false);
 const setAvailability = ref(false);
 
 const assignedProjects = ref<Project[]>([]);
+
+const fecthAssignments = createResource({
+  url: "non_profit.non_profit.api.fetch_assigned_projects",
+  auto: true,
+  onSuccess(data) {
+    assignedProjects.value = data || [];
+    hasNotification.value = assignedProjects.value.length > 0;
+  },
+});
 
 const { presentSlots } = usersStore();
 
