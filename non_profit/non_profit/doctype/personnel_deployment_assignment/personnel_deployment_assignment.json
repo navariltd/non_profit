@@ -17,13 +17,15 @@
   "column_break_qlbs",
   "company",
   "deployment",
+  "require_contract_before_deployment",
   "dates__reason_section",
   "expected_start_date",
   "expected_end_date",
   "column_break_hmmj",
   "notes",
   "terms_section",
-  "deployment_request_term_template",
+  "terms_of_reference",
+  "term_details",
   "offer_terms",
   "approval_section",
   "deployment_approver",
@@ -157,12 +159,6 @@
    "label": "Terms"
   },
   {
-   "fieldname": "deployment_request_term_template",
-   "fieldtype": "Link",
-   "label": "Deployment Request Term Template",
-   "options": "Job Offer Term Template"
-  },
-  {
    "fieldname": "offer_terms",
    "fieldtype": "Table",
    "label": "Offer Terms",
@@ -218,6 +214,23 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "require_contract_before_deployment",
+   "fieldtype": "Check",
+   "label": "Require Contract Before Deployment"
+  },
+  {
+   "fieldname": "terms_of_reference",
+   "fieldtype": "Link",
+   "label": "Terms of Reference",
+   "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "term_details",
+   "fieldtype": "Text Editor",
+   "label": "Term Details"
   }
  ],
  "grid_page_length": 50,
@@ -249,9 +262,14 @@
    "group": "Claims",
    "link_doctype": "Employee Advance",
    "link_fieldname": "personnel_deployment_assignment"
+  },
+  {
+   "group": "Contract",
+   "link_doctype": "Contract",
+   "link_fieldname": "personnel_deployment_assignment"
   }
  ],
- "modified": "2025-09-19 09:34:33.861286",
+ "modified": "2025-09-19 10:11:48.700829",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Assignment",

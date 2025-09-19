@@ -48,6 +48,9 @@ class PersonnelDeploymentRequest(Document):
                     "expected_start_date": self.expected_start_date,
                     "expected_end_date": self.expected_end_date,
                     "notes": self.notes,
+                    "require_contract_before_deployment": self.require_contract_before_deployment,
+                    "terms_of_reference": self.terms_of_reference,
+                    "term_details": self.term_details,
                 }
 
                 if self.get("deployment_request_term_template"):

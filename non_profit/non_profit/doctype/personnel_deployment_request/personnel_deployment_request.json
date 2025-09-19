@@ -18,6 +18,9 @@
   "notification_channels",
   "number_of_volunteers_required",
   "require_contract_before_deployment",
+  "terms_section",
+  "terms_of_reference",
+  "term_details",
   "section_break_rmvn",
   "notes",
   "quick_filters_section",
@@ -222,6 +225,23 @@
    "fieldtype": "Table MultiSelect",
    "label": "Skills",
    "options": "Volunteer Skill"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "terms_section",
+   "fieldtype": "Section Break",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "terms_of_reference",
+   "fieldtype": "Link",
+   "label": "Terms of Reference",
+   "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "term_details",
+   "fieldtype": "Text Editor",
+   "label": "Term Details"
   }
  ],
  "grid_page_length": 50,
@@ -256,9 +276,14 @@
    "group": "Activity",
    "link_doctype": "Timesheet",
    "link_fieldname": "personnel_deployment_request"
+  },
+  {
+   "group": "Contract",
+   "link_doctype": "Contract",
+   "link_fieldname": "personnel_deployment_request"
   }
  ],
- "modified": "2025-09-19 09:32:14.863049",
+ "modified": "2025-09-19 10:15:27.173321",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Request",
