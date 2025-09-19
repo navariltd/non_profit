@@ -170,34 +170,44 @@
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-4">
-              Project Decision
+          <div class="bg-white rounded-xl shadow-lg border border-red-300 p-8">
+            <h2
+              class="flex flex-row items-center gap-2 text-2xl font-bold text-red-700 mb-4"
+            >
+              <Badge variant="subtle" theme="red">Action Required:</Badge>
+              <span>Project Decision</span>
             </h2>
-            <p class="text-sm text-gray-600 mb-4">
-              Before making a decision, please review the official documents:
-            </p>
-            <ul class="list-disc list-inside text-sm text-gray-700 mb-4">
-              <li>
-                <a
-                  href="/files/contract.pdf"
-                  target="_blank"
-                  class="text-red-600 hover:underline"
-                  >Download Contract</a
-                >
-              </li>
-              <li>
-                <a
-                  href="/files/tor.pdf"
-                  target="_blank"
-                  class="text-red-600 hover:underline"
-                  >Download Terms of Reference (ToR)</a
-                >
-              </li>
-            </ul>
-            <p class="text-sm text-gray-500 mb-6 italic">
-              By accepting this project, you agree to the details outlined in
-              the contract and ToR documents.
+
+            <div class="mb-6">
+              <p class="text-sm text-gray-700 font-medium mb-2">
+                Important: Please review the official project documents before
+                you decide.
+              </p>
+              <ul class="list-disc list-inside text-sm text-gray-700">
+                <li>
+                  <a
+                    href="/files/contract.pdf"
+                    target="_blank"
+                    class="text-red-600 hover:underline"
+                  >
+                    Download Contract
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="/files/tor.pdf"
+                    target="_blank"
+                    class="text-red-600 hover:underline"
+                  >
+                    Download Terms of Reference (ToR)
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            <p class="text-sm text-gray-500 italic mb-6">
+              Your decision to accept this project confirms your agreement to
+              the terms outlined in both documents.
             </p>
 
             <div class="flex gap-3">
