@@ -1070,7 +1070,7 @@ def upload_file():
 
 @frappe.whitelist()
 def fetch_assigned_projects():
-    user = frappe.db.get_value("User", frappe.session.user, ["name"])
+    user = frappe.session.user
 
     volunteer = frappe.db.get_value("Employee", {"user_id": user}, "name")
     if not volunteer:
@@ -1141,6 +1141,37 @@ def fetch_assigned_projects():
             projects.append(project)
 
     return projects
+
+
+@frappe.whitelist()
+def get_project_details(project_name):
+
+    project = frappe.db.get_value(
+        "Project",
+        project_name,
+        [
+            "name",
+            "project_name",
+            "status",
+            "project_type",
+            "is_active",
+            "percent_complete",
+            "priority",
+            "expected_start_date",
+            "expected_end_date",
+            "priority",
+            "notes",
+        ],
+        as_dict=1,
+    )
+
+    project["notes"] = (
+        frappe.utils.strip_html_tags(project["notes"])
+        if project and project.get("notes")
+        else ""
+    )
+
+    return project
 
 
 @frappe.whitelist()
