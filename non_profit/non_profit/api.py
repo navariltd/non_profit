@@ -1077,13 +1077,12 @@ def fetch_assigned_projects():
         return []
 
     assignees = frappe.get_all(
-        "Volunteer Deployment Assignee",
+        "Personnel Deployment Assignment",
         filters={
-            "volunteer": volunteer,
-            "parenttype": "Volunteer Deployment",
+            "employee": volunteer,
             "status": "Pending",
         },
-        fields=["name", "parent"],
+        fields=["name", "deployment"],
     )
 
     if not assignees:
@@ -1091,10 +1090,12 @@ def fetch_assigned_projects():
 
     projects = []
     for assignee in assignees:
-        deployment_name = assignee.parent  # parent is the Volunteer Deployment name
+        deployment_name = (
+            assignee.deployment
+        )  # deployment is the Personnel Deployment name
         assignee_name = assignee.name  # childtable row name
 
-        deployment = frappe.get_doc("Volunteer Deployment", deployment_name)
+        deployment = frappe.get_doc("Personnel Deployment Request", deployment_name)
         if not deployment or not deployment.project:
             continue
 
@@ -1175,13 +1176,81 @@ def get_project_details(project_name):
 
 
 @frappe.whitelist()
-def accept_assignment(name, accepted=True):
-    assignee = frappe.get_doc(
-        "Volunteer Deployment Assignee", name, ignore_permissions=True
+def get_assignment_details(assignment_name):
+
+    assignment = frappe.get_doc(
+        "Personnel Deployment Assignment",
+        assignment_name,
+    ).as_dict()
+
+    if not assignment:
+        return {}
+
+    if assignment.get("require_contract_before_deployment") == 1:
+        contract = None
+        if frappe.db.exists(
+            "Contract", {"personnel_deployment_assignment": assignment["name"]}
+        ):
+            contract = frappe.get_doc(
+                "Contract",
+                {"personnel_deployment_assignment": assignment["name"]},
+            ).as_dict()
+        assignment["contract"] = contract
+
+    deployment = frappe.get_doc("Personnel Deployment Request", assignment.deployment)
+
+    project = frappe.db.get_value(
+        "Project",
+        deployment.project,
+        [
+            "name",
+            "project_name",
+            "status",
+            "project_type",
+            "is_active",
+            "percent_complete",
+            "priority",
+            "expected_start_date",
+            "expected_end_date",
+            "priority",
+            "notes",
+        ],
+        as_dict=1,
     )
-    assignee.status = "Accepted" if accepted else "Rejected"
-    assignee.save(ignore_permissions=True)
-    frappe.db.commit()
+
+    if project:
+        project["notes"] = (
+            frappe.utils.strip_html_tags(project["notes"])
+            if project.get("notes")
+            else ""
+        )
+
+    assignment["project"] = project
+    assignment["deployment_details"] = deployment.as_dict()
+    assignment["term_details"] = (
+        frappe.utils.strip_html_tags(assignment["term_details"])
+        if assignment.get("term_details")
+        else ""
+    )
+
+    return assignment
+
+
+@frappe.whitelist()
+def accept_assignment(name, accepted=True):
+
+    try:
+        assignee = frappe.get_doc(
+            "Personnel Deployment Assignment", name, ignore_permissions=True
+        )
+        assignee.status = "Accepted" if accepted else "Rejected"
+        assignee.save(ignore_permissions=True)
+        frappe.db.commit()
+
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.log_error(frappe.get_traceback(), "Accept Assignment Error")
+        frappe.throw("Accept Assignment Error")
 
 
 @frappe.whitelist(allow_guest=True)
