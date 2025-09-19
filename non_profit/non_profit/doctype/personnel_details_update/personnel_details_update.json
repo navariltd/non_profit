@@ -13,8 +13,7 @@
   "date",
   "company",
   "details_section",
-  "update_details",
-  "amended_from"
+  "update_details"
  ],
  "fields": [
   {
@@ -67,21 +66,11 @@
    "fieldname": "update_details",
    "fieldtype": "Table",
    "options": "Employee Property History"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Employee Details Update",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-19 12:20:03.485241",
+ "modified": "2025-09-19 14:13:44.286516",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Details Update",
