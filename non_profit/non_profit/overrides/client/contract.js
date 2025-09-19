@@ -21,11 +21,11 @@ frappe.ui.form.on("Contract", {
     }
   },
 
-  personnel_deployment(frm) {
-    if (frm.doc.personnel_deployment) {
+  personnel_deployment_assignment(frm) {
+    if (frm.doc.personnel_deployment_assignment) {
       frappe.db.get_value(
-        "Personnel Deployment",
-        frm.doc.personnel_deployment,
+        "Personnel Deployment Assignment",
+        frm.doc.personnel_deployment_assignment,
         ["project", "task"],
         (r) => {
           if (r) {
@@ -34,6 +34,12 @@ frappe.ui.form.on("Contract", {
             }
             if (r.task) {
               frm.set_value("task", r.task);
+            }
+            if (r.task) {
+              frm.set_value(
+                "personnel_deployment_request",
+                r.personnel_deployment_request
+              );
             }
           }
         }
