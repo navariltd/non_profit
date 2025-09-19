@@ -91,7 +91,7 @@
               <router-link
                 :to="{
                   name: 'AssignmentDetail',
-                  params: { id: project.name },
+                  params: { id: project.deployment_name },
                 }"
                 class="ml-4"
               >
@@ -250,46 +250,9 @@ const fecthAssignments = createResource({
 
 const { presentSlots } = usersStore();
 
-const assignmentDecision = createResource({
-  url: "non_profit.non_profit.api.accept_assignment",
-  makeParams(values) {
-    return values;
-  },
-});
 
-const acceptAssignment = (project: Project) => {
-  assignmentDecision.submit(
-    { name: project.deployment_name, accepted: true },
-    {
-      onSuccess() {
-        assignedProjects.value = assignedProjects.value.filter(
-          (p) => p.deployment_name !== project.deployment_name
-        );
-        if (assignedProjects.value.length === 0) {
-          hasNotification.value = false;
-          showNotificationDialog.value = false;
-        }
-      },
-    }
-  );
-};
 
-const rejectAssignment = (project: Project) => {
-  assignmentDecision.submit(
-    { name: project.deployment_name, accepted: false },
-    {
-      onSuccess() {
-        assignedProjects.value = assignedProjects.value.filter(
-          (p) => p.deployment_name !== project.deployment_name
-        );
-        if (assignedProjects.value.length === 0) {
-          hasNotification.value = false;
-          showNotificationDialog.value = false;
-        }
-      },
-    }
-  );
-};
+
 
 // Priority theme
 function priorityTheme(priority: string) {
