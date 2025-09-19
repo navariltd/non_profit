@@ -79,6 +79,28 @@ frappe.ui.form.on("Personnel Deployment Request", {
     });
   },
 
+  terms_of_reference: function (frm) {
+    if (!frm.doc.terms_of_reference) {
+      frm.set_value("term_details", "");
+      return;
+    }
+    frappe.call({
+      method: "frappe.client.get_value",
+      args: {
+        doctype: "Terms and Conditions",
+        fieldname: "terms",
+        filters: {
+          name: frm.doc.terms_of_reference,
+        },
+      },
+      callback: function (r) {
+        if (r.message && r.message.terms) {
+          frm.set_value("term_details", r.message.terms);
+        }
+      },
+    });
+  },
+
   companies: function (frm) {
     frm.trigger("get_employees");
   },

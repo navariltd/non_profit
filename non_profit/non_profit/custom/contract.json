@@ -145,7 +145,7 @@
       "description": null,
       "docstatus": 0,
       "dt": "Contract",
-      "fetch_from": "personnel_deployment_assignment.deployment",
+      "fetch_from": null,
       "fetch_if_empty": 0,
       "fieldname": "personnel_deployment_request",
       "fieldtype": "Link",
