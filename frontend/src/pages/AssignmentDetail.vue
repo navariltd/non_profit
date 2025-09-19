@@ -199,6 +199,14 @@
                   {{ projectDetail.data.project.is_active }}
                 </p>
               </div>
+              <div>
+                <label class="text-sm font-medium text-gray-600"
+                  >Location</label
+                >
+                <p class="text-sm text-gray-900 mt-1">
+                  {{ projectDetail.data.location }}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -283,7 +291,12 @@
           theme="red"
           variant="solid"
           :loading="assignmentDecision.loading"
-          @click="acceptAssignment(projectDetail.data.name, projectDetail.data.contract.name)"
+          @click="
+            acceptAssignment(
+              projectDetail.data.name,
+              projectDetail.data.contract.name
+            )
+          "
         >
           Confirm
         </Button>
@@ -305,6 +318,7 @@ import {
 } from "frappe-ui";
 import { computed, inject, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
+import router from "../router";
 
 const route = useRoute();
 const user = inject<any>("$user");
@@ -316,7 +330,7 @@ onMounted(() => {
   if (!user.data) {
     toast.warning("You must be logged in to view this page");
     setTimeout(() => {
-      window.location.href = "/login";
+      router.push("/login");
     }, 500);
   }
 });
@@ -331,9 +345,6 @@ const projectDetail = createResource({
   cache: ["project_detail", projectParams.value],
   makeParams() {
     return { assignment_name: projectParams.value };
-  },
-  onSuccess(data) {
-    console.log(data);
   },
 });
 
@@ -378,8 +389,15 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const acceptAssignment = (deploymentAssignment: string, contractName: string) => {
-  assignmentDecision.submit({ name: deploymentAssignment, accepted: true, contract_name: contractName });
+const acceptAssignment = (
+  deploymentAssignment: string,
+  contractName: string
+) => {
+  assignmentDecision.submit({
+    name: deploymentAssignment,
+    accepted: true,
+    contract_name: contractName,
+  });
 };
 
 const rejectAssignment = (deploymentAssignment: string) => {
