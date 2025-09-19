@@ -49,19 +49,19 @@
           <div class="flex-1">
             <div class="flex items-center gap-3 mb-3">
               <h1 class="text-3xl font-bold text-gray-900">
-                {{ projectDetail.data.project_name }}
+                {{ projectDetail.data.project.project_name }}
               </h1>
               <Badge
-                :theme="getStatusTheme(projectDetail.data.status)"
+                :theme="getStatusTheme(projectDetail.data.project.status)"
                 class="px-3 py-1"
               >
-                {{ projectDetail.data.status }}
+                {{ projectDetail.data.project.status }}
               </Badge>
             </div>
             <p
               class="text-sm text-gray-500 font-mono bg-gray-50 px-2 py-1 rounded inline-block mb-4"
             >
-              {{ projectDetail.data.name }}
+              {{ projectDetail.data.project.name }}
             </p>
             <div class="flex items-center gap-6 text-sm text-gray-600">
               <span class="flex items-center gap-2">
@@ -78,7 +78,7 @@
                     d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                   />
                 </svg>
-                {{ projectDetail.data.project_type }}
+                {{ projectDetail.data.project.project_type }}
               </span>
               <span class="flex items-center gap-2">
                 <svg
@@ -97,14 +97,30 @@
                 {{ formatDate(projectDetail.data.expected_start_date) }} -
                 {{ formatDate(projectDetail.data.expected_end_date) }}
               </span>
+
+              <Badge
+                v-if="projectDetail.data.status"
+                variant="subtle"
+                :theme="
+                  projectDetail.data.status === 'Pending'
+                    ? 'orange'
+                    : projectDetail.data.status === 'Rejected'
+                      ? 'red'
+                      : 'green'
+                "
+                class="px-3 py-1"
+                size="lg"
+              >
+                Assignment {{ projectDetail.data.status }}
+              </Badge>
             </div>
           </div>
           <div class="flex items-center gap-3">
             <Badge
-              :theme="getPriorityTheme(projectDetail.data.priority)"
+              :theme="getPriorityTheme(projectDetail.data.project.priority)"
               class="px-3 py-1"
             >
-              {{ projectDetail.data.priority }} Priority
+              {{ projectDetail.data.project.priority }} Priority
             </Badge>
           </div>
         </div>
@@ -120,13 +136,15 @@
               <div class="flex items-center justify-between text-sm">
                 <span class="text-gray-600">Completion</span>
                 <span class="font-medium text-gray-900"
-                  >{{ projectDetail.data.percent_complete }}%</span
+                  >{{ projectDetail.data.project.percent_complete }}%</span
                 >
               </div>
               <div class="w-full bg-gray-200 rounded-full h-3">
                 <div
                   class="bg-red-600 h-3 rounded-full transition-all duration-500"
-                  :style="{ width: `${projectDetail.data.percent_complete}%` }"
+                  :style="{
+                    width: `${projectDetail.data.project.percent_complete}%`,
+                  }"
                 ></div>
               </div>
             </div>
@@ -138,10 +156,24 @@
               v-if="projectDetail.data.notes"
               class="prose prose-sm max-w-none text-gray-700"
             >
-              {{ projectDetail.data.notes }}
+              {{ projectDetail.data.project.notes }}
             </div>
             <div v-else class="text-gray-500 italic">
               No notes available for this project.
+            </div>
+          </div>
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">
+              Term Details
+            </h2>
+            <div
+              v-if="projectDetail.data.term_details"
+              class="prose prose-sm max-w-none text-gray-700"
+            >
+              {{ projectDetail.data.term_details }}
+            </div>
+            <div v-else class="text-gray-500 italic">
+              No term details available for this project.
             </div>
           </div>
         </div>
@@ -156,21 +188,24 @@
                 <p class="text-sm text-gray-900 mt-1 flex items-center gap-2">
                   <span
                     class="w-2 h-2 rounded-full"
-                    :class="getStatusColor(projectDetail.data.status)"
+                    :class="getStatusColor(projectDetail.data.project.status)"
                   ></span>
-                  {{ projectDetail.data.status }}
+                  {{ projectDetail.data.project.status }}
                 </p>
               </div>
               <div>
                 <label class="text-sm font-medium text-gray-600">Active</label>
                 <p class="text-sm text-gray-900 mt-1">
-                  {{ projectDetail.data.is_active === "1" ? "Yes" : "No" }}
+                  {{ projectDetail.data.project.is_active }}
                 </p>
               </div>
             </div>
           </div>
 
-          <div class="bg-white rounded-xl shadow-lg border border-red-300 p-8">
+          <div
+            v-if="projectDetail.data.status === 'Pending'"
+            class="bg-white rounded-xl shadow-lg border border-red-300 p-8"
+          >
             <h2
               class="flex flex-row items-center gap-2 text-2xl font-bold text-red-700 mb-4"
             >
@@ -193,15 +228,6 @@
                     Download Contract
                   </a>
                 </li>
-                <li>
-                  <a
-                    href="/files/tor.pdf"
-                    target="_blank"
-                    class="text-red-600 hover:underline"
-                  >
-                    Download Terms of Reference (ToR)
-                  </a>
-                </li>
               </ul>
             </div>
 
@@ -211,32 +237,77 @@
             </p>
 
             <div class="flex gap-3">
-              <Button theme="red" class="flex-1" @click="acceptProject">
+              <Button theme="red" class="flex-1" @click="acceptDialog = true">
                 Accept Project
               </Button>
               <Button
                 theme="gray"
                 variant="outline"
                 class="flex-1"
-                @click="rejectProject"
+                @click="rejectAssignment(projectDetail.data.name)"
+                :loading="assignmentDecision.loading"
               >
                 Reject Project
               </Button>
             </div>
+
+            <ErrorMessage :message="assignmentDecision.error" class="mt-4" />
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Confirmation Dialog -->
+  <Dialog v-model="acceptDialog">
+    <template #body-title>
+      <h3 class="text-2xl font-semibold text-gray-900">Confirm Action</h3>
+    </template>
+
+    <template #body-content>
+      <div class="space-y-4 text-gray-700">
+        <p>
+          By confirming, you acknowledge that you have read the contract details
+          and terms of reference, and that you accept the project.
+        </p>
+        <p class="text-sm text-gray-500 italic">
+          Accepting means you agree to the documents provided.
+        </p>
+      </div>
+    </template>
+
+    <template #actions="{ close }">
+      <div class="flex space-x-2">
+        <Button
+          theme="red"
+          variant="solid"
+          :loading="assignmentDecision.loading"
+          @click="acceptAssignment(projectDetail.data.name)"
+        >
+          Confirm
+        </Button>
+        <Button variant="outline" @click="close()">Cancel</Button>
+      </div>
+    </template>
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
-import { createResource, toast, Button, Badge, Spinner } from "frappe-ui";
-import { computed, inject, onMounted } from "vue";
+import {
+  createResource,
+  toast,
+  Button,
+  Badge,
+  Spinner,
+  ErrorMessage,
+  Dialog,
+} from "frappe-ui";
+import { computed, inject, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
 const user = inject<any>("$user");
+const acceptDialog = ref(false);
 
 onMounted(() => {
   if (!user.data) {
@@ -252,11 +323,14 @@ const projectParams = computed(() => {
 });
 
 const projectDetail = createResource({
-  url: "non_profit.non_profit.api.get_project_details",
+  url: "non_profit.non_profit.api.get_assignment_details",
   auto: true,
   cache: ["project_detail", projectParams.value],
   makeParams() {
-    return { project_name: projectParams.value };
+    return { assignment_name: projectParams.value };
+  },
+  onSuccess(data) {
+    console.log(data);
   },
 });
 
@@ -268,7 +342,6 @@ const getStatusTheme = (status: string): BadgeTheme | undefined => {
     Working: "orange",
     Completed: "green",
     Cancelled: "red",
-    // 'On Hold' intentionally omitted as 'yellow' is not a valid theme
   };
   return statusMap[status] || "gray";
 };
@@ -302,7 +375,23 @@ const formatDate = (dateString: string) => {
   });
 };
 
-function acceptProject() {}
+const acceptAssignment = (deploymentAssignment: string) => {
+  assignmentDecision.submit({ name: deploymentAssignment, accepted: true });
+};
 
-function rejectProject() {}
+const rejectAssignment = (deploymentAssignment: string) => {
+  assignmentDecision.submit({ name: deploymentAssignment, accepted: false });
+};
+
+const assignmentDecision = createResource({
+  url: "non_profit.non_profit.api.accept_assignment",
+  makeParams(values) {
+    return values;
+  },
+  onSuccess() {
+    acceptDialog.value = false;
+    toast.success("Your decision has been recorded.");
+    projectDetail.reload();
+  },
+});
 </script>
