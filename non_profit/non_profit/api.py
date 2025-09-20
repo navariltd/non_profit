@@ -379,42 +379,70 @@ def get_job_details(job):
     return job_details
 
 
+def _attach_file(doc, file_info, field_name=None):
+    file_url = file_info.get("file_url") if isinstance(file_info, dict) else file_info
+    file_name = file_info.get("file_name") if isinstance(file_info, dict) else None
+
+    already_attached = frappe.db.exists(
+        "File",
+        {
+            "attached_to_doctype": doc.doctype,
+            "attached_to_name": doc.name,
+            "file_url": file_url,
+        },
+    )
+    if already_attached:
+        return
+
+    file_doc = frappe.get_doc(
+        {
+            "doctype": "File",
+            "file_name": file_name or file_url.split("/")[-1],
+            "file_url": file_url,
+            "attached_to_doctype": doc.doctype,
+            "attached_to_name": doc.name,
+            "is_private": 0,
+        }
+    )
+
+    file_doc.insert(ignore_permissions=True)
+    if field_name:
+        frappe.db.set_value(
+            doc.doctype,
+            doc.name,
+            {field_name: file_doc.file_url},
+        )
+
+        frappe.db.commit()
+
+
+def handle_attachment_files(application, files_data):
+    profile_photo = files_data.get("profile_photo")
+    documents = files_data.get("documents")
+    resume = files_data.get("resume")
+    for doc in documents or []:
+        _attach_file(application, doc)
+    if resume:
+        _attach_file(application, resume, field_name="resume_attachment")
+
+    if profile_photo:
+        _attach_file(application, profile_photo, field_name="profile_photo")
+
+    return application
+
+
 @frappe.whitelist(allow_guest=True)
 def update_job_application(id: str, **kwargs) -> dict:
     try:
+        files_data = {
+            "profile_photo": kwargs.pop("profile_photo", None),
+            "documents": kwargs.pop("documents", None),
+            "resume": kwargs.pop("resume", None),
+        }
+
         application = frappe.get_doc("Job Applicant", id)
-        if not application:
-            return {"error": "Application not found"}
 
-        resume = kwargs.pop("resume", None)
-        profile_photo = kwargs.pop("profile_photo", None)
-        if resume:
-            resume_doc = frappe.get_doc("File", resume)
-            application.resume_attachment = resume_doc.file_name
-            frappe.db.set_value(
-                "File",
-                resume,
-                {
-                    "attached_to_name": application.name,
-                    "attached_to_doctype": "Job Applicant",
-                    "attached_to_field": "resume_attachment",
-                },
-                update_modified=False,
-            )
-
-        if profile_photo:
-            profile_photo = frappe.get_doc("File", profile_photo)
-            application.profile_photo = profile_photo.file_name
-            frappe.db.set_value(
-                "File",
-                profile_photo,
-                {
-                    "attached_to_name": application.name,
-                    "attached_to_doctype": "Job Applicant",
-                    "attached_to_field": "profile_photo",
-                },
-                update_modified=False,
-            )
+        application = handle_attachment_files(application, files_data)
 
         for key, value in kwargs.items():
             setattr(application, key, value)
@@ -429,10 +457,17 @@ def update_job_application(id: str, **kwargs) -> dict:
 @frappe.whitelist(allow_guest=True)
 def submit_job_application(job_opening: str = None, id: str = None, **kwargs) -> dict:
     try:
+
         if id and frappe.db.exists("Job Applicant", id):
             return update_job_application(id, **kwargs)
 
         company = kwargs.get("company")
+
+        files_data = {
+            "resume": kwargs.pop("resume", None),
+            "profile_photo": kwargs.pop("profile_photo", None),
+            "documents": kwargs.pop("documents", None),
+        }
 
         if job_opening:
             job_opening_data = frappe.db.get_value(
@@ -503,9 +538,6 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
         other_names = kwargs.pop("other_names", "")
         name_to_use = f"{other_names} {surname}".strip()
 
-        resume = kwargs.pop("resume", None)
-        profile_photo = kwargs.pop("profile_photo", None)
-
         table_fields = {
             "disabilities": ("disability", None),
             "allergies": ("allergy", None),
@@ -530,34 +562,6 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
 
         job_application = frappe.get_doc(doc_data)
         job_application.insert(ignore_permissions=True)
-
-        if resume:
-            resume_doc = frappe.get_doc("File", resume)
-            job_application.resume_attachment = resume_doc.file_name
-            frappe.db.set_value(
-                "File",
-                resume,
-                {
-                    "attached_to_name": job_application.name,
-                    "attached_to_doctype": "Job Applicant",
-                    "attached_to_field": "resume_attachment",
-                },
-                update_modified=False,
-            )
-
-        if profile_photo:
-            profile_photo = frappe.get_doc("File", profile_photo)
-            job_application.profile_photo = profile_photo.file_name
-            frappe.db.set_value(
-                "File",
-                profile_photo,
-                {
-                    "attached_to_name": job_application.name,
-                    "attached_to_doctype": "Job Applicant",
-                    "attached_to_field": "profile_photo",
-                },
-                update_modified=False,
-            )
 
         def split_items(value):
             if not value:
@@ -644,6 +648,8 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
                                 job_application.append(key, new_entry_data)
 
         job_application.save(ignore_permissions=True)
+
+        handle_attachment_files(job_application, files_data)
         frappe.db.commit()
 
         return {
@@ -1425,3 +1431,29 @@ def get_all_deployed_projects(**kwargs):
             projects_details.append(project_details)
 
     return projects_details
+
+
+@frappe.whitelist()
+def can_edit_job_application(applicant_id: str) -> bool:
+    if not applicant_id:
+        return False
+
+    applicant = frappe.get_doc("Job Applicant", applicant_id)
+
+    if applicant.status and applicant.status.lower() != "open":
+        return False
+
+    if applicant.job_title:
+        job_opening = frappe.get_doc("Job Opening", applicant.job_title)
+        if job_opening.status.lower() != "open":
+            return False
+
+    interview = frappe.db.exists("Interview", {"job_applicant": applicant_id})
+    if interview:
+        return False
+
+    offer = frappe.db.exists("Job Offer", {"job_applicant": applicant_id})
+    if offer:
+        return False
+
+    return True

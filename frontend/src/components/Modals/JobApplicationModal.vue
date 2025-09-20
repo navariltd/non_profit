@@ -17,14 +17,13 @@
                 :label="__('Branch')"
                 doctype="Company"
                 :required="true"
+                :filters="{ is_group: 0 }"
               />
             </div>
           </section>
 
           <section
-            v-if="
-              !hidePersonalInfo && !showOnlyDocsProfile && !props.showOnlyDocs
-            "
+            v-if="!showOnlyDocsProfile && !props.showOnlyDocs"
             class="mb-10"
           >
             <h2 class="text-xl font-bold text-red-700 mb-4">
@@ -36,12 +35,14 @@
                 :label="__('Surname')"
                 type="text"
                 :required="isPersonalInfoRequired"
+                v-if="!hidePersonalInfo"
               />
               <FormControl
                 v-model="form.other_names"
                 :label="__('Other Names')"
                 type="text"
                 :required="isPersonalInfoRequired"
+                v-if="!hidePersonalInfo"
               />
               <FormControl
                 v-model="form.email_id"
@@ -49,17 +50,14 @@
                 type="email"
                 :disabled="true"
                 :required="isPersonalInfoRequired"
+                v-if="!hidePersonalInfo"
               />
               <FormControl
                 v-model="form.phone"
                 :label="__('Phone Number')"
                 type="tel"
                 :required="isPersonalInfoRequired"
-              />
-              <FormControl
-                v-model="form.mpesa_mobile_phone"
-                :label="__('MPESA Mobile Phone (if different)')"
-                type="tel"
+                v-if="!hidePersonalInfo"
               />
               <Link
                 v-model="form.gender"
@@ -71,12 +69,18 @@
                 v-model="form.date_of_birth"
                 :label="__('Date of Birth')"
                 type="date"
+                :required="isPersonalInfoRequired"
               />
               <FormControl
                 v-model="form.idpassport_number"
                 :label="__('ID/Passport Number')"
                 type="text"
                 :required="isPersonalInfoRequired"
+              />
+              <FormControl
+                v-model="form.mpesa_mobile_phone"
+                :label="__('MPESA Mobile Phone (if different)')"
+                type="tel"
               />
             </div>
           </section>
@@ -179,33 +183,10 @@
                   __("Profile Photo")
                 }}</label>
                 <Uploader
-                  v-if="!profilePhoto"
                   label="Upload Profile Photo"
                   :fileTypes="['.jpg', '.jpeg', '.png']"
                   :onSuccess="(data) => (profilePhoto = data)"
                 />
-                <div
-                  v-else
-                  class="flex items-center p-3 rounded-xl bg-gray-50 justify-between"
-                >
-                  <div class="flex items-center">
-                    <FileText class="h-6 w-6 text-gray-600 mr-2" />
-                    <a
-                      :href="profilePhoto.file_url"
-                      target="_blank"
-                      class="text-blue-600 hover:underline"
-                    >
-                      {{ profilePhoto.file_name }}
-                    </a>
-                  </div>
-                  <Button
-                    @click="profilePhoto = null"
-                    variant="subtle"
-                    class="text-red-500"
-                  >
-                    ✕
-                  </Button>
-                </div>
               </div>
 
               <div>
@@ -213,38 +194,27 @@
                   __("Upload Resume")
                 }}</label>
                 <Uploader
-                  v-if="!resume"
                   label="Upload Resume"
                   :fileTypes="['.pdf', '.docx', '.doc']"
                   :onSuccess="(file) => (resume = file)"
                 />
-                <div
-                  v-else
-                  class="flex items-center p-3 rounded-xl bg-gray-50 justify-between"
-                >
-                  <div class="flex items-center">
-                    <FileText class="h-6 w-6 text-gray-600 mr-2" />
-                    <a
-                      :href="resume.file_url"
-                      target="_blank"
-                      class="text-blue-600 hover:underline"
-                    >
-                      {{ resume.file_name }}
-                    </a>
-                  </div>
-                  <Button
-                    @click="resume = null"
-                    variant="subtle"
-                    class="text-red-500"
-                  >
-                    ✕
-                  </Button>
-                </div>
               </div>
             </div>
           </section>
 
           <section class="mb-10">
+            <div>
+              <label class="block mb-2 font-semibold text-gray-800">
+                {{ __("Supporting Documents") }}
+              </label>
+              <Uploader
+                label="Upload Documents"
+                :fileTypes="['.pdf', '.docx', '.doc', '.jpg', '.png']"
+                :multi="true"
+                :onSuccess="handleDocumentUpload"
+              />
+            </div>
+
             <FormControl
               v-model="form.cover_letter"
               :label="__('Cover Letter')"
@@ -278,7 +248,6 @@ import { FormControl, toast, createResource, Button } from "frappe-ui";
 import Link from "@/components/Controls/Link.vue";
 import MultiSelect from "@/components/Controls/MultiSelect.vue";
 import Uploader from "@/components/Controls/Uploader.vue";
-import { FileText } from "lucide-vue-next";
 
 const router = useRouter();
 const user = inject("$user");
@@ -293,6 +262,7 @@ const loading = ref(true);
 const resume = ref(null);
 const profilePhoto = ref(null);
 const applicationId = ref(null);
+const documents = ref([]);
 
 const form = ref({
   company: "",
@@ -367,9 +337,8 @@ const jobApplication = createResource({
   reloadOn: () => !!user.data?.email,
   onSuccess(data) {
     if (data?.length) {
-      applicationId.value = data[0].name;
-      Object.assign(form.value, data[0]);
       loading.value = false;
+      router.push({ name: "Dashboard" });
     } else {
       loading.value = false;
       form.value.email_id = user.data?.email || "";
@@ -381,9 +350,10 @@ const opportunityApplication = createResource({
   makeParams() {
     const params = {
       ...form.value,
-      resume: resume.value?.name,
-      profile_photo: profilePhoto.value?.name,
+      resume: resume.value,
+      profile_photo: profilePhoto.value,
       is_volunteer: true,
+      documents: documents.value,
     };
 
     if (applicationId.value) {
@@ -393,6 +363,16 @@ const opportunityApplication = createResource({
     return params;
   },
 });
+const handleDocumentUpload = (file) => {
+  const newDocument = {
+    file_name: file.file_name,
+    file_url: file.file_url,
+    file_size: file.file_size,
+    uploaded_on: new Date().toISOString(),
+  };
+  documents.value.push(newDocument);
+  toast.success(`Document "${file.file_name}" uploaded successfully`);
+};
 
 function submitResume() {
   opportunityApplication.submit(
@@ -410,8 +390,6 @@ function submitResume() {
         }
       },
       onSuccess() {
-        console.log("Application submitted", opportunityApplication.data);
-
         toast.success(
           applicationId.value
             ? "Application updated successfully"
