@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "details_tab",
   "details_section",
   "project",
   "task",
@@ -36,8 +37,7 @@
   "advanced_filters_section",
   "filter_list",
   "select_employees_section",
-  "employee_list",
-  "connections_tab"
+  "employee_list"
  ],
  "fields": [
   {
@@ -133,6 +133,7 @@
   {
    "fieldname": "department",
    "fieldtype": "Table MultiSelect",
+   "hidden": 1,
    "label": "Department",
    "options": "Department Item"
   },
@@ -162,12 +163,6 @@
    "fieldname": "notes",
    "fieldtype": "Text Editor",
    "label": "Notes"
-  },
-  {
-   "fieldname": "connections_tab",
-   "fieldtype": "Tab Break",
-   "label": "Connections",
-   "show_dashboard": 1
   },
   {
    "fieldname": "details_section",
@@ -243,6 +238,12 @@
    "fieldname": "term_details",
    "fieldtype": "Text Editor",
    "label": "Term Details"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details",
+   "show_dashboard": 1
   }
  ],
  "grid_page_length": 50,
@@ -284,7 +285,7 @@
    "link_fieldname": "personnel_deployment_request"
   }
  ],
- "modified": "2025-09-20 11:18:33.340398",
+ "modified": "2025-09-20 18:21:23.133953",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Request",

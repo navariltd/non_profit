@@ -7,6 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "details_tab",
   "details_section",
   "employee",
   "employee_name",
@@ -31,10 +32,9 @@
   "approval_section",
   "deployment_approver",
   "deployment_approver_name",
+  "amended_from",
   "column_break_xpwb",
-  "date",
-  "connections_tab",
-  "amended_from"
+  "date"
  ],
  "fields": [
   {
@@ -186,12 +186,6 @@
    "label": "Date"
   },
   {
-   "fieldname": "connections_tab",
-   "fieldtype": "Tab Break",
-   "label": "Connections",
-   "show_dashboard": 1
-  },
-  {
    "fieldname": "deployment",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -227,6 +221,12 @@
    "fieldname": "term_details",
    "fieldtype": "Text Editor",
    "label": "Term Details"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Details",
+   "show_dashboard": 1
   }
  ],
  "grid_page_length": 50,
@@ -265,7 +265,7 @@
    "link_fieldname": "personnel_deployment_assignment"
   }
  ],
- "modified": "2025-09-20 11:32:21.209472",
+ "modified": "2025-09-20 18:19:58.276839",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Assignment",
