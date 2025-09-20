@@ -24,6 +24,16 @@ class PersonnelDeploymentRequest(Document):
             "expected_end_date",
         )
 
+        number_of_volunteers_required = int(self.number_of_volunteers_required or 0)
+        assigned_count = frappe.db.count(
+            "Personnel Deployment Assignment",
+            {"deployment": self.name, "docstatus": 1, "status": "Accepted"},
+        )
+        if assigned_count >= number_of_volunteers_required:
+            frappe.throw(
+                f"Cannot deploy personnel. The number of personnel required ({number_of_volunteers_required}) has already been met."
+            )
+
     @frappe.whitelist()
     def deploy_employees(self, employees: list):
         """Deploy employees by creating Personnel Deployment Assignment records"""
@@ -66,6 +76,8 @@ class PersonnelDeploymentRequest(Document):
                     assignment.set(field, value)
 
                 assignment.insert()
+
+                assignment.submit()
 
                 success.append(
                     {
@@ -273,11 +285,3 @@ class PersonnelDeploymentRequest(Document):
             "Volunteer Deployment Criteria",
             fields=["name", "criteria_name", "description"],
         )
-
-    def before_save(self):
-        """Auto-save functionality - update employee list when filters change"""
-        if not self.is_new():
-            employees = self.get_employees()
-            self.db_set(
-                "number_of_volunteers_required", len(employees), update_modified=False
-            )

@@ -15,8 +15,8 @@
   "expected_end_date",
   "column_break_qlgy",
   "company",
-  "notification_channels",
   "number_of_volunteers_required",
+  "notification_channels",
   "require_contract_before_deployment",
   "terms_section",
   "terms_of_reference",
@@ -121,7 +121,8 @@
    "fieldname": "number_of_volunteers_required",
    "fieldtype": "Int",
    "label": "Number of Volunteers Required",
-   "non_negative": 1
+   "non_negative": 1,
+   "reqd": 1
   },
   {
    "fieldname": "designation",
@@ -217,7 +218,7 @@
   {
    "fieldname": "employment_type",
    "fieldtype": "Table MultiSelect",
-   "label": "Employment Type",
+   "label": "Personnel Type",
    "options": "Employment Type Item"
   },
   {
@@ -283,7 +284,7 @@
    "link_fieldname": "personnel_deployment_request"
   }
  ],
- "modified": "2025-09-19 10:15:27.173321",
+ "modified": "2025-09-20 11:18:33.340398",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Request",

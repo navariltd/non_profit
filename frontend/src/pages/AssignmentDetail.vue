@@ -209,9 +209,42 @@
               </div>
             </div>
           </div>
+          <div
+            v-if="
+              projectDetail?.data?.status === 'Pending' &&
+              projectDetail?.data?.require_contract_before_deployment &&
+              !projectDetail?.data?.contract?.name
+            "
+            class="w-full flex items-center justify-center rounded-lg border border-yellow-300 bg-yellow-50 px-8 py-4 text-sm font-medium text-yellow-700 shadow-sm"
+          >
+            <svg
+              class="h-4 w-4 mr-2 text-yellow-500"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 9v2m0 4h.01M12 5.5a7.5 7.5 0 100 15 7.5 7.5 0 000-15z"
+              />
+            </svg>
+            <div class="flex-1">
+              <h3 class="text-sm font-semibold text-yellow-800 mb-1">
+                Contract Pending
+              </h3>
+              <p class="text-sm text-yellow-700">
+                A signed contract is required before you can accept this
+                project. Please wait, or contact the project manager for
+                assistance.
+              </p>
+            </div>
+          </div>
 
           <div
-            v-if="projectDetail.data.status === 'Pending'"
+            v-else-if="projectDetail?.data?.status === 'Pending'"
             class="bg-white rounded-xl shadow-lg border border-red-300 p-8"
           >
             <h2
@@ -227,9 +260,12 @@
                 you decide.
               </p>
 
-              <div class="flex justify-center">
+              <div
+                class="flex justify-center"
+                v-if="projectDetail?.data?.contract?.name"
+              >
                 <Button
-                  @click="downloadContract(projectDetail.data.contract.name)"
+                  @click="downloadContract(projectDetail?.data?.contract?.name)"
                   :loading="loading"
                   theme="red"
                   variant="solid"
@@ -245,11 +281,11 @@
             </p>
 
             <div class="flex gap-3">
-              <Button theme="red" class="flex-1" @click="acceptDialog = true">
+              <Button theme="green" class="flex-1" @click="acceptDialog = true">
                 Accept Project
               </Button>
               <Button
-                theme="gray"
+                theme="red"
                 variant="outline"
                 class="flex-1"
                 @click="rejectAssignment(projectDetail.data.name)"
@@ -293,8 +329,8 @@
           :loading="assignmentDecision.loading"
           @click="
             acceptAssignment(
-              projectDetail.data.name,
-              projectDetail.data.contract.name
+              projectDetail?.data?.name,
+              projectDetail?.data?.contract?.name
             )
           "
         >
@@ -424,12 +460,12 @@ const downloadContract = (contractName: string) => {
     headers["X-Frappe-CSRF-Token"] = window.csrf_token;
   }
 
-  fetch("/api/method/hrms.api._download_pdf", {
+  fetch("/api/method/frappe.utils.print_format.download_pdf", {
     method: "POST",
     headers,
     body: new URLSearchParams({
       doctype: "Contract",
-      docname: contractName,
+      name: contractName,
     }),
   })
     .then((response) => {
