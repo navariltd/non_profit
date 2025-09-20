@@ -15,6 +15,7 @@
   "task",
   "location",
   "column_break_qlbs",
+  "status",
   "company",
   "deployment",
   "require_contract_before_deployment",
@@ -32,7 +33,6 @@
   "deployment_approver_name",
   "column_break_xpwb",
   "date",
-  "status",
   "connections_tab",
   "amended_from"
  ],
@@ -50,7 +50,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Pending\nAccepted\nApproved\nRejected\nCancelled",
+   "options": "Pending\nAccepted\nRejected\nCancelled",
    "reqd": 1
   },
   {
@@ -69,10 +69,6 @@
    "fetch_from": "employee.first_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
    "label": "Employee Name"
   },
   {
@@ -269,7 +265,7 @@
    "link_fieldname": "personnel_deployment_assignment"
   }
  ],
- "modified": "2025-09-19 10:11:48.700829",
+ "modified": "2025-09-20 11:32:21.209472",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Assignment",
@@ -292,5 +288,22 @@
  "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [
+  {
+   "color": "Yellow",
+   "title": "Pending"
+  },
+  {
+   "color": "Green",
+   "title": "Accepted"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
+  },
+  {
+   "color": "Orange",
+   "title": "Cancelled"
+  }
+ ]
 }

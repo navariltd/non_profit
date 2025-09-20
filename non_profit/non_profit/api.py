@@ -1081,6 +1081,7 @@ def fetch_assigned_projects():
         filters={
             "employee": volunteer,
             "status": "Pending",
+            "docstatus": 1,
         },
         fields=["name", "deployment"],
     )

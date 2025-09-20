@@ -14,7 +14,7 @@ frappe.ui.form.on("Personnel Deployment Request", {
 
     frm.events.set_task_filter(frm);
     frm
-      .add_custom_button(__("Deploy Selected"), () => {
+      .add_custom_button(__("Send Deployment Request"), () => {
         frm.trigger("deploy_employees");
       })
       .addClass("btn-primary");
@@ -311,7 +311,7 @@ frappe.ui.form.on("Personnel Deployment Request", {
 
   confirm_deployment: function (frm, selected_employees) {
     frappe.confirm(
-      __("Deploy {0} employee(s) for this project?", [
+      __("Send deployment request for {0} employee(s) for this project?", [
         selected_employees.length,
       ]),
       () => frm.events.bulk_deploy_employees(frm, selected_employees)
@@ -327,7 +327,7 @@ frappe.ui.form.on("Personnel Deployment Request", {
           employees: employees,
         },
         freeze: true,
-        freeze_message: __("Creating Deployment Assignments..."),
+        freeze_message: __("Creating Deployment Requests..."),
       })
       .then((r) => {
         if (r.message) {
@@ -335,14 +335,14 @@ frappe.ui.form.on("Personnel Deployment Request", {
 
           let message = "";
           if (success && success.length > 0) {
-            message += __("Successfully created {0} deployment assignment(s)", [
+            message += __("Successfully created {0} deployment request(s)", [
               success.length,
             ]);
           }
           if (failure && failure.length > 0) {
             message +=
               (message ? "<br>" : "") +
-              __("Failed to create {0} assignment(s)", [failure.length]);
+              __("Failed to create {0} request(s)", [failure.length]);
           }
 
           if (message) {

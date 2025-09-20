@@ -1,6 +1,7 @@
 frappe.ui.form.on("Contract", {
   refresh(frm) {
     frm.events.set_task_filter(frm);
+    frm.events.set_party_user(frm);
   },
 
   project(frm) {
@@ -19,6 +20,10 @@ frappe.ui.form.on("Contract", {
         }
       });
     }
+  },
+
+  party_name(frm) {
+    frm.events.set_party_user(frm);
   },
 
   personnel_deployment_assignment(frm) {
@@ -55,5 +60,15 @@ frappe.ui.form.on("Contract", {
       }
       return { filters };
     });
+  },
+
+  set_party_user(frm) {
+    if (frm.doc.party_name && frm.doc.party_type === "Employee") {
+      frappe.db.get_value("Employee", frm.doc.party_name, "user_id", (r) => {
+        if (r && r.user_id) {
+          frm.set_value("party_user", r.user_id);
+        }
+      });
+    }
   },
 });
