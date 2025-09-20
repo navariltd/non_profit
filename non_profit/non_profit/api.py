@@ -17,6 +17,14 @@ from frappe.utils.data import make_filter_tuple
 from frappe.utils.file_manager import save_file
 from datetime import datetime
 
+from non_profit.non_profit.utils import (
+    get_current_fiscal_year,
+    get_shift_types,
+    get_dates_for_day_of_week,
+)
+from collections import defaultdict
+from frappe.utils import getdate
+
 
 @frappe.whitelist(allow_guest=True)
 def get_list(
@@ -904,8 +912,6 @@ def get_projects():
 @frappe.whitelist()
 def create_availability_slot(slot_data):
 
-    return
-
     try:
 
         if frappe.db.exists(
@@ -949,16 +955,137 @@ def create_availability_slot(slot_data):
 
 
 @frappe.whitelist()
-def get_availability_slots():
-    user = get_user_info().get("employee")
+def create_availability_schedule(slot_data):
+    
+    """
+    Creates Personnel Availability Schedule and generates Weekly Schedule Patterns
+    """
+    try:
+        employee = slot_data.get("employee")
+        fiscal_year = get_current_fiscal_year()
+        weekly_availability = slot_data.get("weekly_availability", {})
 
-    slots = frappe.db.get_all(
-        "Volunteer Availability Slot",
-        filters={"employee": user},
-        fields=["name", "starts_on", "ends_on"],
+        if frappe.db.exists("Personnel Availability Schedule", {"employee": employee}):
+            existing_doc = frappe.get_value(
+                "Personnel Availability Schedule", {"employee": employee}, "name"
+            )
+            frappe.delete_doc(
+                "Personnel Availability Schedule", existing_doc, ignore_permissions=True
+            )
+
+        personal_schedule_name = create_personal_schedule(employee, fiscal_year)
+        create_schedule(personal_schedule_name, weekly_availability)
+
+        generate_weekly_patterns(
+            personal_schedule_name, weekly_availability, fiscal_year
+        )
+
+        return {"employee": employee}
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Availability Schedule Creation Error")
+        frappe.throw("Availability Schedule Creation Error")
+
+
+def create_personal_schedule(employee, fiscal_year):
+    """Create or get existing Personnel Availability Schedule"""
+    existing = frappe.db.exists(
+        "Personnel Availability Schedule",
+        {"employee": employee, "fiscal_year": fiscal_year},
     )
 
-    return slots
+    if existing:
+        return existing
+
+    schedule_doc = frappe.new_doc("Personnel Availability Schedule")
+    schedule_doc.employee = employee
+    schedule_doc.fiscal_year = fiscal_year
+    schedule_doc.save(ignore_permissions=True)
+
+    return schedule_doc.name
+
+
+def generate_weekly_patterns(schedule_name, weekly_availability, fiscal_year):
+    """Generate individual date/shift records based on weekly pattern"""
+
+    fy_doc = frappe.get_doc("Fiscal Year", fiscal_year)
+    start_date = fy_doc.year_start_date
+    end_date = fy_doc.year_end_date
+
+    shifts = get_shift_types()
+
+    for day_name, selected_shifts in weekly_availability.items():
+        if not selected_shifts:
+            continue
+
+        day_dates = get_dates_for_day_of_week(start_date, end_date, day_name)
+
+        for date in day_dates:
+            for shift_name in selected_shifts:
+                shift_info = next((s for s in shifts if s.name == shift_name), None)
+                if shift_info:
+                    create_weekly_pattern_record(
+                        schedule_name, date, day_name, shift_info
+                    )
+
+
+def create_weekly_pattern_record(schedule_name, date, day_name, shift_info):
+    """Create individual Weekly Schedule Pattern record"""
+
+    pattern_doc = frappe.new_doc("Weekly Schedule Pattern")
+    pattern_doc.parent = schedule_name
+    pattern_doc.parenttype = "Personnel Availability Schedule"
+    pattern_doc.parentfield = "available_days"
+    pattern_doc.day = date
+    pattern_doc.from_time = f"{date} {shift_info.start_time}"
+    pattern_doc.to_time = f"{date} {shift_info.end_time}"
+    pattern_doc.save(ignore_permissions=True)
+
+
+def create_schedule(schedule_name, weekly_availability):
+    schedule_doc = frappe.new_doc("Schedule")
+    schedule_doc.parent = schedule_name
+    schedule_doc.parenttype = "Personnel Availability Schedule"
+    schedule_doc.parentfield = "schedules"
+    for day_name, selected_shifts in weekly_availability.items():
+        if not selected_shifts:
+            continue
+        for shift in selected_shifts:
+            schedule_doc = frappe.new_doc("Schedule")
+            schedule_doc.parent = schedule_name
+            schedule_doc.parenttype = "Personnel Availability Schedule"
+            schedule_doc.parentfield = "schedules"
+            schedule_doc.day = day_name
+            schedule_doc.shift_type = shift
+            schedule_doc.insert(ignore_permissions=True)
+
+
+@frappe.whitelist()
+def get_availability_slots():
+
+    user = get_user_info().get("employee")
+
+    parent = frappe.db.get_value(
+        "Personnel Availability Schedule", {"employee": user}, "name"
+    )
+    schedules = frappe.get_all(
+        "Schedule",
+        filters={"parent": parent},
+        fields=["name", "day", "shift_type"],
+    )
+
+    return schedules
+
+
+@frappe.whitelist()
+def get_present_slots():
+    user = get_user_info().get("employee")
+
+    slot = frappe.db.exists("Personnel Availability Schedule", {"employee": user})
+
+    if slot:
+        return True
+
+    return None
 
 
 @frappe.whitelist()

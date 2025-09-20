@@ -69,15 +69,15 @@
     </template>
     <template #actions>
       <div class="flex flex-row justify-end space-x-2 w-full items-center">
-        <Button variant="outline" theme="gray" @click="cancel"> Cancel </Button>
+        <Button variant="outline" theme="gray" @click="cancel"> Close </Button>
         <Button
           variant="solid"
-          theme="red"
+          theme="green"
           :loading="newSlot.loading"
           @click="submitAvailability"
           :disabled="totalSelectedShifts === 0"
         >
-          Save Availability
+          Save
         </Button>
       </div>
       <ErrorMessage :message="newSlot.error" class="mt-2 text-center" />
@@ -105,10 +105,8 @@ const shifts = createListResource({
   doctype: "Shift Type",
   fields: ["name", "start_time", "end_time"],
   auto: true,
+  orderBy: "start_time asc",
   cache: ["shifts"],
-  onSuccess(data) {
-    console.log("Fetched shifts:", data);
-  },
 });
 
 const daysList = [
@@ -132,16 +130,15 @@ const availability = reactive({
 });
 
 const newSlot = createResource({
-  url: "non_profit.non_profit.api.create_availability_slot",
+  url: "non_profit.non_profit.api.create_availability_schedule",
   makeParams(values) {
     return { slot_data: { ...values } };
   },
   onSuccess() {
-    if (presentSlots) {
-      presentSlots.fetch().then(() => {});
-    }
+    availabilitySlots.reload();
     resetForm();
     emit("success");
+    presentSlots.reload();
   },
 });
 
@@ -158,6 +155,29 @@ function formatTime(timeString) {
 function capitalizeDay(day) {
   return day.charAt(0).toUpperCase() + day.slice(1);
 }
+
+const availabilitySlots = createResource({
+  url: "non_profit.non_profit.api.get_availability_slots",
+  auto: true,
+  onSuccess(data) {
+    if (data && Array.isArray(data) && data.length > 0) {
+      resetForm();
+
+      data.forEach((slot) => {
+        const day = slot.day.toLowerCase();
+        const shiftType = slot.shift_type;
+
+        if (availability[day] && Array.isArray(availability[day])) {
+          if (!availability[day].includes(shiftType)) {
+            availability[day].push(shiftType);
+          }
+        }
+      });
+    } else {
+      resetForm();
+    }
+  },
+});
 
 function cancel() {
   setAvailability.value = false;
@@ -197,9 +217,7 @@ function submitAvailability() {
 
   const slotData = {
     employee: roleResource.data.employee,
-    company: roleResource.data.company,
-    user: roleResource.data.name,
-    weekly_availability: availability,
+    weekly_availability: { ...availability },
     type: "weekly_pattern",
   };
 
