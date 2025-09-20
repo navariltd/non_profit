@@ -950,8 +950,7 @@ def create_availability_slot(slot_data):
 
 @frappe.whitelist()
 def create_availability_schedule(slot_data):
-    print("Creating availability schedule...")
-    print(slot_data)
+    
     """
     Creates Personnel Availability Schedule and generates Weekly Schedule Patterns
     """

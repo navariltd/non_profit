@@ -60,7 +60,6 @@ def get_shift_types():
 def get_dates_for_day_of_week(start_date, end_date, day_name):
     """Get all dates for a specific day of week within date range"""
 
-    # Map day names to weekday numbers (Monday=0, Sunday=6)
     day_mapping = {
         "monday": 0,
         "tuesday": 1,
@@ -78,13 +77,11 @@ def get_dates_for_day_of_week(start_date, end_date, day_name):
     dates = []
     current_date = start_date
 
-    # Find first occurrence of target weekday
     while current_date.weekday() != target_weekday:
         current_date += timedelta(days=1)
 
-    # Collect all occurrences
     while current_date <= end_date:
         dates.append(current_date)
-        current_date += timedelta(days=7)  # Next week
+        current_date += timedelta(days=7)  
 
     return dates
