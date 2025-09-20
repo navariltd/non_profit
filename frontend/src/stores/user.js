@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { createResource } from "frappe-ui";
+import { createResource, createListResource } from "frappe-ui";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -27,8 +27,8 @@ export const usersStore = defineStore("lms-users", () => {
   });
 
   const presentSlots = createResource({
-    url: "non_profit.non_profit.api.get_availability_slots",
-    cache: "availability_slots",
+    url: "non_profit.non_profit.api.get_present_slots",
+    cache: "presentSlots",
     auto: true,
   });
 
