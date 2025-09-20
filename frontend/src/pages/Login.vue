@@ -15,14 +15,30 @@
             label="Email"
             v-model="userEmail"
           />
-          <Input
-            required
-            name="password"
-            type="password"
-            placeholder="••••••"
-            label="Password"
-            v-model="password"
-          />
+
+          <div class="flex items-center space-x-2">
+            <Input
+              class="w-full"
+              required
+              name="password"
+              :type="passWordVisible ? 'text' : 'password'"
+              placeholder="••••••"
+              label="Password"
+              v-model="password"
+            />
+
+            <Eye
+              v-if="!passWordVisible"
+              class="w-5 h-5 mt-6 cursor-pointer text-gray-600"
+              @click="passWordVisible = !passWordVisible"
+            />
+
+            <EyeOff
+              v-if="passWordVisible"
+              class="w-5 h-5 mt-6 cursor-pointer text-gray-600"
+              @click="passWordVisible = !passWordVisible"
+            />
+          </div>
         </template>
 
         <template v-else>
@@ -53,6 +69,7 @@
             label="Email"
             v-model="signUpForm.email"
           />
+
           <Input
             required
             type="text"
@@ -107,7 +124,8 @@
   <Dialog
     :options="{
       title: 'Successfully Registered',
-      message: 'Await communication via email from RedCross',
+      message:
+        'We have sent you an email with a link to set your password. Please check your inbox (and spam folder) to complete your registration.',
       size: 'lg',
       icon: {
         name: 'check-circle',
@@ -129,10 +147,13 @@ import { createResource, Select } from "frappe-ui";
 import Dialog from "frappe-ui/src/components/Dialog/Dialog.vue";
 import { SignUp, initialForm, resetSignUpForm } from "../utils/volunteer";
 import { useRoute, useRouter } from "vue-router";
+import { Eye, EyeOff } from "lucide-vue-next";
 
 const route = useRoute();
 
 const router = useRouter();
+
+const passWordVisible = ref(false);
 
 const isLogin = ref(true);
 const userEmail = ref("");

@@ -190,7 +190,11 @@
     </div>
   </div>
 
-  <Availability @success="updateAvailability" v-model="setAvailability" />
+  <Availability
+    @success="updateAvailability"
+    v-model="setAvailability"
+    @cancel="updateAvailability(true)"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -199,6 +203,7 @@ import { Dialog, Button, createResource, Badge, toast } from "frappe-ui";
 import { Bell, LucideCalendar } from "lucide-vue-next";
 import Availability from "./Modals/Availability.vue";
 import { usersStore } from "../stores/user";
+import { set } from "ace-builds-internal/config";
 
 interface Task {
   name: string;
@@ -250,10 +255,6 @@ const fecthAssignments = createResource({
 
 const { presentSlots } = usersStore();
 
-
-
-
-
 // Priority theme
 function priorityTheme(priority: string) {
   switch (priority) {
@@ -268,8 +269,12 @@ function priorityTheme(priority: string) {
   }
 }
 
-function updateAvailability() {
+function updateAvailability(cancelled = false) {
   presentSlots.reload();
   toast.success("Availability updated successfully");
+
+  if (cancelled) {
+    setAvailability.value = false;
+  }
 }
 </script>
