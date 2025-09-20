@@ -3,7 +3,7 @@
     <!-- Top Buttons -->
     <div class="flex flex-row justify-end items-center m-6 md:space-x-4">
       <div
-        v-if="presentSlots.data && presentSlots.data.length === 0"
+        v-if="!presentSlots.data"
         class="flex items-center justify-center"
       >
         <p
