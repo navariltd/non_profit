@@ -66,7 +66,7 @@ import Autocomplete from "@/components/Controls/Autocomplete.vue";
 import { watchDebounced } from "@vueuse/core";
 import { createResource, Button } from "frappe-ui";
 import { Plus, X } from "lucide-vue-next";
-import { useAttrs, computed, ref } from "vue";
+import { useAttrs, computed, ref, watch } from "vue";
 
 const props = defineProps({
   doctype: {
@@ -121,15 +121,20 @@ watchDebounced(
   { debounce: 300, immediate: true }
 );
 
+const serializeFilters = (f) => {
+  if (!f) return "{}";
+  return typeof f === "string" ? f : JSON.stringify(f);
+};
+
 const options = createResource({
   url: "non_profit.non_profit.api.custom_search_link",
-  cache: [props.doctype, text.value],
+  cache: [props.doctype, text.value, serializeFilters(props.filters)],
   method: "POST",
   auto: true,
   params: {
     txt: text.value,
     doctype: props.doctype,
-    filters: props.filters,
+    filters: serializeFilters(props.filters),
   },
   transform: (data) => {
     return data.map((option) => {
@@ -142,12 +147,12 @@ const options = createResource({
   },
 });
 
-const reload = (val) => {
+const reload = (val = autocomplete.value?.query || "") => {
   options.update({
     params: {
       txt: val,
       doctype: props.doctype,
-      filters: props.filters,
+      filters: serializeFilters(props.filters),
     },
   });
   options.reload();
@@ -167,4 +172,10 @@ const labelClasses = computed(() => {
     "text-ink-gray-5",
   ];
 });
+
+watch(
+  () => props.filters,
+  () => reload(autocomplete.value?.query || ""),
+  { immediate: true, deep: true }
+);
 </script>

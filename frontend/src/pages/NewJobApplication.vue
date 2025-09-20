@@ -1,6 +1,5 @@
 <template>
   <div class="max-w-5xl mx-auto py-10 space-y-8">
-    <!-- Job Header -->
     <div
       v-if="job.data"
       class="p-6 rounded-xl shadow-sm border border-gray-200 bg-gradient-to-r from-red-50 to-white"
@@ -39,7 +38,6 @@
       </div>
     </div>
 
-    <!-- Already Applied Notice -->
     <div
       v-if="isApplied"
       class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center"
@@ -61,7 +59,6 @@
       </Button>
     </div>
 
-    <!-- Application Form -->
     <div
       v-else
       class="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
@@ -71,7 +68,6 @@
       </h2>
 
       <form class="space-y-10" @submit.prevent="submitApplication">
-        <!-- Personal Information -->
         <div
           v-if="!user.data?.name"
           class="bg-gray-50 rounded-xl p-6 border border-gray-200"
@@ -111,11 +107,9 @@
           </div>
         </div>
 
-        <!-- Documents -->
         <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
           <h3 class="text-xl font-semibold text-gray-800 mb-6">Documents</h3>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Profile Photo -->
             <div>
               <label class="block mb-2 font-semibold text-gray-800"
                 >Profile Photo</label
@@ -153,7 +147,6 @@
               </div>
             </div>
 
-            <!-- Resume -->
             <div>
               <label class="block mb-2 font-semibold text-gray-800"
                 >Resume</label
@@ -192,9 +185,22 @@
               </div>
             </div>
           </div>
+
+          <div class="mt-6">
+            <label class="block mb-2 font-semibold text-gray-800"
+              >Supporting Documents</label
+            >
+            <Uploader
+              label="Upload Supporting Documents"
+              :multi="true"
+              :fileTypes="['.pdf', '.docx', '.doc', '.jpg', '.png']"
+              :maxSize="10"
+              :onSuccess="(file) => documents.push(file)"
+              :onError="handleError"
+            />
+          </div>
         </div>
 
-        <!-- Cover Letter -->
         <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
           <h3 class="text-xl font-semibold text-gray-800 mb-6">Cover Letter</h3>
           <FormControl
@@ -206,7 +212,6 @@
           />
         </div>
 
-        <!-- Submit Button -->
         <div class="flex justify-end">
           <Button
             type="submit"
@@ -251,6 +256,7 @@ const form = ref({
 
 const resume = ref(null);
 const profilePhoto = ref(null);
+const documents = ref([]);
 
 const jobApplication = createResource({
   url: "frappe.client.get_list",
@@ -274,8 +280,9 @@ const opportunityApplication = createResource({
     return {
       job_opening: jobId,
       ...form.value,
-      resume: resume.value?.name,
-      profile_photo: profilePhoto.value?.name,
+      resume: resume.value,
+      profile_photo: profilePhoto.value,
+      documents: documents.value,
     };
   },
 });

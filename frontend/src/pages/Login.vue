@@ -107,7 +107,8 @@
   <Dialog
     :options="{
       title: 'Successfully Registered',
-      message: 'Await communication via email from RedCross',
+      message:
+        'We have sent you an email with a link to set your password. Please check your inbox (and spam folder) to complete your registration.',
       size: 'lg',
       icon: {
         name: 'check-circle',
