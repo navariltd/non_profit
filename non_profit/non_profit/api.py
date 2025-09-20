@@ -898,6 +898,8 @@ def get_projects():
 @frappe.whitelist()
 def create_availability_slot(slot_data):
 
+    return
+
     try:
 
         if frappe.db.exists(
