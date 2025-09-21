@@ -215,12 +215,20 @@
               />
             </div>
 
-            <FormControl
-              v-model="form.cover_letter"
-              :label="__('Cover Letter')"
-              type="textarea"
-              :rows="10"
-            />
+            <span class="mb-2 !pt-4 text-lg font-semibold text-gray-800">
+              {{ __("Cover Letter") }}
+            </span>
+            <div
+              class="mt-6 mb-2 font-semibold text-gray-800 border border-gray-300 rounded-lg"
+            >
+              <TextEditor
+                editor-class="min-h-[20rem] w-full rounded-b-lg border-t-0 p-2"
+                :content="form.cover_letter"
+                @change="(val) => (form.cover_letter = val)"
+                :bubbleMenu="true"
+                :fixed-menu="true"
+              />
+            </div>
           </section>
 
           <div class="flex justify-end">
@@ -244,7 +252,13 @@
 import { ref, inject, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { usersStore } from "../../stores/user";
-import { FormControl, toast, createResource, Button } from "frappe-ui";
+import {
+  FormControl,
+  TextEditor,
+  toast,
+  createResource,
+  Button,
+} from "frappe-ui";
 import Link from "@/components/Controls/Link.vue";
 import MultiSelect from "@/components/Controls/MultiSelect.vue";
 import Uploader from "@/components/Controls/Uploader.vue";
