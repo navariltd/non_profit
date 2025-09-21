@@ -19,8 +19,7 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Course",
-   "options": "LMS Course",
-   "reqd": 1
+   "options": "LMS Course"
   },
   {
    "fieldname": "column_break_jyfw",
@@ -40,10 +39,10 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-20 18:26:54.444482",
+ "modified": "2025-09-21 23:28:34.843200",
  "modified_by": "Administrator",
  "module": "Non Profit",
- "name": "LMS Course Item",
+ "name": "Employee LMS Course",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

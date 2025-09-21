@@ -99,19 +99,39 @@
       </button>
     </div>
 
-    <div v-if="uploading" class="space-y-1 mt-4">
-      <div class="flex justify-between text-sm text-gray-600">
-        <span>Uploading {{ currentUploadFile }}...</span>
-        <span>{{ progress }}%</span>
-      </div>
-      <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-        <div
-          class="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full animate-pulse transition-all duration-300"
-          :style="{ width: `${progress}%` }"
-        ></div>
-      </div>
-      <div class="text-xs text-gray-500 text-center">
-        {{ uploadQueue.length }} file(s) remaining
+    <div
+      v-if="uploading"
+      class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
+    >
+      <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg">
+        <h2 class="text-lg font-semibold text-gray-800 mb-4">
+          Uploading Files
+        </h2>
+
+        <div class="space-y-4 max-h-80 overflow-y-auto pr-2">
+          <div
+            v-for="(item, index) in uploadQueue"
+            :key="item.file.name + index"
+            class="space-y-1"
+          >
+            <div class="flex justify-between text-sm font-medium text-gray-700">
+              <span class="truncate w-40">{{ item.file.name }}</span>
+              <span>{{ item.progress }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div
+                class="bg-gradient-to-r from-blue-400 to-blue-600 h-2 rounded-full transition-all duration-300"
+                :style="{ width: `${item.progress}%` }"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 text-center">
+          <p class="text-xs text-gray-500">
+            {{ uploadQueue.length }} file(s) uploading...
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -139,6 +159,7 @@ const props = withDefaults(
     uploadArgs?: { [key: string]: any };
     multi?: boolean;
     maxFiles?: number;
+    maxFileSize?: number;
   }>(),
   {
     modelValue: "",
@@ -149,16 +170,14 @@ const props = withDefaults(
     uploadArgs: () => ({}),
     multi: false,
     maxFiles: 10,
+    maxFileSize: 10,
   }
 );
 
 const fileInput = ref<HTMLInputElement | null>(null);
 const uploading = ref(false);
-const progress = ref(0);
 const uploadedFiles = ref<any[]>([]);
-const uploadQueue = ref<File[]>([]);
-const currentUploadFile = ref<string>("");
-let cancelRequested = false;
+const uploadQueue = ref<{ file: File; progress: number }[]>([]);
 
 const triggerFileInput = () => fileInput.value?.click();
 
@@ -186,21 +205,18 @@ async function uploadFile(file: File) {
     ? root + fileData.file_url
     : fileData.file_url;
 
-  if (file.size) {
-    fileData.file_size = file.size;
-  }
+  if (file.size) fileData.file_size = file.size;
 
   return fileData;
 }
 
-const simulateProgress = () => {
+const simulateProgress = (update: (p: number) => void) => {
   return new Promise<void>((resolve) => {
     const start = Date.now();
     const tick = () => {
-      if (cancelRequested) return;
       const elapsed = Date.now() - start;
       const target = Math.min(90, Math.floor((elapsed / 1500) * 90));
-      progress.value = target;
+      update(target);
       if (elapsed >= 1000) return resolve();
       requestAnimationFrame(tick);
     };
@@ -269,46 +285,35 @@ const onDrop = (e: DragEvent) => {
 
 const handleFiles = async (files: File[]) => {
   const validFiles = validateFiles(files);
-
   if (!validFiles.length) return;
 
   if (!props.multi && uploadedFiles.value.length > 0) {
     uploadedFiles.value = [];
   }
 
-  uploadQueue.value = [...validFiles];
+  uploadQueue.value = validFiles.map((f) => ({ file: f, progress: 0 }));
   uploading.value = true;
 
-  for (let i = 0; i < validFiles.length; i++) {
-    const file = validFiles[i];
-    currentUploadFile.value = file.name;
-    progress.value = 0;
+  for (const item of uploadQueue.value) {
+    const file = item.file;
+    item.progress = 0;
 
     try {
-      await simulateProgress();
+      await simulateProgress((p) => (item.progress = p));
       const data = await uploadFile(file);
       uploadedFiles.value.push(data);
+      item.progress = 100;
+
       emit("success", data);
-      progress.value = 100;
-
-      if (!props.multi) {
-        emit("update:modelValue", data.file_url);
-      }
-
+      if (!props.multi) emit("update:modelValue", data.file_url);
       toast.success(`${file.name} uploaded successfully.`);
     } catch (err: any) {
-      console.error(err);
-      toast.error(
-        `Failed to upload ${file.name}: ` + (err.message || "Unknown error")
-      );
+      item.progress = 0;
+      toast.error(`Failed to upload ${file.name}: ${err.message}`);
     }
-
-    uploadQueue.value.shift();
   }
 
   uploading.value = false;
-  currentUploadFile.value = "";
-
   emit("filesChanged", uploadedFiles.value);
 };
 

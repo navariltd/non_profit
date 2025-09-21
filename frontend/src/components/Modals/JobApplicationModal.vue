@@ -1,5 +1,8 @@
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div v-if="alreadyApplied" class="text-center py-10">
+    <PendingApproval />
+  </div>
+  <div v-else class="min-h-screen flex flex-col">
     <main class="flex-1 container mx-auto px-6 py-10">
       <div class="bg-white shadow-lg rounded-2xl p-8">
         <div v-if="loading" class="text-center py-10">
@@ -8,6 +11,11 @@
 
         <div v-else>
           <section class="mb-8">
+            <h1
+              class="text-xl uppercase font-bold mb-4 text-center text-red-700"
+            >
+              Volunteer Signup
+            </h1>
             <h2 class="text-xl font-bold text-red-700 mb-4">
               {{ __("Organization") }}
             </h2>
@@ -131,7 +139,7 @@
               class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-300"
             >
               <MultiSelect
-                doctype="Training Program"
+                doctype="LMS Course"
                 v-model="form.trainings"
                 :label="__('Trainings')"
               />
@@ -215,12 +223,20 @@
               />
             </div>
 
-            <FormControl
-              v-model="form.cover_letter"
-              :label="__('Cover Letter')"
-              type="textarea"
-              :rows="10"
-            />
+            <span class="mb-2 !pt-4 text-lg font-semibold text-gray-800">
+              {{ __("Cover Letter") }}
+            </span>
+            <div
+              class="mt-6 mb-2 font-semibold text-gray-800 border border-gray-300 rounded-lg"
+            >
+              <TextEditor
+                editor-class="min-h-[20rem] w-full rounded-b-lg border-t-0 p-2"
+                :content="form.cover_letter"
+                @change="(val) => (form.cover_letter = val)"
+                :bubbleMenu="true"
+                :fixed-menu="true"
+              />
+            </div>
           </section>
 
           <div class="flex justify-end">
@@ -244,10 +260,17 @@
 import { ref, inject, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { usersStore } from "../../stores/user";
-import { FormControl, toast, createResource, Button } from "frappe-ui";
+import {
+  FormControl,
+  TextEditor,
+  toast,
+  createResource,
+  Button,
+} from "frappe-ui";
 import Link from "@/components/Controls/Link.vue";
 import MultiSelect from "@/components/Controls/MultiSelect.vue";
 import Uploader from "@/components/Controls/Uploader.vue";
+import PendingApproval from "../PendingApproval.vue";
 
 const router = useRouter();
 const user = inject("$user");
@@ -320,6 +343,7 @@ const bloodGroupOptions = [
 const hidePersonalInfo = computed(() => roleResource.data?.name);
 const showOnlyDocsProfile = computed(() => roleResource.data?.employee);
 const isPersonalInfoRequired = computed(() => !showOnlyDocsProfile.value);
+const alreadyApplied = ref(false);
 
 const jobApplication = createResource({
   url: "non_profit.non_profit.api.get_list",
@@ -338,7 +362,7 @@ const jobApplication = createResource({
   onSuccess(data) {
     if (data?.length) {
       loading.value = false;
-      router.push({ name: "Dashboard" });
+      alreadyApplied.value = true;
     } else {
       loading.value = false;
       form.value.email_id = user.data?.email || "";

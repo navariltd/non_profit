@@ -1,14 +1,10 @@
 <template>
-  <div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">Volunteer Signup</h1>
-
-    <!-- Child component -->
-    <JobApplicationModal
-      v-model="showModal"
-      :show-only-docs="false"
-      job="VOLUNTEER-001"
-    />
-  </div>
+  <!-- Child component -->
+  <JobApplicationModal
+    v-model="showModal"
+    :show-only-docs="false"
+    job="VOLUNTEER-001"
+  />
 </template>
 
 <script setup lang="ts">

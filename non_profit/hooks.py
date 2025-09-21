@@ -42,6 +42,8 @@ doctype_js = {
     "Employee": "non_profit/overrides/client/employee.js",
     "Job Applicant": "non_profit/overrides/client/job_applicant.js",
     "Contract": "non_profit/overrides/client/contract.js",
+    "Interview": "non_profit/overrides/client/interview.js",
+    "Interview Round": "non_profit/overrides/client/interview_round.js",
 }
 
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
@@ -126,6 +128,9 @@ doc_events = {
     "Employee Onboarding": {
         "on_update": "non_profit.non_profit.overrides.server.employee_onboarding.on_update",
         "on_update_after_submit": "non_profit.non_profit.overrides.server.employee_onboarding.on_update_after_submit",
+    },
+    "Job Opening": {
+        "validate": "non_profit.non_profit.overrides.server.job_opening.validate"
     },
 }
 

@@ -16,15 +16,14 @@
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Additional Skill",
-   "reqd": 1
+   "label": "Additional Skill"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-02 08:51:55.382049",
+ "modified": "2025-09-21 23:29:03.935965",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Additional Skill",

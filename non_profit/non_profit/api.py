@@ -391,6 +391,9 @@ def _attach_file(doc, file_info, field_name=None):
     file_url = file_info.get("file_url") if isinstance(file_info, dict) else file_info
     file_name = file_info.get("file_name") if isinstance(file_info, dict) else None
 
+    if not file_url:
+        return
+
     already_attached = frappe.db.exists(
         "File",
         {
@@ -410,17 +413,19 @@ def _attach_file(doc, file_info, field_name=None):
             "attached_to_doctype": doc.doctype,
             "attached_to_name": doc.name,
             "is_private": 0,
+            "file_size": 0,
+            "content": None,
         }
     )
 
     file_doc.insert(ignore_permissions=True)
+
     if field_name:
         frappe.db.set_value(
             doc.doctype,
             doc.name,
             {field_name: file_doc.file_url},
         )
-
         frappe.db.commit()
 
 
@@ -498,8 +503,7 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             kwargs["other_names"] = f"{first_name} {middle_name}".strip()
             kwargs["email_id"] = user_doc.email or ""
             kwargs["gender"] = user_doc.gender or ""
-            kwargs["date_of_birth"] = user_doc.birth_date or ""
-            kwargs["phone"] = user_doc.phone or user_doc.mobile_no or ""
+            kwargs["phone_number"] = user_doc.phone or user_doc.mobile_no or ""
 
         email_id = kwargs.get("email_id")
         if (
@@ -528,7 +532,7 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             "profession": "profession",
             "reason_to_join": "reason_to_join",
             "email_id": "personal_email",
-            "phone": "cell_number",
+            "phone_number": "cell_number",
             "idpassport_number": "id_passport_number",
             "cover_letter": "bio",
             "profile_photo": "image",
@@ -542,20 +546,27 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
                 for app_field, emp_field in employee_fields_map.items():
                     if hasattr(employee, emp_field) and getattr(employee, emp_field):
                         kwargs[app_field] = getattr(employee, emp_field)
-        surname = kwargs.pop("surname", "")
-        other_names = kwargs.pop("other_names", "")
+        surname = kwargs.get("surname", "")
+        other_names = kwargs.get("other_names", "")
         name_to_use = f"{other_names} {surname}".strip()
 
         table_fields = {
             "disabilities": ("disability", None),
             "allergies": ("allergy", None),
-            "additional_skills": ("additional_skill", None),
-            "trainings": ("training_program", "Training Program"),
+            "skills": ("skill", None),
+            "trainings": ("course", "LMS Course"),
             "languages": ("language", "Language"),
         }
 
         other_languages = kwargs.pop("other_languages", None)
         table_data = {key: kwargs.pop(key, None) for key in table_fields}
+
+        if kwargs.get("date_of_birth"):
+            try:
+                date_of_birth = getdate(kwargs.get("date_of_birth"))
+                kwargs["date_of_birth"] = date_of_birth
+            except Exception:
+                kwargs.pop("date_of_birth", None)
 
         doc_data = {
             "doctype": "Job Applicant",
@@ -956,7 +967,6 @@ def create_availability_slot(slot_data):
 
 @frappe.whitelist()
 def create_availability_schedule(slot_data):
-    
     """
     Creates Personnel Availability Schedule and generates Weekly Schedule Patterns
     """

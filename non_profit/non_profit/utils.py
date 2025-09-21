@@ -82,6 +82,31 @@ def get_dates_for_day_of_week(start_date, end_date, day_name):
 
     while current_date <= end_date:
         dates.append(current_date)
-        current_date += timedelta(days=7)  
+        current_date += timedelta(days=7)
 
     return dates
+
+
+@frappe.whitelist()
+def get_interviewers():
+    settings = frappe.get_single("Non Profit Settings")
+    allowed_roles = [r.role for r in settings.interview_roles]
+
+    if not allowed_roles:
+        return frappe.get_all("User", filters={"enabled": 1}, pluck="name")
+
+    users_with_roles = frappe.get_all(
+        "User",
+        filters={
+            "name": [
+                "in",
+                frappe.get_all(
+                    "Has Role", filters={"role": ["in", allowed_roles]}, pluck="parent"
+                ),
+            ],
+            "enabled": 1,
+        },
+        pluck="name",
+    )
+
+    return users_with_roles

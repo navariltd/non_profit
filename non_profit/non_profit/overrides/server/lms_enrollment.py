@@ -16,23 +16,25 @@ def on_update(doc: Document, method: str) -> None:
     if not course_skills:
         return
 
-    existing_skills = {skill.skill for skill in frappe.get_all("User Skill", fields=["skill"])}
+    existing_skills = {
+        skill.skill for skill in frappe.get_all("User Skill", fields=["skill"])
+    }
     for skill in course_skills:
         if skill not in existing_skills:
-            skill_doc = frappe.get_doc({
-                "doctype": "User Skill",
-                "skill": skill
-            })
+            skill_doc = frappe.get_doc({"doctype": "User Skill", "skill": skill})
             skill_doc.insert(ignore_permissions=True)
-    
+
     user_doc = frappe.get_doc("User", doc.member)
     existing_user_skills = {row.skill_name for row in getattr(user_doc, "skill", [])}
 
     for skill in course_skills:
         if skill not in existing_user_skills:
-            user_doc.append("skill", {
-                "skill_name": skill,
-            })
+            user_doc.append(
+                "skill",
+                {
+                    "skill_name": skill,
+                },
+            )
 
     user_doc.save(ignore_permissions=True)
 
@@ -40,17 +42,28 @@ def on_update(doc: Document, method: str) -> None:
     if not employee:
         return
 
+    employee_doc = frappe.get_doc("Employee", employee)
+    existing_employee_skills = {
+        row.skill for row in getattr(employee_doc, "skills", [])
+    }
+
+    added_to_employee = False
+    for skill in course_skills:
+        if skill not in existing_employee_skills:
+            employee_doc.append("skills", {"skill": skill})
+            added_to_employee = True
+
+    if added_to_employee:
+        employee_doc.save(ignore_permissions=True)
+
     skill_maps = frappe.get_all(
-        "Employee Skill Map",
-        filters={"employee": employee},
-        fields=["name"]
+        "Employee Skill Map", filters={"employee": employee}, fields=["name"]
     )
 
     if not skill_maps:
-        skill_map_doc = frappe.get_doc({
-            "doctype": "Employee Skill Map",
-            "employee": employee
-        })
+        skill_map_doc = frappe.get_doc(
+            {"doctype": "Employee Skill Map", "employee": employee}
+        )
         skill_map_doc.insert(ignore_permissions=True)
         skill_maps = [{"name": skill_map_doc.name}]
 
@@ -65,10 +78,7 @@ def on_update(doc: Document, method: str) -> None:
     added = False
     for skill in course_skills:
         if skill not in existing_emp_skills:
-            target_map.append("employee_skills", {
-                "skill": skill,
-                "proficiency": 5
-            })
+            target_map.append("employee_skills", {"skill": skill, "proficiency": 5})
             added = True
 
     if added:
