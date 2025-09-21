@@ -80,7 +80,7 @@ function fetchJobApplicantDetails(frm) {
       "disabilities",
       "allergies",
       "trainings",
-      "additional_skills",
+      "skills",
       "languages",
     ];
 

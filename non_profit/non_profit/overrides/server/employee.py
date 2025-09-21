@@ -193,7 +193,7 @@ def update_fields_from_applicant(doc: Document) -> bool:
             "disabilities",
             "allergies",
             "trainings",
-            "additional_skills",
+            "skills",
             "languages",
         ]
 

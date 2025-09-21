@@ -13,13 +13,12 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Skill",
-   "options": "Skill",
-   "reqd": 1
+   "options": "Skill"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2025-08-28 09:13:43.521183",
+ "modified": "2025-09-21 23:31:31.045052",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Volunteer Skill",

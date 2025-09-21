@@ -17,15 +17,14 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Licence",
-   "options": "Personnel License Type",
-   "reqd": 1
+   "options": "Personnel License Type"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-18 09:25:30.392910",
+ "modified": "2025-09-21 23:28:47.485312",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Licence Item",

@@ -553,7 +553,7 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
         table_fields = {
             "disabilities": ("disability", None),
             "allergies": ("allergy", None),
-            "additional_skills": ("additional_skill", None),
+            "skills": ("skill", None),
             "trainings": ("course", "LMS Course"),
             "languages": ("language", "Language"),
         }

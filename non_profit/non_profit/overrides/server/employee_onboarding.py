@@ -13,6 +13,7 @@ def on_update(doc: Document, method: str) -> None:
 
             if job_applicant:
                 applicant = frappe.get_doc("Job Applicant", job_applicant)
+
                 existing_enrollment = frappe.db.exists(
                     "LMS Enrollment", {"member": job_applicant, "course": course}
                 )
@@ -23,6 +24,23 @@ def on_update(doc: Document, method: str) -> None:
                     new_enrollment.course = course
                     new_enrollment.save(ignore_permissions=True)
                     frappe.db.commit()
+
+                employee = frappe.db.get_value(
+                    "Employee", {"job_applicant": job_applicant}, "name"
+                )
+                if employee:
+                    employee_doc = frappe.get_doc("Employee", employee)
+
+                    training_exists = False
+                    for training in employee_doc.get("trainings", []):
+                        if training.course == course:
+                            training_exists = True
+                            break
+
+                    if not training_exists:
+                        employee_doc.append("trainings", {"course": course})
+                        employee_doc.save(ignore_permissions=True)
+                        frappe.db.commit()
 
 
 @frappe.whitelist()
