@@ -391,6 +391,9 @@ def _attach_file(doc, file_info, field_name=None):
     file_url = file_info.get("file_url") if isinstance(file_info, dict) else file_info
     file_name = file_info.get("file_name") if isinstance(file_info, dict) else None
 
+    if not file_url:
+        return
+
     already_attached = frappe.db.exists(
         "File",
         {
@@ -410,17 +413,19 @@ def _attach_file(doc, file_info, field_name=None):
             "attached_to_doctype": doc.doctype,
             "attached_to_name": doc.name,
             "is_private": 0,
+            "file_size": 0,
+            "content": None,
         }
     )
 
     file_doc.insert(ignore_permissions=True)
+
     if field_name:
         frappe.db.set_value(
             doc.doctype,
             doc.name,
             {field_name: file_doc.file_url},
         )
-
         frappe.db.commit()
 
 
@@ -956,7 +961,6 @@ def create_availability_slot(slot_data):
 
 @frappe.whitelist()
 def create_availability_schedule(slot_data):
-    
     """
     Creates Personnel Availability Schedule and generates Weekly Schedule Patterns
     """
