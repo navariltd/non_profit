@@ -272,42 +272,22 @@ def get_membership_types():
 
 @frappe.whitelist(allow_guest=True)
 def get_job_openings(filters=None, orFilters=None):
-
     if not filters:
         filters = {}
     filters["publish"] = 1
+    filters["status"] = "Open"
+    filters["posted_on"] = ["<=", frappe.utils.nowdate()]
 
-    requested_status = filters.pop("status", None)
+    or_filters = orFilters or []
 
-    today = frappe.utils.nowdate()
-    current_datetime = datetime.now()
-
-    if requested_status == "Open":
-        filters["status"] = "Open"
-        filters["closes_on"] = [">", today]
-        filters["posted_on"] = ["<=", current_datetime]
-    elif requested_status == "Closed":
-        filters["status"] = "Closed"
-    elif requested_status == "Upcoming":
-        filters["status"] = "Open"
-        filters["posted_on"] = [">", current_datetime]
-    elif requested_status == "Ending Soon":
-        filters["status"] = "Open"
-        filters["closes_on"] = ["between", [today, frappe.utils.add_days(today, 7)]]
-    elif requested_status == "Recently Posted":
-        filters["status"] = "Open"
-        filters["posted_on"] = [
-            "between",
-            [
-                datetime.fromtimestamp(current_datetime.timestamp() - 7 * 86400),
-                current_datetime,
-            ],
-        ]
+    user = frappe.session.user
+    if user == "Guest":
+        filters["opportunity_type"] = "Guest"
 
     jobs = frappe.get_all(
         "Job Opening",
         filters=filters,
-        or_filters=orFilters,
+        or_filters=or_filters,
         fields=[
             "job_title",
             "posted_on",
@@ -350,6 +330,7 @@ def get_job_details(job):
             "vacancies",
             "location",
             "employment_type",
+            "opportunity_type",
             "company",
             "department",
             "name",
@@ -368,6 +349,10 @@ def get_job_details(job):
     job_details["applicant_count"] = frappe.db.count(
         "Job Applicant", {"job_title": job_details["name"]}
     )
+
+    job_details["designation"] = frappe.get_doc(
+        "Designation", job_details["designation"]
+    ).as_dict()
 
     if job_details.get("company"):
         company = frappe.db.get_value(

@@ -202,14 +202,20 @@
         </div>
 
         <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-          <h3 class="text-xl font-semibold text-gray-800 mb-6">Cover Letter</h3>
-          <FormControl
-            v-model="form.cover_letter"
-            :label="__('Cover Letter')"
-            type="textarea"
-            :rows="10"
-            placeholder="Write your cover letter here"
-          />
+          <span class="mb-2 !pt-4 text-lg font-semibold text-gray-800">
+            {{ __("Cover Letter") }}
+          </span>
+          <div
+            class="mt-6 mb-2 font-semibold text-gray-800 border border-gray-300 rounded-lg"
+          >
+            <TextEditor
+              editor-class="min-h-[20rem] w-full rounded-b-lg border-t-0 p-2"
+              :content="form.cover_letter"
+              @change="(val) => (form.cover_letter = val)"
+              :bubbleMenu="true"
+              :fixed-menu="true"
+            />
+          </div>
         </div>
 
         <div class="flex justify-end">
@@ -229,7 +235,13 @@
 <script setup>
 import { ref, computed, inject } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Button, FormControl, toast, createResource } from "frappe-ui";
+import {
+  Button,
+  FormControl,
+  toast,
+  createResource,
+  TextEditor,
+} from "frappe-ui";
 import Uploader from "@/components/Controls/Uploader.vue";
 
 const route = useRoute();

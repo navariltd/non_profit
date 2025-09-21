@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-6xl mx-auto py-10 px-4">
+  <div class="w-full mx-auto py-2 px-1">
     <div v-if="!user.data?.email" class="text-center py-20">
       <LogIn class="w-16 h-16 text-gray-400 mx-auto mb-4" />
       <h2 class="text-2xl font-semibold text-gray-700 mb-2">
@@ -33,7 +33,7 @@
           v-for="app in applications.data"
           :key="app.name"
           :to="{ name: 'JobApplicationDetail', params: { id: app.name } }"
-          class="block rounded-xl shadow hover:shadow-lg transition-shadow border border-gray-200 bg-gradient-to-br from-white to-gray-50 p-6"
+          class="flex flex-col bg-gradient-to-br from-white via-red-50 to-red-100 border border-red-200 rounded-2xl p-6 h-full shadow-md hover:shadow-lg transition-all duration-300"
         >
           <div class="flex items-start gap-4">
             <div>
