@@ -1,5 +1,8 @@
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div v-if="alreadyApplied" class="text-center py-10">
+    <PendingApproval />
+  </div>
+  <div v-else class="min-h-screen flex flex-col">
     <main class="flex-1 container mx-auto px-6 py-10">
       <div class="bg-white shadow-lg rounded-2xl p-8">
         <div v-if="loading" class="text-center py-10">
@@ -8,6 +11,11 @@
 
         <div v-else>
           <section class="mb-8">
+            <h1
+              class="text-xl uppercase font-bold mb-4 text-center text-red-700"
+            >
+              Volunteer Signup
+            </h1>
             <h2 class="text-xl font-bold text-red-700 mb-4">
               {{ __("Organization") }}
             </h2>
@@ -262,6 +270,7 @@ import {
 import Link from "@/components/Controls/Link.vue";
 import MultiSelect from "@/components/Controls/MultiSelect.vue";
 import Uploader from "@/components/Controls/Uploader.vue";
+import PendingApproval from "../PendingApproval.vue";
 
 const router = useRouter();
 const user = inject("$user");
@@ -334,6 +343,7 @@ const bloodGroupOptions = [
 const hidePersonalInfo = computed(() => roleResource.data?.name);
 const showOnlyDocsProfile = computed(() => roleResource.data?.employee);
 const isPersonalInfoRequired = computed(() => !showOnlyDocsProfile.value);
+const alreadyApplied = ref(false);
 
 const jobApplication = createResource({
   url: "non_profit.non_profit.api.get_list",
@@ -352,7 +362,7 @@ const jobApplication = createResource({
   onSuccess(data) {
     if (data?.length) {
       loading.value = false;
-      router.push({ name: "Dashboard" });
+      alreadyApplied.value = true;
     } else {
       loading.value = false;
       form.value.email_id = user.data?.email || "";

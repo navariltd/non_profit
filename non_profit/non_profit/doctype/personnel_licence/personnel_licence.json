@@ -17,7 +17,7 @@
  ],
  "fields": [
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "license_type",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -36,15 +36,11 @@
    "columns": 1,
    "fieldname": "discipline",
    "fieldtype": "Link",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
    "label": "Discipline",
    "options": "Personnel Discipline"
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "institution",
    "fieldtype": "Link",
    "in_filter": 1,
@@ -55,7 +51,7 @@
    "options": "Institution"
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "registration_no",
    "fieldtype": "Data",
    "in_filter": 1,
@@ -68,34 +64,22 @@
    "columns": 1,
    "fieldname": "qualification",
    "fieldtype": "Data",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
    "label": "Qualification"
   },
   {
    "columns": 1,
    "fieldname": "valid_from",
    "fieldtype": "Date",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
    "label": "Valid From"
   },
   {
    "columns": 1,
    "fieldname": "valid_to",
    "fieldtype": "Date",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
    "label": "Valid To"
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "attachment",
    "fieldtype": "Attach",
    "label": "Attachment"
@@ -105,7 +89,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-18 09:24:22.255735",
+ "modified": "2025-09-21 23:20:26.747998",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Licence",

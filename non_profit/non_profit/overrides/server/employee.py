@@ -51,10 +51,23 @@ def ensure_job_offer_for_volunteer(job_applicant: str) -> None:
 
     applicant = frappe.get_doc("Job Applicant", job_applicant)
 
+    designation = applicant.designation
+    if not designation:
+        if not frappe.db.exists("Designation", {"designation_name": "Volunteer"}):
+            designation_doc = frappe.get_doc(
+                {
+                    "doctype": "Designation",
+                    "designation_name": "Volunteer",
+                }
+            )
+            designation_doc.insert(ignore_permissions=True)
+        designation = "Volunteer"
+
     job_offer = frappe.new_doc("Job Offer")
     job_offer.job_applicant = applicant.name
     job_offer.company = applicant.company
-    job_offer.designation = applicant.designation
+    job_offer.designation = designation
+
     job_offer.status = "Accepted"
     job_offer.offer_date = frappe.utils.today()
 

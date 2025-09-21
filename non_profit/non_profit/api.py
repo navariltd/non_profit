@@ -503,8 +503,7 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             kwargs["other_names"] = f"{first_name} {middle_name}".strip()
             kwargs["email_id"] = user_doc.email or ""
             kwargs["gender"] = user_doc.gender or ""
-            kwargs["date_of_birth"] = user_doc.birth_date or ""
-            kwargs["phone"] = user_doc.phone or user_doc.mobile_no or ""
+            kwargs["phone_number"] = user_doc.phone or user_doc.mobile_no or ""
 
         email_id = kwargs.get("email_id")
         if (
@@ -533,7 +532,7 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             "profession": "profession",
             "reason_to_join": "reason_to_join",
             "email_id": "personal_email",
-            "phone": "cell_number",
+            "phone_number": "cell_number",
             "idpassport_number": "id_passport_number",
             "cover_letter": "bio",
             "profile_photo": "image",
@@ -547,8 +546,8 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
                 for app_field, emp_field in employee_fields_map.items():
                     if hasattr(employee, emp_field) and getattr(employee, emp_field):
                         kwargs[app_field] = getattr(employee, emp_field)
-        surname = kwargs.pop("surname", "")
-        other_names = kwargs.pop("other_names", "")
+        surname = kwargs.get("surname", "")
+        other_names = kwargs.get("other_names", "")
         name_to_use = f"{other_names} {surname}".strip()
 
         table_fields = {
@@ -561,6 +560,13 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
 
         other_languages = kwargs.pop("other_languages", None)
         table_data = {key: kwargs.pop(key, None) for key in table_fields}
+
+        if kwargs.get("date_of_birth"):
+            try:
+                date_of_birth = getdate(kwargs.get("date_of_birth"))
+                kwargs["date_of_birth"] = date_of_birth
+            except Exception:
+                kwargs.pop("date_of_birth", None)
 
         doc_data = {
             "doctype": "Job Applicant",
