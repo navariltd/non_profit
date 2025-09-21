@@ -131,7 +131,7 @@
               class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-300"
             >
               <MultiSelect
-                doctype="Training Program"
+                doctype="LMS Course"
                 v-model="form.trainings"
                 :label="__('Trainings')"
               />

@@ -1133,7 +1133,7 @@
       "name": "Employee-trainings",
       "no_copy": 0,
       "non_negative": 0,
-      "options": "LMS Course Item",
+      "options": "Employee LMS Course",
       "owner": "Administrator",
       "permlevel": 0,
       "placeholder": null,
