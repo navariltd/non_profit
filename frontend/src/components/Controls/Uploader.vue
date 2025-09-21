@@ -184,7 +184,6 @@ const triggerFileInput = () => fileInput.value?.click();
 async function uploadFile(file: File) {
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("cmd", "non_profit.non_profit.api.upload_file");
 
   for (const [key, value] of Object.entries(props.uploadArgs)) {
     formData.append(key, value);
@@ -192,22 +191,14 @@ async function uploadFile(file: File) {
 
   const response = await fetch(
     "/api/method/non_profit.non_profit.api.upload_file",
-    { method: "POST", body: formData }
+    {
+      method: "POST",
+      body: formData,
+    }
   );
 
   if (!response.ok) throw new Error(await response.text());
-
-  const result = await response.json();
-  const fileData = result.message;
-
-  const root = window.location.origin;
-  fileData.file_url = fileData.file_url.startsWith("/")
-    ? root + fileData.file_url
-    : fileData.file_url;
-
-  if (file.size) fileData.file_size = file.size;
-
-  return fileData;
+  return (await response.json()).message;
 }
 
 const simulateProgress = (update: (p: number) => void) => {
