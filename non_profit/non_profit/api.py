@@ -555,7 +555,7 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             "disabilities": ("disability", None),
             "allergies": ("allergy", None),
             "additional_skills": ("additional_skill", None),
-            "trainings": ("training_program", "Training Program"),
+            "trainings": ("course", "LMS Course"),
             "languages": ("language", "Language"),
         }
 
