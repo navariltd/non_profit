@@ -92,6 +92,64 @@
             </div>
           </div>
 
+          <!-- Designation Section (Red Cross Theme) -->
+          <div v-if="job.data.designation" class="mt-12">
+            <h2
+              class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2"
+            >
+              <ClipboardType class="w-6 h-6 text-red-600" />
+              {{ __("Designation Details") }}
+            </h2>
+
+            <div
+              class="p-6 bg-white rounded-2xl border-l-4 border-red-600 shadow-md space-y-6"
+            >
+              <!-- Title & Description -->
+              <div class="grid sm:grid-cols-2 gap-6">
+                <div>
+                  <p
+                    class="text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                  >
+                    {{ __("Title") }}
+                  </p>
+                  <p class="mt-1 text-lg font-bold text-gray-900">
+                    {{ job.data.designation.name }}
+                  </p>
+                </div>
+
+                <div v-if="job.data.designation.description">
+                  <p
+                    class="text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                  >
+                    {{ __("Description") }}
+                  </p>
+                  <p class="mt-1 text-gray-700 leading-relaxed">
+                    {{ job.data.designation.description }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Required Skills -->
+              <div v-if="job.data.designation.skills?.length">
+                <p
+                  class="text-xs font-semibold text-gray-500 uppercase tracking-wide"
+                >
+                  {{ __("Required Skills") }}
+                </p>
+                <div class="flex flex-wrap gap-2 mt-3">
+                  <span
+                    v-for="(skill, idx) in job.data.designation.skills"
+                    :key="idx"
+                    class="px-3 py-1 rounded-full text-sm font-medium bg-red-50 text-red-700 border border-red-200 flex items-center gap-1 shadow-sm hover:bg-red-100 transition"
+                  >
+                    <Check class="w-3 h-3 text-red-600" />
+                    {{ skill?.skill }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="flex flex-wrap gap-3 mt-4">
             <Badge
               size="lg"

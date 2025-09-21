@@ -417,17 +417,17 @@ export function getSidebarLinks() {
       activeFor: ["Dashboard"],
     },
     {
-      label: "Jobs",
+      label: "Opportunities",
       icon: "Briefcase",
       to: "Jobs",
       activeFor: ["Jobs", "JobDetail", "JobForm", "NewJobApplication"],
     },
-    {
-      label: "Applications",
-      icon: "FileText",
-      to: "JobApplication",
-      activeFor: ["JobApplication", "JobApplicationDetail"],
-    },
+    // {
+    //   label: "Applications",
+    //   icon: "FileText",
+    //   to: "JobApplication",
+    //   activeFor: ["JobApplication", "JobApplicationDetail"],
+    // },
     {
       label: "Projects",
       icon: "FolderKanban",
