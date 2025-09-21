@@ -127,6 +127,9 @@ doc_events = {
         "on_update": "non_profit.non_profit.overrides.server.employee_onboarding.on_update",
         "on_update_after_submit": "non_profit.non_profit.overrides.server.employee_onboarding.on_update_after_submit",
     },
+    "Job Opening": {
+        "validate": "non_profit.non_profit.overrides.server.job_opening.validate"
+    },
 }
 
 # Scheduled Tasks
