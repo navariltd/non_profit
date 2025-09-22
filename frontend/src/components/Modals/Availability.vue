@@ -136,7 +136,6 @@ const newSlot = createResource({
   },
   onSuccess() {
     availabilitySlots.reload();
-    resetForm();
     emit("success");
     presentSlots.reload();
   },
@@ -161,8 +160,6 @@ const availabilitySlots = createResource({
   auto: true,
   onSuccess(data) {
     if (data && Array.isArray(data) && data.length > 0) {
-      resetForm();
-
       data.forEach((slot) => {
         const day = slot.day.toLowerCase();
         const shiftType = slot.shift_type;
@@ -181,7 +178,6 @@ const availabilitySlots = createResource({
 
 function cancel() {
   setAvailability.value = false;
-  resetForm();
   emit("cancel");
 }
 
@@ -218,7 +214,6 @@ function submitAvailability() {
   const slotData = {
     employee: roleResource.data.employee,
     weekly_availability: { ...availability },
-    type: "weekly_pattern",
   };
 
   newSlot.submit(slotData);
@@ -229,11 +224,5 @@ const totalSelectedShifts = computed(() => {
     (total, dayShifts) => total + dayShifts.length,
     0
   );
-});
-
-watch(setAvailability, (isOpen) => {
-  if (!isOpen) {
-    resetForm();
-  }
 });
 </script>
