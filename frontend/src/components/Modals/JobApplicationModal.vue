@@ -172,12 +172,12 @@
                 type="textarea"
                 :rows="6"
               />
-              <FormControl
+              <!-- <FormControl
                 v-model="form.additional_skills"
                 :label="__('Additional Skills')"
                 type="textarea"
                 :rows="6"
-              />
+              /> -->
             </div>
           </section>
 
