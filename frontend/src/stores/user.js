@@ -6,7 +6,7 @@ const router = useRouter();
 
 export const usersStore = defineStore("lms-users", () => {
   let userResource = createResource({
-    url: "lms.lms.api.get_user_info",
+    url: "non_profit.non_profit.api.get_user_info",
     onError(error) {
       if (error && error.exc_type === "AuthenticationError") {
         router.push("/login");
