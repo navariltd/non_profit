@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { usersStore } from "./stores/user";
 import { sessionStore } from "./stores/session";
-import { useSettings } from "./stores/settings";
 
 const routes = [
   {
@@ -141,7 +140,6 @@ let router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const { userResource } = usersStore();
   let { isLoggedIn } = sessionStore();
-  const { allowGuestAccess } = useSettings();
 
   if (to.meta.requiresAuth === false) {
     return next();
@@ -156,17 +154,10 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (!isLoggedIn) {
-    await allowGuestAccess.promise;
-    if (allowGuestAccess.data) {
-      if (to.meta.requiresAuth) {
-        return next({ name: "Login" });
-      } else {
-        return next();
-      }
+    if (to.meta.requiresAuth) {
+      return next({ name: "Login" });
     } else {
-      if (to.name !== "Login") {
-        return next({ name: "Login" });
-      }
+      return next();
     }
   }
 
