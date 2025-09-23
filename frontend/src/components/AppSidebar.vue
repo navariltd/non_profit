@@ -157,10 +157,6 @@ import {
   ref,
   onMounted,
   inject,
-  watch,
-  reactive,
-  markRaw,
-  h,
   onUnmounted,
 } from "vue";
 import { getSidebarLinks } from "@/utils";
@@ -168,59 +164,33 @@ import { usersStore } from "@/stores/user";
 import { sessionStore } from "@/stores/session";
 import { useSidebar } from "@/stores/sidebar";
 import { useSettings } from "@/stores/settings";
-import { Button, createResource, Tooltip } from "frappe-ui";
+import { Button, Tooltip } from "frappe-ui";
 import PageModal from "@/components/Modals/PageModal.vue";
-import { capture } from "@/telemetry";
-import VMMSLogo from "@/components/Icons/VMMSLogo.vue";
 import { useRouter } from "vue-router";
-import InviteIcon from "./Icons/InviteIcon.vue";
 import {
-  BookOpen,
   CircleAlert,
   ChevronRight,
   Plus,
   CircleHelp,
-  FolderTree,
-  FileText,
-  UserPlus,
-  Users,
-  BookText,
   Zap,
 } from "lucide-vue-next";
 import {
-  TrialBanner,
-  HelpModal,
-  GettingStartedBanner,
-  useOnboarding,
   showHelpModal,
   minimize,
-  IntermediateStepModal,
 } from "frappe-ui/frappe";
 
 const { user } = sessionStore();
 const { userResource } = usersStore();
 let sidebarStore = useSidebar();
 const socket = inject("$socket");
-const unreadCount = ref(0);
 const sidebarLinks = ref(getSidebarLinks());
 const showPageModal = ref(false);
 const isModerator = ref(false);
-const isInstructor = ref(false);
 const pageToEdit = ref(null);
 const settingsStore = useSettings();
 const { sidebarSettings } = settingsStore;
 const showOnboarding = ref(false);
-const showIntermediateModal = ref(false);
-const currentStep = ref({});
-const router = useRouter();
-let onboardingDetails;
-let isOnboardingStepsCompleted = false;
 const readOnlyMode = window.read_only_mode;
-const iconProps = {
-  strokeWidth: 1.5,
-  width: 16,
-  height: 16,
-};
 
 onMounted(() => {
   setSidebarLinks();
