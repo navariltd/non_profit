@@ -9,19 +9,18 @@ no_cache = 1
 
 
 def get_context():
-	context = frappe._dict()
-	context.boot = get_boot()
-	frappe.db.commit()
-
-	app_path = frappe.form_dict.get("app_path")
-	favicon = frappe.db.get_single_value("Website Settings", "favicon") 
-	title = frappe.db.get_single_value("Website Settings", "app_name") 
-
-	context.title = title
-	context.favicon = favicon
-
-	capture("active_site", "lms")
-	return context
+    csrf_token = frappe.sessions.get_csrf_token()  
+    frappe.db.commit()
+    context = frappe._dict()
+    context.boot = get_boot()
+    context.boot.csrf_token = csrf_token  
+    app_path = frappe.form_dict.get("app_path")
+    favicon = frappe.db.get_single_value("Website Settings", "favicon") 
+    title = frappe.db.get_single_value("Website Settings", "app_name") 
+    context.title = title
+    context.favicon = favicon
+    capture("active_site", "non_profit")
+    return context
 
 
 def get_boot():
@@ -32,5 +31,3 @@ def get_boot():
 			"csrf_token": frappe.sessions.get_csrf_token(),
 		}
 	)
-
-
