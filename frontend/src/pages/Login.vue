@@ -163,6 +163,15 @@ const signInState = ref(false);
 const signUpForm = reactive<SignUp>({ ...initialForm });
 
 const session = sessionStore();
+
+let { isLoggedIn } = sessionStore();
+
+onMounted(() => {
+  if (isLoggedIn) {
+    router.push({ name: "Dashboard" });
+  }
+});
+
 const genderOptions = [
   { label: "Male", value: "Male" },
   { label: "Female", value: "Female" },
