@@ -85,18 +85,20 @@ import { Button, createResource, toast } from "frappe-ui";
 import Welcome from "../components/Welcome.vue";
 import EventCalendar from "../components/EventCalendar.vue";
 import router from "../router";
+import { sessionStore } from "../stores/session";
 
 const { roleResource } = usersStore();
 const { events, currentMembership } = membershipStore();
 const toggleEventView = ref(false);
 
 const user = inject<any>("$user");
+let { isLoggedIn } = sessionStore();
 
 onMounted(() => {
-  if (!user.data) {
+  if (!isLoggedIn) {
     toast.warning("You must be logged in to view this page.");
     setTimeout(() => {
-      router.push("/login");
+      router.push({ name: "Login" });
     }, 500);
   } else {
     roleResource.reload();
