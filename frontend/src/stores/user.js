@@ -4,7 +4,7 @@ import { useRouter } from "vue-router";
 
 const router = useRouter();
 
-export const usersStore = defineStore("lms-users", () => {
+export const usersStore = defineStore("vmms-users", () => {
   let userResource = createResource({
     url: "non_profit.non_profit.api.get_user_info",
     onError(error) {
@@ -13,11 +13,6 @@ export const usersStore = defineStore("lms-users", () => {
       }
     },
     auto: true,
-  });
-
-  const allUsers = createResource({
-    url: "lms.lms.api.get_all_users",
-    cache: ["allUsers"],
   });
 
   const roleResource = createResource({
@@ -34,7 +29,6 @@ export const usersStore = defineStore("lms-users", () => {
 
   return {
     userResource,
-    allUsers,
     roleResource,
     presentSlots,
   };

@@ -220,16 +220,9 @@ const jobs = createResource({
   cache: ["jobs"],
 });
 
-const applications = createResource({
-  url: "non_profit.non_profit.api.get_job_applications",
-  cache: ["applications"],
-});
-
 const updateContent = () => {
   if (currentTab.value === "Open") {
     updateJobs();
-  } else if (currentTab.value === "My Applications") {
-    updateApplications();
   }
 };
 
@@ -239,10 +232,6 @@ const updateJobs = () => {
     params: { filters: filters.value, orFilters: orFilters.value },
   });
   jobs.reload();
-};
-
-const updateApplications = () => {
-  applications.reload();
 };
 
 const updateFilters = () => {
@@ -308,12 +297,6 @@ watch(selectedRegions, () => {
 watch(jobs, () => {
   if (currentTab.value === "Open") {
     jobCount.value = jobs.data?.length || 0;
-  }
-});
-
-watch(applications, () => {
-  if (currentTab.value === "My Applications") {
-    jobCount.value = applications.data?.length || 0;
   }
 });
 

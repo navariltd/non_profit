@@ -27,7 +27,6 @@
 import { computed, inject, onMounted } from "vue";
 import { createResource, ListView, Badge, toast } from "frappe-ui";
 import { useRoute } from "vue-router";
-import { on } from "ace-builds-internal/config";
 
 const route = useRoute();
 const user = inject<any>("$user");

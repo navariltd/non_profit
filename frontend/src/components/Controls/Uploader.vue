@@ -186,7 +186,7 @@ async function uploadFile(file: File) {
   formData.append("file", file);
 
   for (const [key, value] of Object.entries(props.uploadArgs)) {
-    formData.append(key, value);
+    formData.append(key, value as string);
   }
 
   const response = await fetch(
@@ -194,11 +194,20 @@ async function uploadFile(file: File) {
     {
       method: "POST",
       body: formData,
+      credentials: "include",
+      headers: {
+        "X-Frappe-CSRF-Token": (window as any).csrf_token,
+      },
     }
   );
 
-  if (!response.ok) throw new Error(await response.text());
-  return (await response.json()).message;
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text);
+  }
+
+  const data = await response.json();
+  return data.message;
 }
 
 const simulateProgress = (update: (p: number) => void) => {

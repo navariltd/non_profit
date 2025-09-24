@@ -1,24 +1,24 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { defineStore } from "pinia";
+import { ref } from "vue";
 
-export const useSidebar = defineStore('sidebar', () => {
-	const isSidebarCollapsed = ref(false)
-	const isWebpagesCollapsed = ref(true)
+export const useSidebar = defineStore("sidebar", () => {
+  const sidebarCollapsed = ref(false);
+  const webpagesCollapsed = ref(true);
 
-	if (localStorage.getItem('isSidebarCollapsed')) {
-		isSidebarCollapsed.value = JSON.parse(
-			localStorage.getItem('isSidebarCollapsed')
-		)
-	}
+  if (localStorage.getItem("sidebarCollapsed")) {
+    sidebarCollapsed.value = JSON.parse(
+      localStorage.getItem("sidebarCollapsed")
+    );
+  }
 
-	if (localStorage.getItem('isWebpagesCollapsed')) {
-		isWebpagesCollapsed.value = JSON.parse(
-			localStorage.getItem('isWebpagesCollapsed')
-		)
-	}
+  if (localStorage.getItem("webpagesCollapsed")) {
+    webpagesCollapsed.value = JSON.parse(
+      localStorage.getItem("webpagesCollapsed")
+    );
+  }
 
-	return {
-		isSidebarCollapsed,
-		isWebpagesCollapsed,
-	}
-})
+  return {
+    sidebarCollapsed,
+    webpagesCollapsed,
+  };
+});

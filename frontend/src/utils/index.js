@@ -1,9 +1,6 @@
 import { call, toast } from "frappe-ui";
 import { useTimeAgo } from "@vueuse/core";
 import { theme } from "@/utils/theme";
-import { Quiz } from "@/utils/quiz";
-import { Program } from "@/utils/program";
-import { Assignment } from "@/utils/assignment";
 import { Upload } from "@/utils/upload";
 import { Markdown } from "@/utils/markdownParser";
 import { useSettings } from "@/stores/settings";
@@ -129,9 +126,6 @@ export function getEditorTools() {
       class: Table,
       inlineToolbar: true,
     },
-    quiz: Quiz,
-    assignment: Assignment,
-    program: Program,
     upload: Upload,
     markdown: {
       class: Markdown,
@@ -420,19 +414,7 @@ export function getSidebarLinks() {
       label: "Opportunities",
       icon: "Briefcase",
       to: "Jobs",
-      activeFor: ["Jobs", "JobDetail", "JobForm", "NewJobApplication"],
-    },
-    // {
-    //   label: "Applications",
-    //   icon: "FileText",
-    //   to: "JobApplication",
-    //   activeFor: ["JobApplication", "JobApplicationDetail"],
-    // },
-    {
-      label: "Projects",
-      icon: "FolderKanban",
-      to: "Projects",
-      activeFor: ["Projects"],
+      activeFor: ["Jobs", "JobDetail", "NewJobApplication"],
     },
     {
       label: "Events",
@@ -445,6 +427,11 @@ export function getSidebarLinks() {
       icon: "Users",
       to: "Membership",
       activeFor: ["Membership"],
+    },
+    {
+      label: "Learning",
+      icon: "BookOpen",
+      to: "lms",
     },
   ];
 }
@@ -544,14 +531,6 @@ export const escapeHTML = (text) => {
   return String(text).replace(
     /[&<>"'`=]/g,
     (char) => escape_html_mapping[char] || char
-  );
-};
-
-export const canCreateCourse = () => {
-  const { userResource } = usersStore();
-  return (
-    !readOnlyMode &&
-    (userResource.data?.is_instructor || userResource.data?.is_moderator)
   );
 };
 
@@ -663,7 +642,7 @@ export const cleanError = (message) => {
 };
 
 export const getMetaInfo = (type, route, meta) => {
-  call("lms.lms.api.get_meta_info", {
+  call("non_profit.non_profit.api.get_meta_info", {
     type: type,
     route: route,
   }).then((data) => {
@@ -680,7 +659,7 @@ export const getMetaInfo = (type, route, meta) => {
 };
 
 export const updateMetaInfo = (type, route, meta) => {
-  call("lms.lms.api.update_meta_info", {
+  call("non_profit.non_profit.api.update_meta_info", {
     type: type,
     route: route,
     meta_tags: [

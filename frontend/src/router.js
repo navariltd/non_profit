@@ -15,41 +15,6 @@ const routes = [
     name: "Dashboard",
     component: () => import("@/pages/Dashboard.vue"),
   },
-
-  {
-    path: "/user/:username",
-    name: "Profile",
-    component: () => import("@/pages/Profile.vue"),
-    props: true,
-    redirect: { name: "ProfileAbout" },
-    children: [
-      {
-        name: "ProfileAbout",
-        path: "",
-        component: () => import("@/pages/ProfileAbout.vue"),
-      },
-      {
-        name: "ProfileCertificates",
-        path: "certificates",
-        component: () => import("@/pages/ProfileCertificates.vue"),
-      },
-      {
-        name: "ProfileRoles",
-        path: "roles",
-        component: () => import("@/pages/ProfileRoles.vue"),
-      },
-      {
-        name: "ProfileEvaluator",
-        path: "slots",
-        component: () => import("@/pages/ProfileEvaluator.vue"),
-      },
-      {
-        name: "ProfileEvaluationSchedule",
-        path: "schedule",
-        component: () => import("@/pages/ProfileEvaluationSchedule.vue"),
-      },
-    ],
-  },
   {
     path: "/opportunities",
     name: "Jobs",
@@ -60,17 +25,6 @@ const routes = [
     name: "JobDetail",
     component: () => import("@/pages/JobDetail.vue"),
     props: true,
-  },
-  {
-    path: "/opportunities/:jobName/edit",
-    name: "JobForm",
-    component: () => import("@/pages/JobForm.vue"),
-    props: true,
-  },
-  {
-    path: "/persona",
-    name: "PersonaForm",
-    component: () => import("@/pages/PersonaForm.vue"),
   },
   {
     name: "Login",

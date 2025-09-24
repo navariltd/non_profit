@@ -532,8 +532,6 @@ const canEditResource = createResource({
     return { applicant_id: applicationId };
   },
   onSuccess(data) {
-    console.log("Can Edit Response:", data);
-
     if (!data) {
       toast.warning(data?.reason || "This application cannot be edited.");
     }

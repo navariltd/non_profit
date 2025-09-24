@@ -4,7 +4,7 @@ import { usersStore } from "./user";
 import router from "@/router";
 import { computed, reactive, ref } from "vue";
 
-export const sessionStore = defineStore("lms-session", () => {
+export const sessionStore = defineStore("vmms-session", () => {
   let { userResource } = usersStore();
   const brand = reactive({});
 
@@ -43,25 +43,15 @@ export const sessionStore = defineStore("lms-session", () => {
   });
 
   const branding = createResource({
-    url: "lms.lms.api.get_branding",
+    url: "non_profit.non_profit.api.get_branding",
     cache: "brand",
     auto: true,
     onSuccess(data) {
       brand.name = data.app_name;
       brand.logo = data.app_logo;
       brand.favicon =
-        data.favicon?.file_url || "/assets/lms/frontend/learning.svg";
+        data.favicon?.file_url || "/assets/non_profit/frontend/favicon.png";
     },
-  });
-
-  const livecodeURL = createResource({
-    url: "frappe.client.get_single_value",
-    params: {
-      doctype: "LMS Settings",
-      field: "livecode_url",
-    },
-    cache: "livecodeURL",
-    auto: true,
   });
 
   return {
@@ -71,6 +61,5 @@ export const sessionStore = defineStore("lms-session", () => {
     logout,
     brand,
     branding,
-    livecodeURL,
   };
 });

@@ -1,33 +1,12 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { createResource } from "frappe-ui";
 import { sessionStore } from "./session";
+import { createResource } from "frappe-ui";
 
 export const useSettings = defineStore("settings", () => {
   const { isLoggedIn } = sessionStore();
   const isSettingsOpen = ref(false);
   const activeTab = ref(null);
-
-  const learningPaths = createResource({
-    url: "lms.lms.api.get_lms_setting",
-    params: { field: "enable_learning_paths" },
-    auto: true,
-    cache: ["learningPath"],
-  });
-
-  const allowGuestAccess = createResource({
-    url: "lms.lms.api.get_lms_setting",
-    params: { field: "allow_guest_access" },
-    auto: true,
-    cache: ["allowGuestAccess"],
-  });
-
-  const preventSkippingVideos = createResource({
-    url: "lms.lms.api.get_lms_setting",
-    params: { field: "prevent_skipping_videos" },
-    auto: true,
-    cache: ["preventSkippingVideos"],
-  });
 
   const sidebarSettings = createResource({
     url: "lms.lms.api.get_sidebar_settings",
@@ -38,9 +17,7 @@ export const useSettings = defineStore("settings", () => {
   return {
     isSettingsOpen,
     activeTab,
-    learningPaths,
-    allowGuestAccess,
-    preventSkippingVideos,
+    isLoggedIn,
     sidebarSettings,
   };
 });
