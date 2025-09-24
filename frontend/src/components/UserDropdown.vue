@@ -57,10 +57,8 @@ import Apps from "@/components/Apps.vue";
 import { useRouter } from "vue-router";
 import { convertToTitleCase } from "@/utils";
 import { usersStore } from "@/stores/user";
-import { useSettings } from "@/stores/settings";
 import { markRaw, watch, ref, onMounted, computed } from "vue";
 import { createDialog } from "@/utils/dialogs";
-import SettingsModal from "@/components/Settings/Settings.vue";
 import FrappeCloudIcon from "@/components/Icons/FrappeCloudIcon.vue";
 import {
   ChevronDown,
@@ -76,7 +74,6 @@ import {
 const router = useRouter();
 const { logout, branding } = sessionStore();
 let { userResource } = usersStore();
-const settingsStore = useSettings();
 let { isLoggedIn } = sessionStore();
 const showSettingsModal = ref(false);
 const theme = ref("light");
@@ -90,49 +87,11 @@ const props = defineProps({
   },
 });
 
-onMounted(() => {
-  theme.value = localStorage.getItem("theme") || "light";
-  if (["light", "dark"].includes(theme.value)) {
-    document.documentElement.setAttribute("data-theme", theme.value);
-  }
-});
-
-watch(
-  () => settingsStore.isSettingsOpen,
-  (value) => {
-    showSettingsModal.value = value;
-  }
-);
-
-const toggleTheme = () => {
-  const currentTheme = document.documentElement.getAttribute("data-theme");
-  theme.value = currentTheme === "dark" ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", theme.value);
-  localStorage.setItem("theme", theme.value);
-};
-
 const userDropdownOptions = computed(() => {
   return [
     {
       group: "",
       items: [
-        {
-          icon: User,
-          label: "My Profile",
-          onClick: () => {
-            router.push(`/user/${userResource.data?.username}`);
-          },
-          condition: () => {
-            return isLoggedIn;
-          },
-        },
-        // {
-        //   icon: theme.value === "light" ? Moon : Sun,
-        //   label: "Toggle Theme",
-        //   onClick: () => {
-        //     toggleTheme();
-        //   },
-        // },
         {
           component: markRaw(Apps),
           condition: () => {
@@ -144,16 +103,6 @@ const userDropdownOptions = computed(() => {
             else return false;
           },
         },
-        // {
-        //   icon: Settings,
-        //   label: "Settings",
-        //   onClick: () => {
-        //     settingsStore.isSettingsOpen = true;
-        //   },
-        //   condition: () => {
-        //     return userResource.data?.is_moderator;
-        //   },
-        // },
         {
           icon: FrappeCloudIcon,
           label: "Login to Frappe Cloud",

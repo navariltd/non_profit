@@ -15,6 +15,7 @@ from frappe.desk.search import (
 from frappe.model.db_query import get_order_by
 from frappe.utils.data import make_filter_tuple
 from frappe.utils.file_manager import save_file
+from frappe.translate import get_all_translations
 from datetime import datetime
 
 from non_profit.non_profit.utils import (
@@ -1579,3 +1580,104 @@ def can_edit_job_application(applicant_id: str) -> bool:
         return False
 
     return True
+
+
+@frappe.whitelist()
+def get_meta_info(type, route):
+    if frappe.db.exists("Website Meta Tag", {"parent": f"{type}/{route}"}):
+        meta_tags = frappe.get_all(
+            "Website Meta Tag",
+            {
+                "parent": f"{type}/{route}",
+            },
+            ["name", "key", "value"],
+        )
+
+        return meta_tags
+
+    return []
+
+
+@frappe.whitelist()
+def update_meta_info(type, route, meta_tags):
+    parent_name = f"{type}/{route}"
+    if not isinstance(meta_tags, list):
+        frappe.throw(_("Meta tags should be a list."))
+
+    for tag in meta_tags:
+        existing_tag = frappe.db.exists(
+            "Website Meta Tag",
+            {
+                "parent": parent_name,
+                "parenttype": "Website Route Meta",
+                "parentfield": "meta_tags",
+                "key": tag["key"],
+            },
+        )
+        if existing_tag:
+            if not tag.get("value"):
+                frappe.db.delete("Website Meta Tag", existing_tag)
+                continue
+            frappe.db.set_value("Website Meta Tag", existing_tag, "value", tag["value"])
+        elif tag.get("value"):
+            tag_properties = {
+                "parent": parent_name,
+                "parenttype": "Website Route Meta",
+                "parentfield": "meta_tags",
+                "key": tag["key"],
+                "value": tag["value"],
+            }
+
+            parent_exists = frappe.db.exists("Website Route Meta", parent_name)
+            if not parent_exists:
+                route_meta = frappe.new_doc("Website Route Meta")
+                route_meta.update(
+                    {
+                        "__newname": parent_name,
+                    }
+                )
+                route_meta.append("meta_tags", tag_properties)
+                route_meta.insert()
+            else:
+                new_tag = frappe.new_doc("Website Meta Tag")
+                new_tag.update(tag_properties)
+                print(new_tag)
+                new_tag.insert()
+                print(new_tag.as_dict())
+
+
+@frappe.whitelist(allow_guest=True)
+def get_translations():
+    if frappe.session.user != "Guest":
+        language = frappe.db.get_value("User", frappe.session.user, "language")
+    else:
+        language = frappe.db.get_single_value("System Settings", "language")
+    return get_all_translations(language)
+
+
+@frappe.whitelist(allow_guest=True)
+def get_branding():
+    """Get branding details."""
+    website_settings = frappe.get_single("Website Settings")
+    image_fields = ["banner_image", "footer_logo", "favicon"]
+
+    for field in image_fields:
+        if website_settings.get(field):
+            file_info = get_file_info(website_settings.get(field))
+            website_settings.update({field: json.loads(json.dumps(file_info))})
+        else:
+            website_settings.update({field: None})
+
+    return website_settings
+
+
+@frappe.whitelist()
+def get_file_info(file_url):
+    """Get file info for the given file URL."""
+    file_info = frappe.db.get_value(
+        "File",
+        {"file_url": file_url},
+        ["file_name", "file_size", "file_url"],
+        as_dict=1,
+    )
+    return file_info

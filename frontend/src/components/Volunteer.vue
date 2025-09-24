@@ -2,10 +2,7 @@
   <div>
     <!-- Top Buttons -->
     <div class="flex flex-row justify-end items-center m-6 md:space-x-4">
-      <div
-        v-if="!presentSlots.data"
-        class="flex items-center justify-center"
-      >
+      <div v-if="!presentSlots.data" class="flex items-center justify-center">
         <p
           class="text-sm border border-blue-600 p-1 bg-blue-100 rounded-lg text-blue-600 font-medium"
         >
@@ -203,7 +200,6 @@ import { Dialog, Button, createResource, Badge, toast } from "frappe-ui";
 import { Bell, LucideCalendar } from "lucide-vue-next";
 import Availability from "./Modals/Availability.vue";
 import { usersStore } from "../stores/user";
-import { set } from "ace-builds-internal/config";
 
 interface Task {
   name: string;
