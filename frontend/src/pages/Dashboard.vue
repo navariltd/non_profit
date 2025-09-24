@@ -94,16 +94,19 @@ const toggleEventView = ref(false);
 const user = inject<any>("$user");
 let { isLoggedIn } = sessionStore();
 
-onMounted(() => {
+onMounted(async () => {
   if (!isLoggedIn) {
     toast.warning("You must be logged in to view this page.");
     setTimeout(() => {
       router.push({ name: "Login" });
     }, 500);
   } else {
-    window.location.reload();
-    roleResource.reload();
-    currentMembership.reload();
+    await Promise.all([
+      roleResource.reload(),
+      currentMembership.reload(),
+      confirmEventStatus.reload(),
+      dashboardStats.reload(),
+    ]);
   }
 });
 
