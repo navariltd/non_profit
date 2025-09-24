@@ -101,6 +101,7 @@ onMounted(() => {
       router.push({ name: "Login" });
     }, 500);
   } else {
+    window.location.reload();
     roleResource.reload();
     currentMembership.reload();
   }
