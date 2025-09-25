@@ -31,12 +31,24 @@ def create_user(**kwargs):
                 "gender": kwargs.get("gender"),
                 "enabled": 1,
                 "default_app": "non_profit",
-                "module_profile": "Member",
                 "role_profile_name": "Member",
+                "module_profile": "Member",
             }
         )
 
         user.insert(ignore_permissions=True)
+
+        user_permission = frappe.get_doc(
+            {
+                "doctype": "User Permission",
+                "user": user.name,
+                "allow": "User",
+                "for_value": user.name,
+            }
+        )
+
+        user_permission.insert(ignore_permissions=True)
+
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Error signing up")
         frappe.throw("Error signing up")
@@ -52,8 +64,10 @@ def create_membership(**kwargs):
         membership = None
 
         if frappe.db.exists("Member", {"email_id": kwargs.get("email_id")}):
-            member = frappe.db.get_value("Member", {"email_id": kwargs.get("email_id")}, "name")
-        
+            member = frappe.db.get_value(
+                "Member", {"email_id": kwargs.get("email_id")}, "name"
+            )
+
             membership = frappe.db.exists("Membership", {"member": member})
         if member and membership:
             frappe.throw("Membership already exists for this member")
@@ -94,10 +108,18 @@ def create_membership(**kwargs):
 
             membership.insert(ignore_permissions=True)
 
+        user_permission = frappe.get_doc(
+            {
+                "doctype": "User Permission",
+                "user": user.name,
+                "allow": "Company",
+                "for_value": kwargs.get("branch"),
+            }
+        )
+        user_permission.insert(ignore_permissions=True)
+
         frappe.db.commit()
     except Exception as e:
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), "Error creating membership")
         frappe.throw("Error creating membership")
-
-
