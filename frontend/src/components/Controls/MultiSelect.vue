@@ -1,9 +1,9 @@
 <template>
   <div>
-    <label class="block mb-1" :class="labelClasses" v-if="label">
+    <!-- <label class="block mb-1" :class="labelClasses" v-if="label">
       {{ label }}
       <span class="text-ink-red-3" v-if="required">*</span>
-    </label>
+    </label> -->
 
     <div class="w-full">
       <Combobox v-model="selectedValue" nullable>
@@ -23,6 +23,7 @@
               autocomplete="off"
               @focus="() => togglePopover()"
               @keydown.delete.capture.stop="removeLastValue"
+              :placeholder="props.label || 'Select...'"
             />
           </template>
 

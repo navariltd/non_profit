@@ -1,17 +1,17 @@
 <template>
   <div class="space-y-2">
-    <label
+    <!-- <label
       v-if="label"
       :class="labelClasses"
       class="block font-medium text-gray-700"
     >
       {{ label }} <span v-if="required" class="text-red-600">*</span>
-    </label>
+    </label> -->
 
     <input
       v-model="query"
       type="text"
-      placeholder="Search..."
+      :placeholder="props.label || 'Select...'"
       autocomplete="off"
       class="form-input w-full rounded-md border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:ring focus:ring-red-200"
     />
