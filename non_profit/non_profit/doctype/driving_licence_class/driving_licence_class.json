@@ -2,26 +2,25 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "prompt",
- "creation": "2025-09-25 12:50:41.451846",
+ "creation": "2025-09-25 12:14:38.476218",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "description"
+  "section_break_5dzd"
  ],
  "fields": [
   {
-   "fieldname": "description",
-   "fieldtype": "Small Text",
-   "label": "Description"
+   "fieldname": "section_break_5dzd",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-25 12:51:23.846217",
+ "modified": "2025-09-25 12:14:46.873567",
  "modified_by": "Administrator",
  "module": "Non Profit",
- "name": "Disability",
+ "name": "Driving Licence Class",
  "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [

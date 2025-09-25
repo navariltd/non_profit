@@ -1,7 +1,7 @@
 // Copyright (c) 2025, Frappe and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Personnel Discipline", {
+// frappe.ui.form.on("Profession", {
 // 	refresh(frm) {
 
 // 	},

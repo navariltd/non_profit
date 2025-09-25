@@ -2,25 +2,25 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "prompt",
- "creation": "2025-09-18 08:39:23.141112",
+ "creation": "2025-09-25 11:47:25.625039",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "section_break_ppgh"
+  "section_break_yqqv"
  ],
  "fields": [
   {
-   "fieldname": "section_break_ppgh",
+   "fieldname": "section_break_yqqv",
    "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-18 08:39:30.084475",
+ "modified": "2025-09-25 11:47:42.017099",
  "modified_by": "Administrator",
  "module": "Non Profit",
- "name": "Personnel Discipline",
+ "name": "Profession",
  "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [

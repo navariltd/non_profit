@@ -472,17 +472,82 @@ def update_job_application(id: str, **kwargs) -> dict:
         }
 
         application = frappe.get_doc("Job Applicant", id)
+        meta = frappe.get_meta("Job Applicant")
+
+        table_fields = {
+            "disabilities": ("disability", None),
+            "allergies": ("allergy", None),
+            "skills": ("skill", None),
+            "driving_licences": ("course", "LMS Course"),
+            "licences": ("license_type", "Personnel License Type"),
+            "languages": ("language", "Language"),
+        }
+
+        table_data = {}
+        for key in table_fields:
+            if key in kwargs:
+                table_data[key] = kwargs.pop(key)
+
+        for key, value in kwargs.items():
+            if meta.has_field(key):
+                setattr(application, key, value)
+
+        table_fields = {
+            "disabilities": ("disability", None),
+            "allergies": ("allergy", None),
+            "skills": ("skill", None),
+            "driving_licences": (
+                "course",
+                "LMS Course",
+            ),
+            "licences": (None, "Personnel License Type"),
+            "languages": ("language", "Language"),
+        }
+
+        for key, (fieldname, linked_doctype) in table_fields.items():
+            if key in table_data and table_data[key]:
+                application.set(key, [])
+
+                value = table_data[key]
+                try:
+                    items = (
+                        frappe.parse_json(value) if isinstance(value, str) else value
+                    )
+                except Exception:
+                    items = str(value).split(",") if value else []
+
+                if not isinstance(items, list):
+                    items = [items]
+
+                for item in items:
+                    if fieldname is None:
+                        if isinstance(item, dict):
+                            application.append(key, item)
+
+                    else:
+                        item_value = item.strip() if isinstance(item, str) else item
+                        if item_value:
+                            if linked_doctype and not frappe.db.exists(
+                                linked_doctype, item_value
+                            ):
+                                frappe.get_doc(
+                                    {"doctype": linked_doctype, "name": item_value}
+                                ).insert(ignore_permissions=True)
+
+                            application.append(key, {fieldname: item_value})
 
         application = handle_attachment_files(application, files_data)
 
-        for key, value in kwargs.items():
-            setattr(application, key, value)
-
-        application.save()
+        application.save(ignore_permissions=True)
         frappe.db.commit()
-        return {"message": "Application updated successfully"}
+        return {
+            "success": True,
+            "message": "Application updated successfully",
+            "name": application.name,
+        }
     except Exception as e:
-        return {"error": str(e)}
+        frappe.log_error(frappe.get_traceback(), "Job Application Update Error")
+        return {"success": False, "error": str(e)}
 
 
 @frappe.whitelist(allow_guest=True)
@@ -497,8 +562,7 @@ def submit_job_application(id: str = None) -> dict:
             return {"error": "Only applications with status 'Draft' can be submitted."}
 
         application.status = "Open"
-        application.submitted_on = datetime.now()
-        application.save()
+        application.save(ignore_permissions=True)
         frappe.db.commit()
         return {"message": "Application submitted successfully"}
     except Exception as e:
