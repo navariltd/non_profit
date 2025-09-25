@@ -35,7 +35,9 @@
         class="fixed bottom-0 left-0 w-full flex items-center justify-between border-t border-outline-gray-2 bg-surface-white standalone:pb-4 z-10"
       >
         <button
-          v-for="tab in sidebarLinks.filter(link => link.label !== 'Learning')"
+          v-for="tab in sidebarLinks.filter(
+            (link) => link.label !== 'Learning'
+          )"
           :key="tab.label"
           :class="isVisible(tab) ? 'block' : 'hidden'"
           class="flex-1 flex flex-col items-center justify-center py-4 transition active:scale-95"
@@ -66,7 +68,7 @@
 <script setup>
 import { getSidebarLinks } from "@/utils";
 import { useRouter } from "vue-router";
-import { watch, ref, onMounted } from "vue";
+import { watch, ref, onMounted, toRaw } from "vue";
 import { sessionStore } from "@/stores/session";
 import { useSettings } from "@/stores/settings";
 import { usersStore } from "@/stores/user";
@@ -173,13 +175,20 @@ let isActive = (tab) => {
   return tab.activeFor?.includes(router.currentRoute.value.name);
 };
 
-const handleClick = (tab) => {
-  if (tab.label == "Log in") window.location.href = "/login";
-  else if (tab.label == "Log out")
+const handleClick = (tabLink) => {
+  let tab = toRaw(tabLink);
+
+  if (tab.label === "Log in") {
+    window.location.href = "/login";
+  } else if (tab.label === "Log out") {
     logout.submit().then(() => {
       isLoggedIn = false;
     });
-  else window.location.href = tab.route || tab.to;
+  } else if (tab.logo) {
+    window.location.href = tab.to;
+  } else if (tab.to) {
+    router.push({ name: tab.to });
+  }
 };
 
 const isVisible = (tab) => {
