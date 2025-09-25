@@ -71,7 +71,35 @@
       </div>
     </Card>
 
-    
+    <div
+      v-if="
+        membershipStatus && roleResource.data && !roleResource.data.is_volunteer
+      "
+      class="my-auto mx-auto"
+    >
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">
+          Not a volunteer yet?
+        </h2>
+        <p class="text-gray-600 mb-6 max-w-md">
+          Join the Kenya Red Cross Society as a volunteer and play an active
+          role in supporting your community. As a volunteer, you'll help deliver
+          life-saving services, gain valuable skills through training, and be
+          part of a global humanitarian movement dedicated to making a
+          difference.
+        </p>
+      </div>
+      <router-link :to="{ name: 'VolunteerSignup' }">
+        <Button
+          variant="ghost"
+          theme="red"
+          icon-right="arrow-right"
+          class="w-full py-4 rounded-xl shadow-lg text-lg font-medium"
+        >
+          Register as Volunteer
+        </Button>
+      </router-link>
+    </div>
   </div>
 </template>
 
@@ -79,6 +107,9 @@
 import { Badge, Card } from "frappe-ui";
 import Button from "frappe-ui/src/components/Button/Button.vue";
 import { RouterLink } from "vue-router";
+import { usersStore } from "../stores/user";
+import { data } from "autoprefixer";
+const { roleResource, userResource } = usersStore();
 
 interface Props {
   name?: string;
