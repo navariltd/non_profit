@@ -1,9 +1,13 @@
 <template>
   <div class="max-w-5xl mx-auto py-10 space-y-8">
     <div v-if="!isLoggedIn" class="text-center py-20">
-      <h2 class="text-3xl font-bold text-gray-900 mb-4">Please Log In</h2>
+      <LogIn class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">
+        Authentication Required
+      </h2>
       <p class="text-gray-600 mb-8">
-        You need to be logged in to view and manage your application.
+        Please log in to access your job application details. Your application
+        information is protected and only available to authenticated users.
       </p>
       <Button
         variant="solid"
@@ -78,7 +82,7 @@
             variant="solid"
             @click="isEditing = !isEditing"
             class="px-4 py-2 rounded-lg"
-            :disabled="!canEditResource?.data"
+            :disabled="!canEditResource?.data || submitted"
           >
             <template #prefix>
               <Edit3 class="w-4 h-4" />
@@ -143,18 +147,7 @@
           </div>
 
           <div class="grid grid-cols-1 gap-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p class="text-sm text-gray-500 mb-1">Profile Photo</p>
-                <div v-if="application?.data?.profile_photo" class="space-y-3">
-                  <img
-                    :src="application.data.profile_photo"
-                    alt="Profile"
-                    class="rounded-lg border w-full max-w-xs"
-                  />
-                </div>
-                <p v-else class="text-gray-500">No photo uploaded</p>
-              </div>
+            <div class="grid grid-cols-1 gap-6">
               <div>
                 <p class="text-sm text-gray-500 mb-1">Resume</p>
                 <div
@@ -301,20 +294,7 @@
           <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
             <h3 class="text-xl font-semibold text-gray-800 mb-6">Documents</h3>
             <div class="grid grid-cols-1 gap-8">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <label class="block mb-2 font-semibold text-gray-800">
-                    Profile Photo
-                  </label>
-                  <Uploader
-                    label="Upload Profile Photo"
-                    :fileTypes="['.jpg', '.jpeg', '.png']"
-                    :maxSize="5"
-                    :onSuccess="handleProfilePhotoUpload"
-                    :onError="handleError"
-                  />
-                </div>
-
+              <div class="grid grid-cols-1 gap-8">
                 <div>
                   <label class="block mb-2 font-semibold text-gray-800">
                     Resume
@@ -380,7 +360,7 @@
             </div>
           </div>
 
-          <div class="flex justify-end">
+          <div class="flex justify-end gap-4">
             <Button
               type="submit"
               variant="solid"
@@ -391,9 +371,63 @@
             </Button>
           </div>
         </form>
+
+        <div class="flex justify-end gap-4">
+          <Button
+            variant="solid"
+            class="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-lg"
+            :loading="submitApplicationResource.loading"
+            v-if="canEditResource?.data && !isEditing && !submitted"
+            @click="showSubmitDialog = true"
+          >
+            Submit Application
+          </Button>
+        </div>
       </div>
     </div>
   </div>
+  <Dialog v-model="showSubmitDialog">
+    <!-- Title -->
+    <template #body-title>
+      <h2 class="text-lg font-bold text-gray-900">
+        {{ __("Confirm Submission") }}
+      </h2>
+    </template>
+
+    <!-- Content -->
+    <template #body-content>
+      <p class="text-gray-700 leading-relaxed">
+        {{ __("Are you sure you want to submit this application?") }}
+      </p>
+      <p class="mt-2 text-sm text-red-600 font-medium">
+        {{ __("You won’t be able to make further edits after submission.") }}
+      </p>
+    </template>
+
+    <!-- Actions -->
+    <template #actions>
+      <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <Button
+          variant="outline"
+          class="w-full sm:w-auto py-3"
+          @click="showSubmitDialog = false"
+        >
+          {{ __("Cancel") }}
+        </Button>
+        <Button
+          variant="solid"
+          class="w-full sm:w-auto bg-red-700 hover:bg-red-800 text-white py-3"
+          :loading="submitApplicationResource.loading"
+          @click="confirmSubmit"
+        >
+          <template #prefix>
+            <FeatherIcon name="check-circle" class="w-4" />
+          </template>
+          {{ __("Submit") }}
+        </Button>
+      </div>
+    </template>
+  </Dialog>
 </template>
 
 <script setup>
@@ -402,16 +436,24 @@ import { useRoute, useRouter } from "vue-router";
 import { Button, TextEditor, toast, createResource } from "frappe-ui";
 import Uploader from "@/components/Controls/Uploader.vue";
 import { Edit3, LogIn } from "lucide-vue-next";
+import { Dialog } from "frappe-ui";
 
 import { formatDistanceToNow, parseISO } from "date-fns";
 
+import { usersStore } from "../stores/user";
+import { sessionStore } from "../stores/session";
+
+const showSubmitDialog = ref(false);
+const { userResource } = usersStore();
+const { isLoggedIn } = sessionStore();
+const user = userResource;
+
 const router = useRouter();
-const user = inject("$user");
-const isLoggedIn = computed(() => !!user.data?.name);
 
 const route = useRoute();
 const applicationId = route.params?.id || "";
 const isEditing = ref(false);
+const submitted = ref(false);
 
 const form = ref({
   applicant_name: "",
@@ -552,9 +594,29 @@ const updateApplicationResource = createResource({
   },
 });
 
-const handleProfilePhotoUpload = (file) => {
-  profilePhoto.value = file;
-  toast.success("Profile photo uploaded successfully");
+const submitApplicationResource = createResource({
+  url: "non_profit.non_profit.api.submit_job_application",
+  makeParams() {
+    return {
+      id: applicationId,
+    };
+  },
+});
+
+const confirmSubmit = () => {
+  submitApplicationResource.submit(
+    {},
+    {
+      onSuccess: () => {
+        toast.success("Application submitted successfully");
+        showSubmitDialog.value = false;
+        isEditing.value = false;
+        application.reload();
+        submitted.value = true;
+      },
+      onError: (err) => toast.error(err.messages?.[0] || err),
+    }
+  );
 };
 
 const handleDocumentUpload = (file) => {
@@ -584,21 +646,6 @@ const removeResume = () => {
   if (confirm("Are you sure you want to remove the resume?")) {
     resume.value = null;
     toast.success("Resume removed successfully");
-  }
-};
-
-const removeProfilePhoto = () => {
-  if (confirm("Are you sure you want to remove the profile photo?")) {
-    profilePhoto.value = null;
-    toast.success("Profile photo removed");
-  }
-};
-
-const removeDocument = (index) => {
-  const doc = documents.value[index];
-  if (confirm(`Are you sure you want to remove "${doc.file_name}"?`)) {
-    documents.value.splice(index, 1);
-    toast.success("Document removed successfully");
   }
 };
 

@@ -1,12 +1,13 @@
 <template>
   <div class="w-full mx-auto py-2 px-1">
-    <div v-if="!user.data?.email" class="text-center py-20">
+    <div v-if="!isLoggedIn" class="text-center py-20">
       <LogIn class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h2 class="text-2xl font-semibold text-gray-700 mb-2">
-        Please log in to see your job applications
+      <h2 class="text-3xl font-bold text-gray-900 mb-4">
+        Authentication Required
       </h2>
-      <p class="text-gray-500 mb-6">
-        You need to sign in to view and manage your job applications.
+      <p class="text-gray-600 mb-8">
+        Please log in to access your job application details. Your application
+        information is protected and only available to authenticated users.
       </p>
       <Button
         variant="solid"
@@ -88,10 +89,12 @@
             class="mt-4 p-3 bg-gray-50 rounded-lg text-sm text-gray-700"
           >
             <strong>Cover Letter:</strong>
-            {{
-              app.cover_letter.substring(0, 150) +
-              (app.cover_letter.length > 150 ? "..." : "")
-            }}
+            <div
+              v-html="
+                app.cover_letter.substring(0, 150) +
+                (app.cover_letter.length > 150 ? '...' : '')
+              "
+            ></div>
           </div>
 
           <div
@@ -127,8 +130,13 @@ import { useRouter } from "vue-router";
 import { createResource, Button } from "frappe-ui";
 import { LogIn } from "lucide-vue-next";
 import { formatDistanceToNow, parseISO, format } from "date-fns";
+import { usersStore } from "../stores/user";
+import { sessionStore } from "../stores/session";
 
-const user = inject("$user");
+const { userResource } = usersStore();
+const { isLoggedIn } = sessionStore();
+const user = userResource;
+
 const router = useRouter();
 
 const applications = createResource({

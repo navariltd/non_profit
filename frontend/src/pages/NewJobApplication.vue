@@ -109,44 +109,7 @@
 
         <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
           <h3 class="text-xl font-semibold text-gray-800 mb-6">Documents</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block mb-2 font-semibold text-gray-800"
-                >Profile Photo</label
-              >
-              <Uploader
-                v-if="!profilePhoto"
-                label="Upload Profile Photo"
-                :fileTypes="['.jpg', '.jpeg', '.png']"
-                :maxSize="5"
-                :onSuccess="(file) => (profilePhoto = file)"
-                :onError="handleError"
-              />
-              <div
-                v-else
-                class="flex justify-between p-3 rounded-lg bg-white border"
-              >
-                <div class="grid grid-cols-1 gap-4 justify-between">
-                  <img
-                    :src="profilePhoto.file_url"
-                    class="w-24 h-24 rounded-lg object-cover"
-                  />
-                  <a
-                    :href="profilePhoto.file_url"
-                    target="_blank"
-                    class="font-medium text-gray-800"
-                    >{{ profilePhoto.file_name }}</a
-                  >
-                </div>
-                <Button
-                  variant="subtle"
-                  @click="profilePhoto = null"
-                  class="text-red-500 hover:text-red-700"
-                  >✕</Button
-                >
-              </div>
-            </div>
-
+          <div class="grid grid-cols-1 gap-6">
             <div>
               <label class="block mb-2 font-semibold text-gray-800"
                 >Resume</label
@@ -287,13 +250,12 @@ const isApplied = computed(() => jobApplication.data?.length > 0);
 const applicationId = computed(() => jobApplication.data?.[0]?.name || null);
 
 const opportunityApplication = createResource({
-  url: "non_profit.non_profit.api.submit_job_application",
+  url: "non_profit.non_profit.api.create_job_application",
   makeParams() {
     return {
       job_opening: jobId,
       ...form.value,
       resume: resume.value,
-      profile_photo: profilePhoto.value,
       documents: documents.value,
     };
   },

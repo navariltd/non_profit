@@ -16,101 +16,70 @@
           }}
         </div>
       </div>
-      <div class="flex items-center space-x-2" v-if="currentTab === 'Open'">
-        <Button
-          variant="ghost"
-          class="lg:hidden p-2 text-gray-700 hover:bg-gray-100"
-          @click="showFilters = !showFilters"
-        >
-          <Filter class="h-5 w-5" />
-        </Button>
-      </div>
     </header>
 
-    <div class="flex flex-col-reverse lg:flex-row flex-1">
-      <aside
-        v-if="currentTab === 'Open'"
-        :class="[
-          'w-full lg:w-96 xl:w-[28rem] border-r border-gray-200 bg-white p-6 space-y-6 lg:sticky lg:top-0 lg:h-[calc(100vh-65px)] overflow-y-auto transition-transform duration-300 transform',
-          'scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent',
-          showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
-          'fixed inset-0 z-20 lg:relative lg:block',
-        ]"
-      >
-        <div class="flex items-center justify-between lg:hidden mb-4">
-          <div class="text-xl font-semibold text-gray-800">
-            {{ __("Filters") }}
-          </div>
-          <Button variant="ghost" class="p-2" @click="showFilters = false">
-            <X class="h-5 w-5 text-gray-600" />
-          </Button>
-        </div>
+    <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
+      <div class="flex justify-start mb-6 lg:mb-8">
+        <TabButtons
+          :buttons="jobTabs"
+          v-model="currentTab"
+          class="w-full sm:w-auto"
+          active-class="bg-red-600 text-white"
+          inactive-class="text-gray-700 hover:bg-gray-100"
+        />
+      </div>
 
-        <div class="space-y-4">
-          <FormControl
-            type="text"
-            :placeholder="__('Search jobs...')"
-            v-model="searchQuery"
-            class="w-full"
-            @input="updateJobs"
-          >
-            <template #prefix>
-              <Search class="w-5 h-5 text-gray-400" />
-            </template>
-          </FormControl>
-          <Button
-            variant="ghost"
-            class="w-full justify-center text-red-600 hover:bg-red-50 border border-red-200"
-            @click="clearFilters"
-          >
-            <span class="text-sm font-medium">{{ __("Clear All") }}</span>
-          </Button>
-        </div>
+      <div v-if="currentTab === 'Open'">
+        <div
+          v-if="currentTab === 'Open'"
+          class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 space-y-6"
+        >
+          <!-- <div
+            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+          ></div> -->
 
-        <div class="space-y-6 mt-6">
-          <div class="space-y-4">
-            <div class="text-lg font-semibold text-gray-700">
-              {{ __("Job Details") }}
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-              <Link
-                doctype="Employment Type"
-                v-model="jobType"
-                :placeholder="__('Employment Type')"
-                class="w-full"
-                @change="updateJobs"
-              />
-              <Link
-                doctype="Designation"
-                v-model="designation"
-                :placeholder="__('Designation')"
-                class="w-full"
-                @change="updateJobs"
-              />
-              <Link
-                doctype="Department"
-                v-model="department"
-                :placeholder="__('Department')"
-                class="w-full"
-                @change="updateJobs"
-              />
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <div class="text-lg font-semibold text-gray-700">
-              {{ __("Location") }}
-            </div>
-            <div class="space-y-3">
-              <MultiSelect
-                doctype="Company"
-                v-model="selectedRegions"
-                :label="__('Region')"
-                :filters="{ is_group: 1 }"
-                class="w-full"
-                @change="onRegionChange"
-                :cols="2"
-              />
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <FormControl
+              type="text"
+              :placeholder="__('Search jobs...')"
+              v-model="searchQuery"
+              class="w-full"
+              @input="updateJobs"
+            >
+              <template #prefix>
+                <Search class="w-5 h-5 text-gray-400" />
+              </template>
+            </FormControl>
+            <Link
+              doctype="Employment Type"
+              v-model="jobType"
+              :placeholder="__('Employment Type')"
+              class="w-full"
+              @change="updateJobs"
+            />
+            <Link
+              doctype="Designation"
+              v-model="designation"
+              :placeholder="__('Designation')"
+              class="w-full"
+              @change="updateJobs"
+            />
+            <Link
+              doctype="Department"
+              v-model="department"
+              :placeholder="__('Department')"
+              class="w-full"
+              @change="updateJobs"
+            />
+            <MultiSelect
+              doctype="Company"
+              v-model="selectedRegions"
+              :label="__('Region')"
+              :filters="{ is_group: 1 }"
+              class="w-full"
+              @change="onRegionChange"
+            />
+            <div class="col-span-1 lg:col-span-2" v-if="selectedRegions.length">
               <MultiSelectList
                 doctype="Company"
                 v-model="selectedBranches"
@@ -118,46 +87,39 @@
                 :filters="branchFilters"
                 class="w-full"
                 @change="updateJobs"
-                :cols="2"
+                cols="6"
               />
             </div>
-          </div>
-        </div>
-      </aside>
-
-      <main class="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
-        <div class="flex justify-start mb-6 lg:mb-8">
-          <TabButtons
-            :buttons="jobTabs"
-            v-model="currentTab"
-            class="w-full sm:w-auto"
-            active-class="bg-red-600 text-white"
-            inactive-class="text-gray-700 hover:bg-gray-100"
-          />
-        </div>
-
-        <div v-if="currentTab === 'Open'">
-          <div
-            v-if="jobs.data?.length"
-            class="grid gap-6 grid-cols-[repeat(auto-fit,minmax(250px,1fr))]"
-          >
-            <router-link
-              v-for="job in jobs.data"
-              :key="job.name"
-              :to="{ name: 'JobDetail', params: { job: job.name } }"
-              class="transition-transform duration-300 hover:scale-[1.02] transform"
+            <Button
+              variant="ghost"
+              class="justify-center text-red-600 hover:bg-red-50 border border-red-200"
+              @click="clearFilters"
             >
-              <JobCard :job="job" />
-            </router-link>
+              <span class="text-sm font-medium">{{ __("Clear All") }}</span>
+            </Button>
           </div>
-          <EmptyState v-else type="Job Openings" />
         </div>
 
-        <div v-else-if="currentTab === 'My Applications'">
-          <JobApplication />
+        <div
+          v-if="jobs.data?.length"
+          class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
+          <router-link
+            v-for="job in jobs.data"
+            :key="job.name"
+            :to="{ name: 'JobDetail', params: { job: job.name } }"
+            class="transition-transform duration-300 hover:scale-[1.02] transform"
+          >
+            <JobCard :job="job" />
+          </router-link>
         </div>
-      </main>
-    </div>
+        <EmptyState v-else type="Job Openings" />
+      </div>
+
+      <div v-else-if="currentTab === 'My Applications'">
+        <JobApplication />
+      </div>
+    </main>
   </div>
 </template>
 
@@ -245,13 +207,18 @@ const updateFilters = () => {
 
   if (department.value) filters.value.department = department.value;
   else delete filters.value.department;
-  const combinedCompanyFilters = [
-    ...(selectedBranches.value || []),
-    ...(selectedRegions.value || []),
-  ];
-  if (combinedCompanyFilters.length > 0) {
-    filters.value.company = ["in", combinedCompanyFilters];
-  } else delete filters.value.company;
+
+  if (selectedRegions.value?.length) {
+    filters.value.region = ["in", selectedRegions.value];
+  } else {
+    delete filters.value.region;
+  }
+
+  if (selectedBranches.value?.length) {
+    filters.value.company = selectedBranches.value;
+  } else {
+    delete filters.value.company;
+  }
 
   if (searchQuery.value) {
     orFilters.value = {

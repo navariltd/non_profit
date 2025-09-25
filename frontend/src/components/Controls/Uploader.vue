@@ -48,13 +48,13 @@
               v-if="isImage(file.file_url)"
               :src="file.file_url"
               alt="Uploaded preview"
-              class="w-32 h-32 p-2 rounded-lg border object-cover"
+              class="w-full h-32 p-2 rounded-lg border object-cover"
             />
 
             <iframe
               v-else-if="isPDF(file.file_url)"
               :src="file.file_url"
-              class="w-48 h-64 border rounded-lg"
+              class="w-full h-64 border rounded-lg"
             ></iframe>
 
             <div
