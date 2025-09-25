@@ -99,10 +99,10 @@ watch(
   () => user?.data,
   (val) => {
     if (!val || !isLoggedIn) {
-      toast.warning("You must be logged in to view this page.");
-      setTimeout(() => {
-        router.push({ name: "Login" });
-      }, 500);
+      // toast.warning("You must be logged in to view this page.");
+      // setTimeout(() => {
+      //   router.push({ name: "Login" });
+      // }, 500);
     } else {
       roleResource.reload();
       currentMembership.reload();

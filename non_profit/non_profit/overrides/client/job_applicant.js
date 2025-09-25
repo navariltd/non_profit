@@ -6,7 +6,7 @@ frappe.ui.form.on("Job Applicant", {
         .then((r) => {
           if (r && !r.message.name) {
             frm.add_custom_button(
-              __("Create Volunteer"),
+              __("Volunteer"),
               () => {
                 frappe.route_options = {
                   job_applicant: frm.doc.name,

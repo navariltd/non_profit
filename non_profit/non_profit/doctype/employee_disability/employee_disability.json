@@ -1,34 +1,33 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-09-01 17:28:52.076789",
+ "creation": "2025-09-01 14:37:18.186016",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "language"
+  "disability"
  ],
  "fields": [
   {
-   "fieldname": "language",
+   "fieldname": "disability",
    "fieldtype": "Link",
    "in_filter": 1,
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Language",
-   "options": "Language",
-   "reqd": 1
+   "label": "Disability",
+   "options": "Disability"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-25 12:09:03.195572",
+ "modified": "2025-09-25 12:51:54.360745",
  "modified_by": "Administrator",
  "module": "Non Profit",
- "name": "Volunteer Language",
+ "name": "Employee Disability",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",

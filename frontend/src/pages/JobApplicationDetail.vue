@@ -433,10 +433,9 @@
 <script setup>
 import { ref, computed, inject } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Button, TextEditor, toast, createResource } from "frappe-ui";
+import { Button, TextEditor, toast, createResource, Dialog } from "frappe-ui";
 import Uploader from "@/components/Controls/Uploader.vue";
 import { Edit3, LogIn } from "lucide-vue-next";
-import { Dialog } from "frappe-ui";
 
 import { formatDistanceToNow, parseISO } from "date-fns";
 

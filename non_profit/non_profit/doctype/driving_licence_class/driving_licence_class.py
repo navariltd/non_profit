@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class PersonnelDiscipline(Document):
+class DrivingLicenceClass(Document):
 	pass
