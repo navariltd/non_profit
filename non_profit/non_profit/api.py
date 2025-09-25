@@ -277,13 +277,34 @@ def get_job_openings(filters=None, orFilters=None):
         filters = {}
     filters["publish"] = 1
     filters["status"] = "Open"
-    filters["posted_on"] = ["<=", frappe.utils.nowdate()]
+    now = datetime.now()
+    filters["posted_on"] = ["<=", now]
 
     or_filters = orFilters or []
 
     user = frappe.session.user
+
     if user == "Guest":
         filters["opportunity_type"] = "Guest"
+
+    region = filters.pop("region", None)
+    companies = filters.pop("company", None)
+
+    if region:
+        children = frappe.get_all(
+            "Company",
+            filters={"parent_company": region},
+            pluck="name",
+        )
+
+        if companies:
+            company_list = [region] + companies
+        else:
+            company_list = [region] + children
+
+        filters["company"] = ["in", company_list]
+    elif companies:
+        filters["company"] = ["in", companies]
 
     jobs = frappe.get_all(
         "Job Opening",
@@ -309,11 +330,22 @@ def get_job_openings(filters=None, orFilters=None):
         order_by="creation desc",
     )
 
+    if user != "Guest":
+        user_email = frappe.db.get_value("User", user, "email")
+        if user_email:
+            applied_jobs = frappe.get_all(
+                "Job Applicant",
+                filters={"email_id": user_email},
+                pluck="job_title",
+            )
+            jobs = [job for job in jobs if job.name not in applied_jobs]
+
     for job in jobs:
         job.description = (
             frappe.utils.strip_html_tags(job.description) if job.description else ""
         )
         job.applicants = frappe.db.count("Job Applicant", {"job_title": job.name})
+
     return jobs
 
 
@@ -454,7 +486,27 @@ def update_job_application(id: str, **kwargs) -> dict:
 
 
 @frappe.whitelist(allow_guest=True)
-def submit_job_application(job_opening: str = None, id: str = None, **kwargs) -> dict:
+def submit_job_application(id: str = None) -> dict:
+    try:
+        if not id or not frappe.db.exists("Job Applicant", id):
+            return {"error": "Invalid Job Application ID"}
+
+        application = frappe.get_doc("Job Applicant", id)
+
+        if application.status != "Draft":
+            return {"error": "Only applications with status 'Draft' can be submitted."}
+
+        application.status = "Open"
+        application.submitted_on = datetime.now()
+        application.save()
+        frappe.db.commit()
+        return {"message": "Application submitted successfully"}
+    except Exception as e:
+        return {"error": str(e)}
+
+
+@frappe.whitelist(allow_guest=True)
+def create_job_application(job_opening: str = None, id: str = None, **kwargs) -> dict:
     try:
 
         if id and frappe.db.exists("Job Applicant", id):
@@ -557,7 +609,7 @@ def submit_job_application(job_opening: str = None, id: str = None, **kwargs) ->
         doc_data = {
             "doctype": "Job Applicant",
             "applicant_name": name_to_use,
-            "status": "Open",
+            "status": "Draft",
             "company": company,
             **kwargs,
         }
@@ -1433,7 +1485,7 @@ def fetch_applications(email: str):
 
     applicants = frappe.get_all(
         "Job Applicant",
-        filters={"email_id": email, "job_title": ("!=", None)},
+        filters={"email_id": email, "job_title": ("!=", None), "is_volunteer": 0},
         fields=[
             "name",
             "applicant_name",
@@ -1549,8 +1601,6 @@ def get_all_deployed_projects(**kwargs):
             as_dict=True,
         )
         if project_details:
-            print("----project_details----")
-            print(project_details)
             projects_details.append(project_details)
 
     return projects_details
@@ -1563,7 +1613,7 @@ def can_edit_job_application(applicant_id: str) -> bool:
 
     applicant = frappe.get_doc("Job Applicant", applicant_id)
 
-    if applicant.status and applicant.status.lower() != "open":
+    if applicant.status and applicant.status.lower() != "draft":
         return False
 
     if applicant.job_title:
