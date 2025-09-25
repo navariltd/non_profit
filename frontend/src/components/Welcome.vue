@@ -26,7 +26,7 @@
             class="w-full py-4 rounded-xl shadow-lg text-lg font-medium"
             @click="navigateTo('volunteer/signup')"
           >
-            Sign Up as Volunteer
+            Register as Volunteer
           </Button>
           <Button
             variant="outline"
@@ -35,7 +35,7 @@
             class="w-full py-4 rounded-xl shadow-md text-lg font-medium"
             @click="navigateTo('membership')"
           >
-            Sign Up as Member
+            Register as Member
           </Button>
         </div>
       </div>
