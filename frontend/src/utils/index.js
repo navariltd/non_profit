@@ -406,7 +406,7 @@ export function getSidebarLinks() {
   return [
     {
       label: "Dashboard",
-      icon: "GraduationCap",
+      icon: "LayoutDashboard",
       to: "Dashboard",
       activeFor: ["Dashboard"],
     },

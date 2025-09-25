@@ -122,7 +122,6 @@
 
   <div class="px-10">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-8">
-      <router-link :to="{ name: 'Projects', params: { status: 'all' } }">
         <div
           class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
         >
@@ -136,7 +135,6 @@
           </div>
           <div class="text-xs text-gray-500">All assigned projects</div>
         </div>
-      </router-link>
 
       <div
         @click="showNotificationDialog = true"
@@ -153,7 +151,6 @@
         <div class="text-xs text-gray-500">Awaiting response</div>
       </div>
 
-      <router-link :to="{ name: 'Projects', params: { status: 'accepted' } }">
         <div
           class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
         >
@@ -167,9 +164,7 @@
           </div>
           <div class="text-xs text-gray-500">Ongoing assignments</div>
         </div>
-      </router-link>
 
-      <router-link :to="{ name: 'Projects', params: { status: 'rejected' } }">
         <div
           class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
         >
@@ -183,7 +178,6 @@
           </div>
           <div class="text-xs text-gray-500">Declined assignments</div>
         </div>
-      </router-link>
     </div>
   </div>
 

@@ -39,17 +39,6 @@
             {{ toggleEventView ? "List" : "Calendar" }} View
           </Button>
         </div>
-
-        <router-link :to="{ name: 'Events' }">
-          <Button
-            variant="subtle"
-            size="lg"
-            theme="red"
-            icon-right="arrow-right"
-          >
-            View All Events
-          </Button>
-        </router-link>
       </div>
 
       <div
