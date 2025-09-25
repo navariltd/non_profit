@@ -126,9 +126,12 @@
   },
   {
    "fieldname": "email_id",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Email Address",
-   "options": "Email"
+   "options": "User",
+   "reqd": 1
   },
   {
    "fieldname": "subscription_id",
@@ -183,7 +186,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2025-08-29 13:32:59.040381",
+ "modified": "2025-09-25 18:47:50.374991",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Member",
