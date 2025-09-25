@@ -38,17 +38,6 @@
             {{ toggleEventView ? "List" : "Calendar" }} View
           </Button>
         </div>
-
-        <router-link :to="{ name: 'Events' }">
-          <Button
-            variant="subtle"
-            size="lg"
-            theme="red"
-            icon-right="arrow-right"
-          >
-            View All Events
-          </Button>
-        </router-link>
       </div>
 
       <div
@@ -94,27 +83,19 @@ const toggleEventView = ref(false);
 const user = inject<any>("$user");
 let { isLoggedIn } = sessionStore();
 
-onMounted(async () => {
+onMounted(() => {
   if (!isLoggedIn) {
     toast.warning("You must be logged in to view this page.");
     setTimeout(() => {
       router.push({ name: "Login" });
     }, 500);
   } else {
-    await Promise.all([
-      roleResource.reload(),
-      currentMembership.reload(),
-      confirmEventStatus.reload(),
-      dashboardStats.reload(),
-    ]);
+    roleResource.reload();
+    currentMembership.reload();
+    confirmEventStatus.reload();
+    dashboardStats.reload();
   }
 });
-
-watch(
-  () => roleResource.data,
-  (val) => {},
-  { immediate: true }
-);
 
 const confirmEventStatus = createResource({
   url: "non_profit.non_profit.api.confirm_event_status",
