@@ -498,10 +498,9 @@ const job = createResource({
 });
 
 const application = createResource({
-  url: "frappe.client.get",
+  url: "non_profit.non_profit.api.get_job_application",
   makeParams() {
     return {
-      doctype: "Job Applicant",
       name: applicationId,
     };
   },

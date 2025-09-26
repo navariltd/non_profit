@@ -31,7 +31,12 @@
       </RouterLink>
     </div>
     <!-- Membership Cards -->
-    <h1 class="text-3xl font-bold text-gray-800">Your Memberships</h1>
+    <h1
+      v-if="membershipList.data && membershipList.data.length > 0"
+      class="text-3xl font-bold text-gray-800"
+    >
+      Your Memberships
+    </h1>
     <div
       v-if="membershipList.data && membershipList.data.length > 0"
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"

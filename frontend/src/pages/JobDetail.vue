@@ -16,7 +16,7 @@
 
       <div class="flex items-center gap-2">
         <Button
-          v-if="!user.data?.name && job.data?.is_internal"
+          v-if="(!user.data?.name && job.data?.is_internal) || !user.data?.name"
           variant="solid"
           class="bg-red-600 hover:bg-red-700 text-white"
           @click="redirectToLogin"

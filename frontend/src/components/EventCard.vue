@@ -7,7 +7,7 @@
       <h3
         class="text-lg font-semibold text-gray-900 group-hover:text-red-600 transition-colors"
       >
-        {{ event.name }}
+        {{ event.subject }}
       </h3>
       <Badge
         v-if="event.confirmStatus"
@@ -19,11 +19,6 @@
         Confirmed
       </Badge>
     </div>
-
-    <!-- Event Subject -->
-    <p class="font-medium text-gray-700 leading-5 text-sm mb-3">
-      {{ event.subject }}
-    </p>
 
     <!-- Dates & Times -->
     <div class="flex items-center space-x-2 text-sm text-gray-600 mb-1">

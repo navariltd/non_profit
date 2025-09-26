@@ -1684,25 +1684,35 @@ def can_edit_job_application(applicant_id: str) -> bool:
     if not applicant_id:
         return False
 
-    applicant = frappe.get_doc("Job Applicant", applicant_id)
+    try:
+        applicant = frappe.get_doc(
+            "Job Applicant", applicant_id, ignore_permissions=True
+        )
 
-    if applicant.status and applicant.status.lower() != "draft":
-        return False
-
-    if applicant.job_title:
-        job_opening = frappe.get_doc("Job Opening", applicant.job_title)
-        if job_opening.status.lower() != "open":
+        if applicant.status and applicant.status.lower() != "draft":
             return False
 
-    interview = frappe.db.exists("Interview", {"job_applicant": applicant_id})
-    if interview:
-        return False
+        if applicant.job_title:
+            job_opening = frappe.get_doc(
+                "Job Opening", applicant.job_title, ignore_permissions=True
+            )
+            if job_opening.status.lower() != "open":
+                return False
 
-    offer = frappe.db.exists("Job Offer", {"job_applicant": applicant_id})
-    if offer:
-        return False
+        interview = frappe.db.exists("Interview", {"job_applicant": applicant_id})
+        if interview:
+            return False
 
-    return True
+        offer = frappe.db.exists("Job Offer", {"job_applicant": applicant_id})
+        if offer:
+            return False
+
+        return True
+    except Exception:
+        frappe.log_error(
+            frappe.get_traceback(), "Error checking job application edit permission"
+        )
+        return False
 
 
 @frappe.whitelist()
@@ -1804,3 +1814,30 @@ def get_file_info(file_url):
         as_dict=1,
     )
     return file_info
+
+
+@frappe.whitelist()
+def get_job_application(name=None):
+    if not name:
+        return {"error": "Application ID is required"}
+
+    try:
+        job_application = frappe.get_doc("Job Applicant", name).as_dict()
+
+        if (
+            frappe.session.user != "Administrator"
+            and job_application.get("email_id") != frappe.session.user
+        ):
+            return {"error": "You don't have permission to access this application"}
+
+        if job_application.get("job_title"):
+            job_opening = frappe.get_doc(
+                "Job Opening", job_application.get("job_title"), ignore_permissions=True
+            ).as_dict()
+            job_application["job_opening_details"] = job_opening
+
+        return job_application
+
+    except Exception as e:
+        frappe.log_error(str(e), "Error fetching job application")
+        return {"error": "Failed to retrieve application details"}
