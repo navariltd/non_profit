@@ -62,27 +62,32 @@ def create_membership(**kwargs):
 
         member = None
         membership = None
+        branch = kwargs.get("branch")
 
         if frappe.db.exists("Member", {"email_id": kwargs.get("email_id")}):
             member = frappe.db.get_value(
                 "Member", {"email_id": kwargs.get("email_id")}, "name"
             )
 
-            membership = frappe.db.exists("Membership", {"member": member})
+            membership = frappe.db.exists(
+                "Membership", {"member": member, "company": branch}
+            )
         if member and membership:
             frappe.throw("Membership already exists for this member")
 
-        member = frappe.get_doc(
-            {
-                "doctype": "Member",
-                "member_name": kwargs.get("member_name"),
-                "email_id": kwargs.get("email_id"),
-                "membership_type": kwargs.get("membership_type"),
-                "custom_company": kwargs.get("branch"),
-                "pan_number": kwargs.get("phone_number"),
-            }
-        )
-        member.insert(ignore_permissions=True)
+        if not member:
+            member = frappe.get_doc(
+                {
+                    "doctype": "Member",
+                    "member_name": kwargs.get("member_name"),
+                    "email_id": kwargs.get("email_id"),
+                    "membership_type": kwargs.get("membership_type"),
+                    "pan_number": kwargs.get("phone_number"),
+                }
+            )
+            member.insert(ignore_permissions=True)
+        else:
+            member = frappe.get_doc("Member", member)
 
         user = frappe.get_doc("User", {"email": member.email_id})
 

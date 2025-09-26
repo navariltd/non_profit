@@ -1,126 +1,133 @@
 <template>
-  <div class="flex flex-col md:flex-row gap-6 p-6 border">
-    <!-- Current Membership Card -->
-    <Card
-      v-if="membershipStatus"
-      class="flex flex-col -1/4 rounded-2xl p-6 h-full shadow-sm hover:shadow-md transition-all duration-300 group"
-    >
-      <!-- Header -->
-      <div class="mb-4">
-        <h2
-          class="text-xl font-semibold text-gray-900 group-hover:text-red-600 transition-colors"
-        >
-          Current Membership Plan
-        </h2>
-      </div>
-
-      <!-- Membership Info -->
-      <div class="mb-4">
-        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-800 mb-2">
-            {{ membershipStatus.membership_type }}
-          </h3>
-
-          <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-500">Status:</span>
-            <Badge
-              :variant="'subtle'"
-              :theme="
-                getMembershipStatusTheme(
-                  membershipStatus.membership_status || ''
-                )
-              "
-              size="lg"
-              class="border border-red-200 text-red-700 bg-red-50"
-            >
-              {{ membershipStatus.membership_status }}
-            </Badge>
-          </div>
-        </div>
-      </div>
-
-      <!-- Details -->
-      <div
-        class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm text-gray-600 mb-6"
-      >
-        <div class="flex flex-col">
-          <span class="text-gray-500">Start Date</span>
-          <span class="font-medium text-gray-800">{{
-            membershipStatus.from_date
-          }}</span>
-        </div>
-        <div class="flex flex-col">
-          <span class="text-gray-500">Renewal Due</span>
-          <span class="font-medium text-gray-800">{{
-            membershipStatus.to_date
-          }}</span>
-        </div>
-        <div class="flex flex-col sm:col-span-2">
-          <span class="text-gray-500">Amount</span>
-          <span class="font-semibold text-gray-900 text-lg">
-            KES {{ membershipStatus.amount }}
-          </span>
-        </div>
-      </div>
-
-      <!-- Action Button -->
-      <div class="mt-auto">
-        <Button :variant="'solid'" theme="red" class="w-full">
-          Renew Membership
-        </Button>
-      </div>
-    </Card>
-
+  <div class="flex flex-col gap-8 p-6 border">
+    <!-- Volunteer Section -->
     <div
       v-if="
-        membershipStatus && roleResource.data && !roleResource.data.is_volunteer
+        membershipList.data &&
+        membershipList.data.length > 0 &&
+        roleResource.data &&
+        !roleResource.data.is_volunteer
       "
-      class="my-auto mx-auto"
+      class="rounded-2xl border bg-red-50 p-8 text-center shadow-sm"
     >
-      <div>
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">
-          Not a volunteer yet?
-        </h2>
-        <p class="text-gray-600 mb-6 max-w-md">
-          Join the Kenya Red Cross Society as a volunteer and play an active
-          role in supporting your community. As a volunteer, you'll help deliver
-          life-saving services, gain valuable skills through training, and be
-          part of a global humanitarian movement dedicated to making a
-          difference.
-        </p>
-      </div>
-      <router-link :to="{ name: 'VolunteerSignup' }">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">
+        Not a volunteer yet?
+      </h2>
+      <p class="text-gray-700 mb-6 max-w-2xl mx-auto">
+        Join the Kenya Red Cross Society as a volunteer and play an active role
+        in supporting your community. You'll help deliver life-saving services,
+        gain valuable skills through training, and be part of a global
+        humanitarian movement dedicated to making a difference.
+      </p>
+      <RouterLink :to="{ name: 'VolunteerSignup' }">
         <Button
-          variant="ghost"
+          variant="solid"
           theme="red"
           icon-right="arrow-right"
-          class="w-full py-4 rounded-xl shadow-lg text-lg font-medium"
+          class="px-8 py-4 rounded-xl text-lg font-semibold shadow-md"
         >
           Register as Volunteer
         </Button>
-      </router-link>
+      </RouterLink>
+    </div>
+    <!-- Membership Cards -->
+    <h1 class="text-3xl font-bold text-gray-800">Your Memberships</h1>
+    <div
+      v-if="membershipList.data && membershipList.data.length > 0"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
+      <Card
+        v-for="membership in membershipList.data"
+        :key="membership.name"
+        class="flex flex-col rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group"
+      >
+        <!-- Header -->
+        <div class="p-6 border-b bg-gray-50 flex justify-between items-center">
+          <h2 class="text-lg font-semibold text-gray-900">
+            {{ membership.membership_type }}
+          </h2>
+          <Badge
+            :variant="'subtle'"
+            :theme="
+              getMembershipStatusTheme(membership.membership_status || '')
+            "
+            size="lg"
+            class="border text-sm"
+          >
+            {{ membership.membership_status }}
+          </Badge>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 flex flex-col gap-4 flex-1">
+          <!-- Dates -->
+          <div class="flex justify-between text-sm text-gray-600">
+            <div>
+              <span class="block text-gray-500">Start</span>
+              <span class="font-medium text-gray-800">
+                {{ formatDate(membership.from_date) }}
+              </span>
+            </div>
+            <div>
+              <span class="block text-gray-500">Renewal Due</span>
+              <span class="font-medium text-gray-800">
+                {{ formatDate(membership.to_date) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Branch + Amount -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <div>
+              <span class="block text-gray-500">Branch / County</span>
+              <span class="font-medium text-gray-800">
+                {{ membership.company }}
+              </span>
+            </div>
+            <div>
+              <span class="block text-gray-500">Amount</span>
+              <span class="font-semibold text-gray-900 text-lg">
+                KES {{ membership.amount }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA Footer -->
+        <div class="bg-gray-50 p-4 border-t">
+          <Button :variant="'solid'" theme="red" class="w-full">
+            Renew Membership
+          </Button>
+        </div>
+      </Card>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Badge, Card } from "frappe-ui";
+import { Badge, Card, createResource } from "frappe-ui";
 import Button from "frappe-ui/src/components/Button/Button.vue";
 import { RouterLink } from "vue-router";
 import { usersStore } from "../stores/user";
-import { data } from "autoprefixer";
-const { roleResource, userResource } = usersStore();
 
-interface Props {
+const { roleResource } = usersStore();
+
+interface Membership {
   name?: string;
   membership_type?: string;
   from_date?: string;
   to_date?: string;
   membership_status?: string;
   amount?: number;
+  company?: string;
+  type_details?: Record<string, any>;
 }
 
-defineProps<{ membershipStatus: Props }>();
+const membershipList = createResource<Membership[]>({
+  url: "non_profit.non_profit.api.get_current_membership",
+  auto: true,
+  cache: ["currentMembership"],
+});
 
 function getMembershipStatusTheme(status: string) {
   switch (status) {
@@ -132,6 +139,18 @@ function getMembershipStatusTheme(status: string) {
       return "orange";
     case "Cancelled":
       return "gray";
+    default:
+      return "gray";
   }
+}
+
+function formatDate(dateStr?: string): string {
+  if (!dateStr) return "";
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
 }
 </script>

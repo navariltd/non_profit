@@ -1505,37 +1505,46 @@ def accept_assignment(name, accepted=True, contract_name=None):
         frappe.throw("Accept Assignment Error")
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def get_current_membership():
     if frappe.session.user == "Guest":
-        return None
+        return []
 
     member = frappe.db.get_value(
         "Member",
         {"email_id": frappe.session.user},
-        as_dict=1,
+        ["name"],
+        as_dict=True,
     )
 
     if not member:
-        return None
+        return []
 
-    membership = frappe.db.get_value(
+    memberships = frappe.get_all(
         "Membership",
-        {"member": member.name},
-        ["name", "membership_type", "from_date", "to_date", "membership_status"],
-        as_dict=1,
+        filters={"member": member.name},
+        fields=[
+            "name",
+        ],
+        order_by="from_date desc",
     )
 
-    amount = frappe.db.get_value(
-        "Membership Type",
-        membership.get("membership_type"),
-        ["amount"],
-        as_dict=1,
-    )
+    if not memberships:
+        return []
 
-    membership["amount"] = amount.get("amount") if amount else 0
+    result = []
+    for membership_item in memberships:
+        membership = frappe.get_doc("Membership", membership_item.name)
+        membership_data = membership.as_dict()
 
-    return membership
+        if membership.membership_type:
+            membership_type_doc = frappe.get_doc(
+                "Membership Type", membership.membership_type
+            )
+            membership_data["type_details"] = membership_type_doc.as_dict()
+
+        result.append(membership_data)
+    return result
 
 
 @frappe.whitelist()
