@@ -7,7 +7,7 @@
       <router-link
         v-for="membershipType in membershipTypes.data"
         :key="membershipType.name"
-        :to="{ name: 'Login' }"
+        :to="{ name: 'Login', hash: '#signup' }"
         class="flex justify-center"
       >
         <VmmsPortalCard :membershipType="membershipType" />
@@ -24,7 +24,7 @@
         <h2 class="text-3xl md:text-4xl font-bold m-2">
           Sign up to be a volunteer today!
         </h2>
-        <router-link :to="{ name: 'Login' }">
+        <router-link :to="{ name: 'Login', hash: '#signup' }">
           <Button
             :variant="'solid'"
             :ref_for="true"

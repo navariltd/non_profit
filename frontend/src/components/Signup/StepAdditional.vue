@@ -38,7 +38,7 @@
         :label="__('Driving Licence')"
         doctype="Driving Licence Class"
       />
-      <div class="w-full md:col-span-2 space-y-6">
+      <!-- <div class="w-full md:col-span-2 space-y-6">
         <ChildTable
           v-model="localModel.licences"
           :columns="[
@@ -55,7 +55,7 @@
           ]"
           :label="__('Certifications')"
         />
-      </div>
+      </div> -->
     </div>
   </section>
 </template>

@@ -134,7 +134,7 @@
       </div>
     </div>
     <div class="w-full md:col-span-2 space-y-6 mt-6">
-      <ChildTable
+      <!-- <ChildTable
         v-model="localModel.education"
         :columns="[
           {
@@ -154,7 +154,7 @@
           { key: 'year', label: 'Year of Graduation', type: 'number' },
         ]"
         label="Education"
-      />
+      /> -->
     </div>
   </section>
 </template>
@@ -172,8 +172,12 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"]);
 
 const localModel = computed({
-  get: () => props.modelValue,
-  set: (val) => emit("update:modelValue", val),
+  get() {
+    return props.modelValue;
+  },
+  set(value) {
+    emit("update:modelValue", value);
+  },
 });
 
 const maritalOptions = [

@@ -1,4 +1,21 @@
 <template>
+  <div v-if="!isLoggedIn" class="text-center py-20">
+    <LogIn class="w-16 h-16 text-gray-400 mx-auto mb-4" />
+    <h2 class="text-3xl font-bold text-gray-900 mb-4">
+      Authentication Required
+    </h2>
+
+    <Button
+      variant="solid"
+      class="bg-red-600 hover:bg-red-700 text-white"
+      @click="redirectToLogin"
+    >
+      <template #prefix>
+        <LogIn class="w-4 h-4" />
+      </template>
+      {{ "Login to View Dashboard" }}
+    </Button>
+  </div>
   <div v-if="user?.data">
     <div class="flex flex-col">
       <h1 class="text-3xl font-bold px-4 mt-5">
@@ -65,6 +82,7 @@
 <script lang="ts" setup>
 import { provide, ref, watch } from "vue";
 import EmptyState from "../components/EmptyState.vue";
+import { LogIn } from "lucide-vue-next";
 import EventCard from "../components/EventCard.vue";
 import Member from "../components/MemberPlan.vue";
 import Volunteer from "../components/Volunteer.vue";
@@ -84,30 +102,28 @@ const toggleEventView = ref(false);
 
 const user = userResource;
 
-watch(
-  () => user?.data,
-  (val) => {
-    if (!val || !isLoggedIn) {
-      // toast.warning("You must be logged in to view this page.");
-      // setTimeout(() => {
-      //   router.push({ name: "Login" });
-      // }, 500);
-    } else {
-      roleResource.reload();
-      currentMembership.reload();
-      events.reload();
-      
-    }
-  },
-  { immediate: true }
-);
+import { onMounted } from "vue";
+
+onMounted(() => {
+  console.log("isLoggedIn", isLoggedIn);
+
+  if (isLoggedIn) {
+    roleResource.reload();
+    currentMembership.reload();
+    events.reload();
+  }
+});
+
+function redirectToLogin() {
+  router.push("/login");
+}
 
 const confirmEventStatus = createResource({
   url: "non_profit.non_profit.api.confirm_event_status",
   auto: true,
-  onSuccess(data) {
+  onSuccess(data: any) {
     if (events?.data) {
-      events.data = events.data.map((e) => {
+      events.data = events.data.map((e: any) => {
         const match = data.find((d: any) => d.event.name === e.name);
         return {
           ...e,

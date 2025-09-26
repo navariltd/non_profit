@@ -112,7 +112,7 @@
         <span v-else>Already have an account? </span>
         <Button
           class="text-red-600 hover:underline font-medium"
-          @click="isLogin = !isLogin"
+          @click="toggleForm"
           type="button"
         >
           {{ isLogin ? "Sign up" : "Login" }}
@@ -141,7 +141,7 @@ import Button from "frappe-ui/src/components/Button/Button.vue";
 import { sessionStore } from "../stores/session";
 import Card from "frappe-ui/src/components/Card.vue";
 import Input from "frappe-ui/src/components/Input.vue";
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
 import { createResource, Select } from "frappe-ui";
 import Dialog from "frappe-ui/src/components/Dialog/Dialog.vue";
@@ -150,12 +150,9 @@ import { useRoute, useRouter } from "vue-router";
 import { Eye, EyeOff } from "lucide-vue-next";
 
 const route = useRoute();
-
 const router = useRouter();
 
 const passWordVisible = ref(false);
-
-const isLogin = ref(true);
 const userEmail = ref("");
 const password = ref("");
 const signInState = ref(false);
@@ -163,10 +160,21 @@ const signInState = ref(false);
 const signUpForm = reactive<SignUp>({ ...initialForm });
 
 const session = sessionStore();
-
 let { isLoggedIn } = sessionStore();
 
+const isLogin = computed(() => route.hash !== "#signup");
+
+function toggleForm() {
+  if (isLogin.value) {
+    router.replace({ hash: "#signup" });
+  } else {
+    router.replace({ hash: "#login" });
+  }
+}
+
 onMounted(() => {
+  if (!route.hash) {
+  }
   if (isLoggedIn) {
     router.push({ name: "Dashboard" });
   }
@@ -188,7 +196,7 @@ const createSignUp = createResource({
   onSuccess() {
     signInState.value = true;
     resetSignUpForm(signUpForm);
-    isLogin.value = true;
+    router.replace({ hash: "#login" });
   },
 });
 
@@ -201,11 +209,9 @@ function submit() {
   if (isLogin.value) {
     session.login.submit(
       { usr: userEmail.value, pwd: password.value },
-
       {
         onSuccess: () => {
           const redirectTo = route.query["redirect-to"] as string;
-
           if (redirectTo) {
             router.push(redirectTo);
           } else {
