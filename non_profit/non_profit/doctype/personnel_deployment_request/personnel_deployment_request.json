@@ -22,6 +22,11 @@
   "terms_section",
   "terms_of_reference",
   "term_details",
+  "approvers_section",
+  "deployment_approver",
+  "column_break_lfwy",
+  "advance_approver",
+  "expense_approver",
   "section_break_rmvn",
   "notes",
   "quick_filters_section",
@@ -244,6 +249,34 @@
    "fieldtype": "Tab Break",
    "label": "Details",
    "show_dashboard": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "approvers_section",
+   "fieldtype": "Section Break",
+   "label": "Approvers"
+  },
+  {
+   "fieldname": "expense_approver",
+   "fieldtype": "Link",
+   "label": "Expense Approver",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_lfwy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "advance_approver",
+   "fieldtype": "Link",
+   "label": "Advance Approver",
+   "options": "User"
+  },
+  {
+   "fieldname": "deployment_approver",
+   "fieldtype": "Link",
+   "label": "Deployment Approver",
+   "options": "User"
   }
  ],
  "grid_page_length": 50,
@@ -285,7 +318,7 @@
    "link_fieldname": "personnel_deployment_request"
   }
  ],
- "modified": "2025-09-20 18:21:23.133953",
+ "modified": "2025-09-26 06:20:17.591058",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Request",

@@ -61,6 +61,9 @@ class PersonnelDeploymentRequest(Document):
                     "require_contract_before_deployment": self.require_contract_before_deployment,
                     "terms_of_reference": self.terms_of_reference,
                     "term_details": self.term_details,
+                    "expense_approver": self.expense_approver,
+                    "advance_approver": self.advance_approver,
+                    "deployment_approver": self.deployment_approver,
                 }
 
                 if self.get("deployment_request_term_template"):
@@ -91,7 +94,8 @@ class PersonnelDeploymentRequest(Document):
             except Exception as e:
                 frappe.db.rollback(save_point=savepoint)
                 frappe.log_error(
-                    f"Personnel Deployment Assignment failed for employee {employee}: {str(e)}"
+                    f"Personnel Deployment Assignment failed for employee {employee}.",
+                    str(e),
                 )
                 failure.append(employee)
 

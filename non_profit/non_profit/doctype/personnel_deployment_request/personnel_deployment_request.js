@@ -13,6 +13,31 @@ frappe.ui.form.on("Personnel Deployment Request", {
     frm.trigger("set_primary_action");
 
     frm.events.set_task_filter(frm);
+
+    frappe.call({
+      method: "non_profit.non_profit.utils.get_expense_and_advance_approvers",
+      callback: function (r) {
+        if (r.message) {
+          frm.allowed_approvers = r.message;
+
+          frm.set_query("expense_approver", function () {
+            return {
+              filters: {
+                name: ["in", frm.allowed_approvers],
+              },
+            };
+          });
+
+          frm.set_query("advance_approver", function () {
+            return {
+              filters: {
+                name: ["in", frm.allowed_approvers],
+              },
+            };
+          });
+        }
+      },
+    });
     frm
       .add_custom_button(__("Send Deployment Request"), () => {
         frm.trigger("deploy_employees");
@@ -55,6 +80,9 @@ frappe.ui.form.on("Personnel Deployment Request", {
         "expected_start_date",
         "expected_end_date",
         "notes",
+        "expense_approver",
+        "advance_approver",
+        "project_manager",
       ])
       .then((r) => {
         if (r && r.message) {
@@ -64,6 +92,12 @@ frappe.ui.form.on("Personnel Deployment Request", {
           if (r.message.expected_end_date)
             frm.set_value("expected_end_date", r.message.expected_end_date);
           if (r.message.notes) frm.set_value("notes", r.message.notes);
+          if (r.message.expense_approver)
+            frm.set_value("expense_approver", r.message.expense_approver);
+          if (r.message.advance_approver)
+            frm.set_value("advance_approver", r.message.advance_approver);
+          if (r.message.project_manager)
+            frm.set_value("deployment_approver", r.message.project_manager);
         }
       });
     frm.trigger("get_employees");
@@ -311,7 +345,7 @@ frappe.ui.form.on("Personnel Deployment Request", {
 
   confirm_deployment: function (frm, selected_employees) {
     frappe.confirm(
-      __("Send deployment request for {0} employee(s) for this project?", [
+      __("Send request to {0} personnel(s) for this project?", [
         selected_employees.length,
       ]),
       () => frm.events.bulk_deploy_employees(frm, selected_employees)
@@ -327,7 +361,7 @@ frappe.ui.form.on("Personnel Deployment Request", {
           employees: employees,
         },
         freeze: true,
-        freeze_message: __("Creating Deployment Requests..."),
+        freeze_message: __("Sending Requests..."),
       })
       .then((r) => {
         if (r.message) {
@@ -335,9 +369,7 @@ frappe.ui.form.on("Personnel Deployment Request", {
 
           let message = "";
           if (success && success.length > 0) {
-            message += __("Successfully created {0} deployment request(s)", [
-              success.length,
-            ]);
+            message += __("Successfully sent {0} request(s)", [success.length]);
           }
           if (failure && failure.length > 0) {
             message +=

@@ -3,6 +3,30 @@
 
 frappe.ui.form.on("Personnel Deployment Assignment", {
   refresh(frm) {
+    frappe.call({
+      method: "non_profit.non_profit.utils.get_expense_and_advance_approvers",
+      callback: function (r) {
+        if (r.message) {
+          frm.allowed_approvers = r.message;
+
+          frm.set_query("expense_approver", function () {
+            return {
+              filters: {
+                name: ["in", frm.allowed_approvers],
+              },
+            };
+          });
+
+          frm.set_query("advance_approver", function () {
+            return {
+              filters: {
+                name: ["in", frm.allowed_approvers],
+              },
+            };
+          });
+        }
+      },
+    });
     if (!frm.is_new() && frm.doc.require_contract_before_deployment) {
       frappe.db.get_value(
         "Contract",
@@ -32,6 +56,115 @@ frappe.ui.form.on("Personnel Deployment Assignment", {
         }
       );
     }
+  },
+  task(frm) {
+    if (!frm.doc.task) return;
+
+    frappe.db
+      .get_value("Task", frm.doc.task, [
+        "company",
+        "exp_start_date",
+        "exp_end_date",
+        "description",
+        "project",
+      ])
+      .then((r) => {
+        if (r && r.message) {
+          if (r.message.company) frm.set_value("company", r.message.company);
+          if (r.message.exp_start_date)
+            frm.set_value("expected_start_date", r.message.exp_start_date);
+          if (r.message.exp_end_date)
+            frm.set_value("expected_end_date", r.message.exp_end_date);
+          if (r.message.description)
+            frm.set_value("notes", r.message.description);
+          if (r.message.project) frm.set_value("project", r.message.project);
+        }
+      });
+    frm.trigger("get_employees");
+  },
+
+  project(frm) {
+    if (!frm.doc.project) return;
+    frm.events.set_task_filter(frm);
+    frappe.db
+      .get_value("Project", frm.doc.project, [
+        "company",
+        "expected_start_date",
+        "expected_end_date",
+        "notes",
+        "expense_approver",
+        "advance_approver",
+        "project_manager",
+      ])
+      .then((r) => {
+        if (r && r.message) {
+          if (r.message.company) frm.set_value("company", r.message.company);
+          if (r.message.expected_start_date)
+            frm.set_value("expected_start_date", r.message.expected_start_date);
+          if (r.message.expected_end_date)
+            frm.set_value("expected_end_date", r.message.expected_end_date);
+          if (r.message.notes) frm.set_value("notes", r.message.notes);
+          if (r.message.expense_approver)
+            frm.set_value("expense_approver", r.message.expense_approver);
+          if (r.message.advance_approver)
+            frm.set_value("advance_approver", r.message.advance_approver);
+          if (r.message.project_manager)
+            frm.set_value("deployment_approver", r.message.project_manager);
+        }
+      });
+    frm.trigger("get_employees");
+  },
+
+  deployment(frm) {
+    if (!frm.doc.deployment) return;
+    frappe.db
+      .get_value("Personnel Deployment Request", frm.doc.deployment, [
+        "project",
+        "expense_approver",
+        "advance_approver",
+        "deployment_approver",
+        "terms_of_reference",
+        "term_details",
+        "require_contract_before_deployment",
+        "expected_start_date",
+        "expected_end_date",
+        "notes",
+      ])
+      .then((r) => {
+        if (r && r.message) {
+          if (r.message.project) frm.set_value("project", r.message.project);
+          if (r.message.expense_approver)
+            frm.set_value("expense_approver", r.message.expense_approver);
+          if (r.message.advance_approver)
+            frm.set_value("advance_approver", r.message.advance_approver);
+          if (r.message.deployment_approver)
+            frm.set_value("deployment_approver", r.message.deployment_approver);
+          if (r.message.terms_of_reference)
+            frm.set_value("terms_of_reference", r.message.terms_of_reference);
+          if (r.message.term_details)
+            frm.set_value("term_details", r.message.term_details);
+          if (r.message.require_contract_before_deployment !== undefined)
+            frm.set_value(
+              "require_contract_before_deployment",
+              r.message.require_contract_before_deployment
+            );
+          if (r.message.expected_start_date)
+            frm.set_value("expected_start_date", r.message.expected_start_date);
+          if (r.message.expected_end_date)
+            frm.set_value("expected_end_date", r.message.expected_end_date);
+          if (r.message.notes) frm.set_value("notes", r.message.notes);
+        }
+      });
+  },
+
+  set_task_filter(frm) {
+    frm.set_query("task", function () {
+      return {
+        filters: {
+          project: frm.doc.project || "",
+        },
+      };
+    });
   },
 
   terms_of_reference: function (frm) {
