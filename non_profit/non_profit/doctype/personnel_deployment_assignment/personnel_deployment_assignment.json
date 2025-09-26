@@ -34,7 +34,9 @@
   "deployment_approver_name",
   "amended_from",
   "column_break_xpwb",
-  "date"
+  "date",
+  "expense_approver",
+  "advance_approver"
  ],
  "fields": [
   {
@@ -166,12 +168,14 @@
    "label": "Approval"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "deployment_approver",
    "fieldtype": "Link",
    "label": "Deployment Approver",
-   "options": "Employee"
+   "options": "User"
   },
   {
+   "fetch_from": "deployment_approver.full_name",
    "fieldname": "deployment_approver_name",
    "fieldtype": "Data",
    "label": "Deployment Approver Name"
@@ -227,6 +231,22 @@
    "fieldtype": "Tab Break",
    "label": "Details",
    "show_dashboard": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "expense_approver",
+   "fieldtype": "Link",
+   "label": "Expense Approver",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "advance_approver",
+   "fieldtype": "Link",
+   "label": "Advance Approver",
+   "options": "User",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
@@ -265,7 +285,7 @@
    "link_fieldname": "personnel_deployment_assignment"
   }
  ],
- "modified": "2025-09-20 18:19:58.276839",
+ "modified": "2025-09-26 06:44:06.151658",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Assignment",

@@ -110,3 +110,27 @@ def get_interviewers():
     )
 
     return users_with_roles
+
+
+@frappe.whitelist()
+def get_expense_and_advance_approvers():
+
+    allowed_roles = ["Expense Approver", "HR Manager"]
+
+    users_with_roles = frappe.get_all(
+        "User",
+        filters={
+            "name": [
+                "in",
+                frappe.get_all(
+                    "Has Role",
+                    filters={"role": ["in", allowed_roles]},
+                    pluck="parent",
+                ),
+            ],
+            "enabled": 1,
+        },
+        pluck="name",
+    )
+
+    return users_with_roles
