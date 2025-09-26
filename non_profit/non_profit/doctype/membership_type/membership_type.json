@@ -46,8 +46,7 @@
    "fieldname": "linked_item",
    "fieldtype": "Link",
    "label": "Linked Item",
-   "options": "Item",
-   "unique": 1
+   "options": "Item"
   },
   {
    "fieldname": "column_break_tssr",
@@ -94,7 +93,7 @@
    "link_fieldname": "membership_type"
   }
  ],
- "modified": "2025-09-03 12:34:43.645651",
+ "modified": "2025-09-26 08:13:13.854649",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Type",

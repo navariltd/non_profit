@@ -132,6 +132,10 @@ doc_events = {
     "Job Opening": {
         "validate": "non_profit.non_profit.overrides.server.job_opening.validate"
     },
+    "Sales Invoice": {
+        "on_update": "non_profit.non_profit.overrides.server.sales_invoice.on_update",
+        "on_update_after_submit": "non_profit.non_profit.overrides.server.sales_invoice.on_update",
+    },
 }
 
 # Scheduled Tasks
