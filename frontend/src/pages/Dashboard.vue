@@ -95,6 +95,8 @@ watch(
     } else {
       roleResource.reload();
       currentMembership.reload();
+      events.reload();
+      
     }
   },
   { immediate: true }
