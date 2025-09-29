@@ -1,117 +1,136 @@
 <template>
-  <div class="space-y-8">
-    <!-- Membership Status -->
-    <div class="w-full">
-      <Member
-        v-if="currentMembership.data"
-        :membershipStatus="currentMembership.data"
-      />
-      <EmptyState v-else type="Membership" />
-    </div>
+  <div class="space-y-4 max-w-7xl mx-auto px-4">
+    <ProgressSpinner
+      v-if="currentMembership.loading || membershipTypes.loading"
+      class="mt-6"
+    />
 
-    <!-- Membership Types -->
-    <div class="p-4 bg-gray-50 rounded-xl shadow-sm">
-      <h1 class="text-3xl font-bold text-gray-800">
-        Select a Plan to Continue
-      </h1>
+    <ErrorMessage
+      v-if="currentMembership.error || membershipTypes.error"
+      class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm my-auto mt-20"
+      message="Failed to get Membership Details"
+    />
 
-      <div v-if="membershipTypes.data?.length > 0" class="mt-10">
-        <div
-          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 place-items-stretch"
-        >
-          <div
-            v-for="membershipType in membershipTypes.data"
-            :key="membershipType.name"
-            class="flex"
-          >
-            <VmmsPortalCard
-              class="w-full transition hover:scale-105 hover:shadow-lg cursor-pointer"
-              :membershipType="membershipType"
-              @click="selectMembershipType(membershipType)"
-            />
-          </div>
-        </div>
+    <template v-else>
+      <div class="w-full flex flex-col items-center">
+        <Member
+          v-if="currentMembership.data && currentMembership.data.length > 0"
+          :membershipStatus="currentMembership.data"
+        />
+        <EmptyState v-else type="Membership" class="mt-6" />
       </div>
 
-      <EmptyState v-else type="Membership Type" class="mt-10" />
-    </div>
+      <div
+        class="p-2 pt-2 md:p-8 bg-gray-50 rounded-2xl shadow-md text-center mb-20"
+      >
+        <h1 class="text-3xl font-bold text-gray-800">Select a New Plan</h1>
 
-    <div class="w-full justify-center text-center">
-      <Dialog v-model="registerDialog">
-        <template #body-title>
-          <h3 class="text-2xl font-bold text-gray-900">
-            Register as a <span class="text-red-600">Member</span>
-          </h3>
-        </template>
-
-        <template #body-content>
-          <form @submit.prevent="submit" class="space-y-6">
-            <p class="text-gray-600">
-              Please fill in the details below to complete your membership
-              registration.
-            </p>
-
-            <!-- Branch -->
-            <div class="bg-white border rounded-lg p-4 shadow-sm">
-              <Link
-                id="branch"
-                :label="'Branch / County'"
-                doctype="Company"
-                :required="true"
-                :filters="{ is_group: 0 }"
-                v-model="membershipForm.branch"
-                class="w-full"
+        <div v-if="membershipTypes.data?.length > 0" class="mt-10">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div
+              v-for="membershipType in membershipTypes.data"
+              :key="membershipType.name"
+              class="flex justify-center"
+            >
+              <VmmsPortalCard
+                class="w-full max-w-sm transition hover:scale-105 hover:shadow-lg cursor-pointer"
+                :membershipType="membershipType"
+                @click="selectMembershipType(membershipType)"
               />
             </div>
+          </div>
+        </div>
 
-            <!-- Membership Info -->
-            <!-- <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p class="font-medium text-gray-800">
-                Membership Type:
-                <span class="text-red-600">
-                  {{ membershipForm.membership_type }}
-                </span>
-              </p>
-              <p class="text-gray-700 mt-1">
-                Amount:
-                <span class="font-semibold"
-                  >KES {{ membershipForm.amount }}</span
-                >
-              </p>
-            </div> -->
+        <EmptyState v-else type="Membership Type" class="mt-10" />
+      </div>
+      <div></div>
+    </template>
 
-            <!-- Error -->
-            <ErrorMessage
-              v-if="createMembership.error"
-              class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm"
-              :message="createMembership.error"
+    <Dialog v-model="registerDialog">
+      <template #body-title>
+        <h3 class="text-2xl font-bold text-gray-900">
+          Register as a <span class="text-red-600">Member</span>
+        </h3>
+      </template>
+
+      <template #body-content>
+        <form @submit.prevent="submit" class="space-y-6">
+          <p class="text-gray-600">
+            Please fill in the details below to complete your membership
+            registration.
+          </p>
+
+          <!-- Branch -->
+          <div class="bg-white border rounded-lg p-4 shadow-sm">
+            <Link
+              id="branch"
+              :label="'Branch / County'"
+              doctype="Company"
+              :required="true"
+              :filters="{ is_group: 0 }"
+              v-model="membershipForm.branch"
+              class="w-full"
             />
+          </div>
 
-            <!-- Actions -->
-            <div class="flex justify-end gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                theme="red"
-                class="rounded-lg px-5"
-                @click="cleanUpMembershipForm()"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="solid"
-                theme="red"
-                :loading="createMembership.loading"
-                class="rounded-lg px-6"
-              >
-                Register
-              </Button>
-            </div>
-          </form>
-        </template>
-      </Dialog>
-    </div>
+          <!-- Membership Info -->
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p class="font-medium text-gray-800">
+              Membership Type:
+              <span class="text-red-600">
+                {{ membershipForm.membership_type }}
+              </span>
+            </p>
+            <p class="text-gray-700 mt-1">
+              Amount:
+              <span class="font-semibold">KES {{ membershipForm.amount }}</span>
+            </p>
+          </div>
+
+          <!-- Error -->
+          <ErrorMessage
+            v-if="createMembership.error"
+            class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm"
+            :message="createMembership.error"
+          />
+
+          <!-- Actions -->
+          <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              theme="red"
+              class="rounded-lg px-5"
+              @click="cleanUpMembershipForm"
+            >
+              Cancel
+            </Button>
+
+            <Button
+              type="submit"
+              variant="solid"
+              theme="green"
+              :loading="createMembership.loading"
+              class="rounded-lg px-6"
+            >
+              Register
+            </Button>
+
+            <!-- Pay Now Button -->
+            <Button
+              type="button"
+              variant="solid"
+              theme="red"
+              icon-right="credit-card"
+              class="rounded-lg px-6"
+              @click="payNow"
+            >
+              Pay Now
+            </Button>
+          </div>
+        </form>
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -122,12 +141,13 @@ import { Dialog, Button, createResource, ErrorMessage, toast } from "frappe-ui";
 import Member from "../components/MemberPlan.vue";
 import EmptyState from "../components/EmptyState.vue";
 import Link from "../components/Controls/Link.vue";
+import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
 
 const { membershipTypes, currentMembership } = membershipStore();
-
 const user = inject<any>("$user");
 
 const registerDialog = ref(false);
+
 const membershipForm = reactive({
   membership_type: "",
   amount: 0,
@@ -141,6 +161,7 @@ const createMembership = createResource({
   onSuccess() {
     toast.success("Membership created successfully");
     currentMembership.reload();
+    membershipTypes.reload();
     cleanUpMembershipForm();
   },
 });
@@ -166,4 +187,6 @@ function submit() {
   }
   createMembership.submit({ ...membershipForm });
 }
+
+function payNow() {}
 </script>

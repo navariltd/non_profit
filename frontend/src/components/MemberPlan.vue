@@ -1,36 +1,5 @@
 <template>
-  <div class="flex flex-col gap-8 p-6 border">
-    <!-- Volunteer Section -->
-    <div
-      v-if="
-        membershipList.data &&
-        membershipList.data.length > 0 &&
-        roleResource.data &&
-        !roleResource.data.is_volunteer
-      "
-      class="rounded-2xl border bg-red-50 p-8 text-center shadow-sm"
-    >
-      <h2 class="text-2xl font-bold text-gray-900 mb-4">
-        Not a volunteer yet?
-      </h2>
-      <p class="text-gray-700 mb-6 max-w-2xl mx-auto">
-        Join the Kenya Red Cross Society as a volunteer and play an active role
-        in supporting your community. You'll help deliver life-saving services,
-        gain valuable skills through training, and be part of a global
-        humanitarian movement dedicated to making a difference.
-      </p>
-      <RouterLink :to="{ name: 'VolunteerSignup' }">
-        <Button
-          variant="solid"
-          theme="red"
-          icon-right="arrow-right"
-          class="px-8 py-4 rounded-xl text-lg font-semibold shadow-md"
-        >
-          Register as Volunteer
-        </Button>
-      </RouterLink>
-    </div>
-    <!-- Membership Cards -->
+  <div class="flex flex-col gap-4 md:gap-8 md:p-6">
     <h1
       v-if="membershipList.data && membershipList.data.length > 0"
       class="text-3xl font-bold text-gray-800"
@@ -105,6 +74,44 @@
           </Button>
         </div>
       </Card>
+    </div>
+    <div
+      v-if="
+        membershipList.data &&
+        membershipList.data.length > 0 &&
+        roleResource.data &&
+        !roleResource.data.is_volunteer
+      "
+      class="rounded-3xl border border-red-200 bg-gradient-to-br from-red-50 to-white p-10 text-center shadow-lg"
+    >
+      <!-- Heading -->
+      <h2 class="text-3xl font-extrabold text-gray-900 mb-4">
+        Become a <span class="text-red-600">Volunteer</span>
+      </h2>
+
+      <!-- Subtext -->
+      <p class="text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
+        Join the <span class="font-semibold">Kenya Red Cross Society</span> as a
+        volunteer and play an active role in supporting your community.
+        Contribute to
+        <span class="text-red-600 font-medium">life-saving services</span>, gain
+        valuable skills through <span class="font-medium">training</span>, and
+        be part of a
+        <span class="italic">global humanitarian movement</span> dedicated to
+        making a difference.
+      </p>
+
+      <!-- Call to Action -->
+      <RouterLink :to="{ name: 'VolunteerSignup' }">
+        <Button
+          variant="solid"
+          theme="red"
+          icon-right="arrow-right"
+          class="px-10 py-4 rounded-2xl text-lg font-semibold shadow-md hover:shadow-xl transition-all"
+        >
+          Register as Volunteer
+        </Button>
+      </RouterLink>
     </div>
   </div>
 </template>

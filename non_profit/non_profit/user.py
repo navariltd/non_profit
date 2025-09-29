@@ -44,6 +44,7 @@ def create_user(**kwargs):
                 "user": user.name,
                 "allow": "User",
                 "for_value": user.name,
+                "is_default": 1
             }
         )
 
@@ -82,7 +83,6 @@ def create_membership(**kwargs):
                     "member_name": kwargs.get("member_name"),
                     "email_id": kwargs.get("email_id"),
                     "membership_type": kwargs.get("membership_type"),
-                    "pan_number": kwargs.get("phone_number"),
                 }
             )
             member.insert(ignore_permissions=True)
@@ -112,18 +112,9 @@ def create_membership(**kwargs):
             )
 
             membership.insert(ignore_permissions=True)
-
-        user_permission = frappe.get_doc(
-            {
-                "doctype": "User Permission",
-                "user": user.name,
-                "allow": "Company",
-                "for_value": kwargs.get("branch"),
-            }
-        )
-        user_permission.insert(ignore_permissions=True)
-
+        
         frappe.db.commit()
+
     except Exception as e:
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), "Error creating membership")

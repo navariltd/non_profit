@@ -265,10 +265,22 @@ def custom_search_link(
 
 @frappe.whitelist(allow_guest=True)
 def get_membership_types():
-
-    return frappe.get_all(
-        "Membership Type", fields=["name", "membership_type", "amount"]
+    memberships = frappe.get_all(
+        "Membership Type",
+        fields=["name", "membership_type", "amount"],
+        order_by="amount desc",
     )
+    for membership in memberships:
+        membership_benefits = frappe.get_all(
+            "Membership Benefit",
+            {"parent": membership.name},
+            ["benefit"]
+        )
+
+        if membership_benefits:
+            membership["benefits"] = [b.benefit for b in membership_benefits]   
+
+    return memberships
 
 
 @frappe.whitelist(allow_guest=True)
