@@ -41,7 +41,6 @@ const routes = [
     name: "Events",
     path: "/events",
     component: () => import("@/pages/Events.vue"),
-    meta: { requiresAuth: true },
   },
   {
     name: "Projects",

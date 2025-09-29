@@ -16,6 +16,7 @@ from frappe.utils import (
     get_link_to_form,
     getdate,
     nowdate,
+    today,
 )
 
 from non_profit.non_profit.doctype.member.member import create_member
@@ -31,7 +32,52 @@ class Membership(Document):
             else:
                 frappe.throw(_("Please select a Member"))
 
-        self.validate_membership_period()
+        self._apply_membership_period_logic()
+
+    def validate_membership_period(self):
+        self._apply_membership_period_logic()
+        self.save(ignore_permissions=True)
+        frappe.db.commit()
+
+    def _apply_membership_period_logic(self):
+        membership_type = frappe.get_doc("Membership Type", self.membership_type)
+
+        invoices = frappe.get_all(
+            "Sales Invoice",
+            filters={"membership": self.name},
+            fields=["name", "grand_total", "outstanding_amount", "posting_date"],
+            order_by="posting_date asc",
+        )
+
+        if not invoices:
+            if self.to_date and getdate(self.to_date) < getdate(today()):
+                self.membership_status = "Expired"
+            return
+
+        total_paid = 0
+        for inv in invoices:
+            if getdate(inv.posting_date) >= getdate(self.from_date):
+                if inv.outstanding_amount == 0:
+                    total_paid += inv.grand_total
+
+        cycle_amount = membership_type.amount
+        cycles = int(total_paid // cycle_amount) if cycle_amount else 0
+
+        if cycles <= 0:
+            if self.to_date and getdate(self.to_date) < getdate(today()):
+                self.membership_status = "Expired"
+            return
+
+        start_date = (
+            today()
+            if not self.from_date or getdate(self.from_date) < getdate(today())
+            else self.from_date
+        )
+
+        end_date = get_cycle_dates(start_date, membership_type.billing_cycle, cycles)
+
+        self.to_date = end_date
+        self.membership_status = "Current"
 
     def create_member_from_website_user(self):
         member_name = frappe.get_value("Member", dict(email_id=frappe.session.user))
@@ -50,32 +96,6 @@ class Membership(Document):
 
         if self.get("__islocal"):
             self.member = member_name
-
-    def validate_membership_period(self):
-        # get last membership (if active)
-        last_membership = get_last_membership(self.member)
-
-        # if person applied for offline membership
-        if (
-            last_membership
-            and last_membership.name != self.name
-            and not frappe.session.user == "Administrator"
-        ):
-            # if last membership does not expire in 30 days, then do not allow to renew
-            if getdate(add_days(last_membership.to_date, -30)) > getdate(nowdate()):
-                frappe.throw(
-                    _("You can only renew if your membership expires within 30 days")
-                )
-
-            self.from_date = add_days(last_membership.to_date, 1)
-
-        if (
-            frappe.db.get_single_value("Non Profit Settings", "billing_cycle")
-            == "Yearly"
-        ):
-            self.to_date = add_years(self.from_date, 1)
-        else:
-            self.to_date = add_months(self.from_date, 1)
 
     def on_payment_authorized(self, status_changed_to=None):
         if status_changed_to not in ("Completed", "Authorized"):
@@ -225,7 +245,7 @@ class Membership(Document):
                 queue="short",
                 timeout=300,
                 is_async=True,
-                **email_args
+                **email_args,
             )
         else:
             frappe.sendmail(**email_args)
@@ -233,6 +253,18 @@ class Membership(Document):
     def generate_and_send_invoice(self):
         self.generate_invoice(save=False)
         self.send_acknowlement()
+
+
+def get_cycle_dates(start_date, billing_cycle, cycles=1):
+    """Return end_date given start_date, billing cycle, and cycles count."""
+    if billing_cycle == "Monthly":
+        return add_months(start_date, cycles)
+    elif billing_cycle == "Yearly":
+        return add_years(start_date, cycles)
+    elif billing_cycle == "One Off":
+        return add_years(start_date, 100)
+    else:
+        frappe.throw(_("Unsupported billing cycle: {0}").format(billing_cycle))
 
 
 def make_invoice(membership, member, plan):
