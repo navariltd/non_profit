@@ -69,7 +69,12 @@
 
         <!-- CTA Footer -->
         <div class="bg-gray-50 p-4 border-t">
-          <Button :variant="'solid'" theme="red" class="w-full">
+          <Button
+            :variant="'solid'"
+            theme="red"
+            class="w-full"
+            @click="payNow = true"
+          >
             Renew Membership
           </Button>
         </div>
@@ -114,15 +119,42 @@
       </RouterLink>
     </div>
   </div>
+  <Dialog v-model="payNow">
+    <template #body-title>
+      <h3 class="text-2xl text-gray-900">
+        <span class="text-red-600">Enter Mpesa Phone Number to Pay</span>
+      </h3>
+    </template>
+
+    <template #body-content>
+      <form @submit.prevent="renewMembership" class="space-y-6">
+        <FormControl
+          :type="'password'"
+          :ref_for="true"
+          size="sm"
+          variant="subtle"
+                    placeholder="+254123456789"
+
+          :disabled="false"
+          label="Phone Number"
+          v-model="phoneNumber"
+        />
+      </form>
+    </template>
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
-import { Badge, Card, createResource } from "frappe-ui";
+import { Badge, Card, createResource, Dialog, FormControl } from "frappe-ui";
 import Button from "frappe-ui/src/components/Button/Button.vue";
 import { RouterLink } from "vue-router";
 import { usersStore } from "../stores/user";
+import { ref } from "vue";
 
 const { roleResource } = usersStore();
+
+const payNow = ref(false);
+const phoneNumber = ref("");
 
 interface Membership {
   name?: string;
@@ -164,5 +196,11 @@ function formatDate(dateStr?: string): string {
     month: "short",
     year: "numeric",
   });
+}
+
+function renewMembership() {
+  // Logic to renew membership
+  console.log("Renewing membership with phone number:", phoneNumber.value);
+  
 }
 </script>

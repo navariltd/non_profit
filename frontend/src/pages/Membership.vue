@@ -46,7 +46,12 @@
       <div></div>
     </template>
 
-    <Dialog v-model="registerDialog">
+    <Dialog
+      v-model="registerDialog"
+      :options="{
+        size: 'xl',
+      }"
+    >
       <template #body-title>
         <h3 class="text-2xl font-bold text-gray-900">
           Register as a <span class="text-red-600">Member</span>
@@ -70,6 +75,7 @@
               :filters="{ is_group: 0 }"
               v-model="membershipForm.branch"
               class="w-full"
+              :readonly="payNow"
             />
           </div>
 
@@ -87,15 +93,16 @@
             </p>
           </div>
 
-          <!-- Error -->
           <ErrorMessage
-            v-if="createMembership.error"
+            v-if="!payNow && createMembership.error"
             class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm"
             :message="createMembership.error"
           />
 
-          <!-- Actions -->
-          <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+          <div
+            v-if="!payNow"
+            class="flex flex-col sm:flex-row justify-end gap-3 pt-2"
+          >
             <Button
               type="button"
               variant="outline"
@@ -115,18 +122,54 @@
             >
               Register
             </Button>
-
-            <!-- Pay Now Button -->
-            <Button
-              type="button"
-              variant="solid"
-              theme="red"
-              icon-right="credit-card"
-              class="rounded-lg px-6"
-              @click="payNow"
+          </div>
+          <div v-if="payNow" class="space-y-4">
+            <span
+              class="text-center border rounded-md p-2 mb-10 border-blue-500 bg-blue-50 text-sm"
             >
-              Pay Now
-            </Button>
+              Registration successful! Please proceed to pay for your membership
+              below.
+            </span>
+
+            <Input
+              :type="'text'"
+              :ref_for="true"
+              size="sm"
+              variant="subtle"
+              placeholder="+254123456789"
+              :disabled="false"
+              label="Enter Mpesa Phone Number to Pay"
+              v-model="membershipForm.phone_number"
+              required
+            />
+
+            <ErrorMessage
+              v-if="createMembership.error"
+              class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm"
+              :message="createMembership.error"
+            />
+
+            <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                theme="red"
+                class="rounded-lg px-5"
+                @click="cleanUpMembershipForm"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="solid"
+                theme="red"
+                icon-right="credit-card"
+                class="rounded-lg px-6"
+                @click="payMembership"
+              >
+                Pay Now
+              </Button>
+            </div>
           </div>
         </form>
       </template>
@@ -135,9 +178,16 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, reactive, ref } from "vue";
+import { inject, reactive, ref, watch } from "vue";
 import { membershipStore } from "../stores/membership";
-import { Dialog, Button, createResource, ErrorMessage, toast } from "frappe-ui";
+import {
+  Dialog,
+  Button,
+  createResource,
+  ErrorMessage,
+  toast,
+  Input,
+} from "frappe-ui";
 import Member from "../components/MemberPlan.vue";
 import EmptyState from "../components/EmptyState.vue";
 import Link from "../components/Controls/Link.vue";
@@ -147,13 +197,14 @@ const { membershipTypes, currentMembership } = membershipStore();
 const user = inject<any>("$user");
 
 const registerDialog = ref(false);
-
+const payNow = ref(false);
 const membershipForm = reactive({
   membership_type: "",
   amount: 0,
   branch: "",
   member_name: user.data ? user.data.full_name : "",
   email_id: user.data ? user.data.email : "",
+  phone_number: "",
 });
 
 const createMembership = createResource({
@@ -162,7 +213,7 @@ const createMembership = createResource({
     toast.success("Membership created successfully");
     currentMembership.reload();
     membershipTypes.reload();
-    cleanUpMembershipForm();
+    payNow.value = true;
   },
 });
 
@@ -171,6 +222,8 @@ function cleanUpMembershipForm() {
   membershipForm.membership_type = "";
   membershipForm.amount = 0;
   membershipForm.branch = "";
+  membershipForm.phone_number = "";
+  payNow.value = false;
   createMembership.error = "";
 }
 
@@ -188,5 +241,32 @@ function submit() {
   createMembership.submit({ ...membershipForm });
 }
 
-function payNow() {}
+function payMembership() {
+  if (!membershipForm.phone_number) {
+    createMembership.error = "Please enter your phone number";
+    return;
+  }
+
+  if (!isValidPhone(membershipForm.phone_number)) {
+    createMembership.error =
+      "Please enter a valid Kenyan phone number.eg. (+254123456789)";
+    return;
+  }
+  createMembership.error = "";
+  // Logic to pay membership
+  alert(
+    `Paying for membership with phone number: ${membershipForm.phone_number}`
+  );
+}
+
+function isValidPhone(phone: string) {
+  const regex = /^\+254\d{9}$/;
+  return regex.test(phone);
+}
+
+watch(registerDialog, (newValue) => {
+  if (newValue === false) {
+    cleanUpMembershipForm();
+  }
+});
 </script>
