@@ -110,9 +110,9 @@ after_install = "non_profit.setup.setup_non_profit"
 # ---------------
 # Override standard doctype classes
 
-override_doctype_class = {
-    "Payment Entry": "non_profit.non_profit.custom_doctype.payment_entry.NonProfitPaymentEntry",
-}
+# override_doctype_class = {
+#     "Payment Entry": "non_profit.non_profit.custom_doctype.payment_entry.NonProfitPaymentEntry",
+# }
 
 # Document Events
 # ---------------
@@ -135,6 +135,10 @@ doc_events = {
     "Sales Invoice": {
         "on_update": "non_profit.non_profit.overrides.server.sales_invoice.on_update",
         "on_update_after_submit": "non_profit.non_profit.overrides.server.sales_invoice.on_update",
+    },
+    "GL Entry": {
+        "after_insert": "non_profit.non_profit.overrides.server.gl_entry.on_update",
+        "on_update": "non_profit.non_profit.overrides.server.gl_entry.on_update",
     },
 }
 

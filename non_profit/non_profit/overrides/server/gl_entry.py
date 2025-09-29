@@ -6,4 +6,5 @@ from ...utils import check_and_renew_membership
 
 @frappe.whitelist()
 def on_update(doc: Document, method: str) -> None:
-    check_and_renew_membership(doc.name)
+    if doc.against_voucher_type == "Sales Invoice" and doc.against_voucher:
+        check_and_renew_membership(doc.against_voucher)

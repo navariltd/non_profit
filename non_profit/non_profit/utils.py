@@ -1,8 +1,7 @@
 import frappe
 
 from non_profit.setup import setup_non_profit
-from datetime import datetime, timedelta
-from frappe.utils import today, add_months, add_years
+from datetime import timedelta
 
 
 def get_company():
@@ -137,28 +136,12 @@ def get_expense_and_advance_approvers():
     return users_with_roles
 
 
-def renew_membership(membership_id: str) -> None:
-    """
-    Renew membership validity based on its billing cycle.
-    """
-    membership = frappe.get_doc("Membership", membership_id)
-    membership_type = frappe.get_doc("Membership Type", membership.membership_type)
+def check_and_renew_membership(invoice_id: str) -> None:
+    if not invoice_id or not frappe.db.exists("Sales Invoice", invoice_id):
+        return
 
-    billing_cycle = membership_type.billing_cycle
-    start_date = today()
-
-    if billing_cycle == "Monthly":
-        end_date = add_months(start_date, 1)
-    elif billing_cycle == "Yearly":
-        end_date = add_years(start_date, 1)
-    elif billing_cycle == "One Off":
-        end_date = add_years(start_date, 100)
-    else:
-        frappe.throw(f"Unsupported billing cycle: {billing_cycle}")
-
-    membership.from_date = start_date
-    membership.to_date = end_date
-    membership.membership_status = "Current"
-
-    membership.save(ignore_permissions=True)
-    frappe.db.commit()
+    invoice = frappe.get_doc("Sales Invoice", invoice_id)
+    if not invoice.membership:
+        return
+    membership = frappe.get_doc("Membership", invoice.membership)
+    membership.validate_membership_period()
