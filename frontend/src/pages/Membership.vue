@@ -123,9 +123,9 @@
               Register
             </Button>
           </div>
-          <div v-if="payNow" class="space-y-4">
+          <div v-if="payNow" class="flex flex-col space-y-4">
             <span
-              class="text-center border rounded-md p-2 mb-10 border-blue-500 bg-blue-50 text-sm"
+              class="text-center text-blue-800 border rounded-md p-2 border-blue-500 bg-blue-50 text-sm"
             >
               Registration successful! Please proceed to pay for your membership
               below.
