@@ -65,7 +65,7 @@
             </div>
 
             <!-- Membership Info -->
-            <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <!-- <div class="bg-red-50 border border-red-200 rounded-lg p-4">
               <p class="font-medium text-gray-800">
                 Membership Type:
                 <span class="text-red-600">
@@ -78,7 +78,7 @@
                   >KES {{ membershipForm.amount }}</span
                 >
               </p>
-            </div>
+            </div> -->
 
             <!-- Error -->
             <ErrorMessage
