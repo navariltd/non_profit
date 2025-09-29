@@ -38,24 +38,23 @@
         :label="__('Driving Licence')"
         doctype="Driving Licence Class"
       />
-      <!-- <div class="w-full md:col-span-2 space-y-6">
+      <div class="w-full md:col-span-2 space-y-6">
+        <ChildTable
+          v-model="localModel.education"
+          :doctype="'Employee Education'"
+          label="Education"
+        />
         <ChildTable
           v-model="localModel.licences"
-          :columns="[
-            {
-              key: 'licence_type',
-              label: 'Type',
-              type: 'link',
-              doctype: 'Personnel License Type',
-            },
-            { key: 'institution', label: 'Institution', type: 'text' },
-            { key: 'description', label: 'Description', type: 'text' },
-            { key: 'valid_from', label: 'Valid From', type: 'date' },
-            { key: 'valid_to', label: 'Valid To', type: 'date' },
-          ]"
-          :label="__('Certifications')"
+          :doctype="'Personnel Licence'"
+          label="Licences"
         />
-      </div> -->
+        <ChildTable
+          v-model="localModel.certifications"
+          :doctype="'Certification'"
+          label="Certifications"
+        />
+      </div>
     </div>
   </section>
 </template>

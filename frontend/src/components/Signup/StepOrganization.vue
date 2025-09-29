@@ -133,29 +133,6 @@
         </p>
       </div>
     </div>
-    <div class="w-full md:col-span-2 space-y-6 mt-6">
-      <!-- <ChildTable
-        v-model="localModel.education"
-        :columns="[
-          {
-            key: 'level',
-            label: 'Level',
-            type: 'select',
-            options: [
-              'Primary',
-              'Secondary / High School',
-              'Undergraduate',
-              'Graduate',
-              'Postgraduate',
-              'Others',
-            ],
-          },
-          { key: 'course', label: 'Course', type: 'text' },
-          { key: 'year', label: 'Year of Graduation', type: 'number' },
-        ]"
-        label="Education"
-      /> -->
-    </div>
   </section>
 </template>
 

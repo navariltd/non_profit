@@ -11,7 +11,7 @@
       <input
         ref="fileInput"
         type="file"
-        :accept="acceptedFileTypes"
+        :accept="acceptAttribute"
         :multiple="multi"
         @change="onFileSelect"
         class="hidden"
@@ -35,26 +35,24 @@
       <div class="text-sm font-medium text-gray-700 mb-2">
         {{ uploadedFiles.length }} file(s) uploaded
       </div>
-      <div
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-      >
+      <div class="grid grid-cols-1 gap-4">
         <div
           v-for="(file, index) in uploadedFiles"
-          :key="file.file_name + index"
+          :key="(file.file_name || file.name || file.file_url) + index"
           class="bg-white p-4 rounded-md border space-y-2"
         >
-          <div class="relative w-fit">
+          <div class="relative w-full">
             <img
-              v-if="isImage(file.file_url)"
-              :src="file.file_url"
+              v-if="isImage(file.file_url || file.url || file.file_url)"
+              :src="file.file_url || file.url || file"
               alt="Uploaded preview"
-              class="w-full h-32 p-2 rounded-lg border object-cover"
+              class="w-full h-fit p-2 rounded-lg border object-cover"
             />
 
             <iframe
-              v-else-if="isPDF(file.file_url)"
-              :src="file.file_url"
-              class="w-full h-64 border rounded-lg"
+              v-else-if="isPDF(file.file_url || file.url || file)"
+              :src="file.file_url || file.url || file"
+              class="w-fit h-64 border rounded-lg"
             ></iframe>
 
             <div
@@ -76,11 +74,11 @@
 
           <div>
             <a
-              :href="file.file_url"
+              :href="file.file_url || file.url || file"
               target="_blank"
               class="block font-medium text-blue-600 hover:underline truncate"
             >
-              {{ file.file_name }}
+              {{ file.file_name || file.name || file }}
             </a>
             <p v-if="file.file_size" class="text-xs text-gray-500 mt-1">
               {{ formatBytes(file.file_size) }}
@@ -138,19 +136,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { toast } from "frappe-ui";
 import { Cloud, FileText } from "lucide-vue-next";
 
 const emit = defineEmits<{
   (e: "success", data: any): void;
-  (e: "update:modelValue", value: string): void;
+  (e: "update:modelValue", value: any): void;
   (e: "filesChanged", files: any[]): void;
 }>();
 
 const props = withDefaults(
   defineProps<{
-    modelValue: string;
+    modelValue?: any;
     label?: string;
     description?: string;
     fileTypes?: string[];
@@ -207,6 +205,7 @@ async function uploadFile(file: File) {
   }
 
   const data = await response.json();
+
   return data.message;
 }
 
@@ -223,6 +222,47 @@ const simulateProgress = (update: (p: number) => void) => {
     tick();
   });
 };
+
+const normalizeFileTypes = computed(() =>
+  (props.fileTypes || ["*/*"]).map((t) => t.trim().toLowerCase())
+);
+
+const acceptAttribute = computed(() =>
+  normalizeFileTypes.value.includes("*/*")
+    ? undefined
+    : normalizeFileTypes.value.join(",")
+);
+
+const supportedFormatsText = computed(() =>
+  props.fileTypes?.length
+    ? props.fileTypes
+        .map((t) => t.replace(".", ""))
+        .join(", ")
+        .toUpperCase()
+    : "ANY"
+);
+
+function fileMatchesAllowed(file: File) {
+  if (normalizeFileTypes.value.includes("*/*")) return true;
+
+  const lowerName = file.name.toLowerCase();
+  const mime = file.type.toLowerCase();
+
+  for (const pattern of normalizeFileTypes.value) {
+    if (pattern.startsWith(".")) {
+      if (lowerName.endsWith(pattern)) return true;
+    } else if (pattern.endsWith("/*")) {
+      const major = pattern.split("/")[0];
+      if (mime.startsWith(major + "/")) return true;
+    } else if (pattern.includes("/")) {
+      if (mime === pattern) return true;
+    } else {
+      if (lowerName.endsWith("." + pattern)) return true;
+    }
+  }
+
+  return false;
+}
 
 const validateFiles = (files: File[]): File[] => {
   const validFiles: File[] = [];
@@ -252,8 +292,17 @@ const validateFiles = (files: File[]): File[] => {
       }
     }
 
+    if (!fileMatchesAllowed(file)) {
+      toast.error(
+        `File ${file.name} is not an allowed type. Supported: ${supportedFormatsText.value}`
+      );
+      continue;
+    }
+
     const isDuplicate = uploadedFiles.value.some(
-      (uploadedFile) => uploadedFile.file_name === file.name
+      (uploadedFile) =>
+        (uploadedFile.file_name || uploadedFile.name || uploadedFile) ===
+        file.name
     );
 
     if (isDuplicate) {
@@ -301,32 +350,54 @@ const handleFiles = async (files: File[]) => {
     try {
       await simulateProgress((p) => (item.progress = p));
       const data = await uploadFile(file);
-      uploadedFiles.value.push(data);
+
+      const fileObj =
+        data && typeof data === "object"
+          ? data
+          : {
+              file_name: file.name,
+              file_url: data || "",
+              file_size: file.size,
+            };
+
+      uploadedFiles.value.push(fileObj);
       item.progress = 100;
 
-      emit("success", data);
-      if (!props.multi) emit("update:modelValue", data.file_url);
+      if (props.multi) {
+        const current = Array.isArray(props.modelValue)
+          ? [...props.modelValue]
+          : [...uploadedFiles.value];
+
+        emit("update:modelValue", uploadedFiles.value.slice());
+        emit("filesChanged", uploadedFiles.value.slice());
+      } else {
+        emit("update:modelValue", fileObj);
+      }
+
+      emit("success", fileObj);
       toast.success(`${file.name} uploaded successfully.`);
     } catch (err: any) {
       item.progress = 0;
-      toast.error(`Failed to upload ${file.name}: ${err.message}`);
+      toast.error(`Failed to upload ${file.name}: ${err?.message || err}`);
     }
   }
 
   uploading.value = false;
-  emit("filesChanged", uploadedFiles.value);
 };
 
 const removeFile = (index: number) => {
   const removedFile = uploadedFiles.value[index];
   uploadedFiles.value.splice(index, 1);
 
-  if (!props.multi && uploadedFiles.value.length === 0) {
+  if (props.multi) {
+    emit("update:modelValue", uploadedFiles.value.slice());
+    emit("filesChanged", uploadedFiles.value.slice());
+  } else {
     emit("update:modelValue", "");
   }
-
-  emit("filesChanged", uploadedFiles.value);
-  toast.success(`${removedFile.file_name} removed successfully.`);
+  toast.success(
+    `${removedFile.file_name || removedFile.name || "File"} removed successfully.`
+  );
 };
 
 const clearAllFiles = () => {
@@ -340,9 +411,11 @@ const clearAllFiles = () => {
 
     if (!props.multi) {
       emit("update:modelValue", "");
+    } else {
+      emit("update:modelValue", []);
+      emit("filesChanged", []);
     }
 
-    emit("filesChanged", []);
     toast.success("All files removed successfully.");
   }
 };
@@ -356,39 +429,58 @@ const formatBytes = (bytes: number, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
-const acceptedFileTypes = computed(() => {
-  if (props.fileTypes?.length > 0) {
-    const normalized = props.fileTypes.map((t) =>
-      t.startsWith(".") ? t : `.${t}`
-    );
-    const mimeTypes = normalized
-      .map((t) => {
-        if (t === ".jpg" || t === ".jpeg") return "image/jpeg";
-        if (t === ".png") return "image/png";
-        if (t === ".pdf") return "application/pdf";
-        if (t === ".doc") return "application/msword";
-        if (t === ".docx")
-          return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-        if (t === ".xls") return "application/vnd.ms-excel";
-        if (t === ".xlsx")
-          return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-        return null;
-      })
-      .filter(Boolean);
-    return [...normalized, ...mimeTypes].join(",");
-  }
-  return "*/*";
-});
-
-const supportedFormatsText = computed(() =>
-  props.fileTypes?.length
-    ? props.fileTypes
-        .map((t) => t.replace(".", ""))
-        .join(", ")
-        .toUpperCase()
-    : "ANY"
-);
-
 const isImage = (url: string) => /\.(jpg|jpeg|png|gif|webp)$/i.test(url);
 const isPDF = (url: string) => /\.pdf$/i.test(url);
+
+function initFromModelValue() {
+  uploadedFiles.value = [];
+
+  if (props.multi) {
+    if (Array.isArray(props.modelValue)) {
+      uploadedFiles.value = props.modelValue.map((v: any) =>
+        normalizeIncomingFileObj(v)
+      );
+    }
+  } else {
+    if (!props.modelValue) {
+      uploadedFiles.value = [];
+    } else {
+      uploadedFiles.value = [normalizeIncomingFileObj(props.modelValue)];
+    }
+  }
+}
+
+function normalizeIncomingFileObj(v: any) {
+  if (typeof v === "string") {
+    return { file_name: v.split("/").pop(), file_url: v, file_size: null };
+  }
+  if (v && typeof v === "object") {
+    return {
+      file_name:
+        v.file_name || v.name || (v.file_url || v.url || "").split("/").pop(),
+      file_url: v.file_url || v.url || v.file_url || v,
+      file_size: v.file_size || v.size || null,
+      ...v,
+    };
+  }
+  return v;
+}
+
+onMounted(() => {
+  initFromModelValue();
+});
+
+watch(
+  () => props.modelValue,
+  () => {
+    initFromModelValue();
+  },
+  { deep: true }
+);
 </script>
+
+<style scoped>
+.group:hover {
+  background-color: #f8fafb;
+}
+</style>
