@@ -1,6 +1,6 @@
 <template>
-  <div class="flex h-full flex-col relative">
-    <div class="h-full pb-10" id="scrollContainer">
+  <div class="flex h-full flex-col gap-2 relative">
+    <div class="h-full pb-10 mb-5" id="scrollContainer">
       <slot />
     </div>
 
