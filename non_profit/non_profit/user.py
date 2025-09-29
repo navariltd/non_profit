@@ -44,6 +44,7 @@ def create_user(**kwargs):
                 "user": user.name,
                 "allow": "User",
                 "for_value": user.name,
+                "is_default": 1
             }
         )
 
