@@ -39,6 +39,11 @@
               @click="passWordVisible = !passWordVisible"
             />
           </div>
+          <button @click="forgotPassword">
+            <span class="text-sm text-right text-red-600 hover:underline"
+              >Forgot Password?</span
+            >
+          </button>
         </template>
 
         <template v-else>
@@ -230,5 +235,9 @@ function submit() {
       ...signUpForm,
     });
   }
+}
+
+function forgotPassword() {
+  window.location.href = "/login#forgot";
 }
 </script>
