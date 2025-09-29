@@ -60,7 +60,7 @@ class Membership(Document):
                 if inv.outstanding_amount == 0:
                     total_paid += inv.grand_total
 
-        cycle_amount = membership_type.amount
+        cycle_amount = self.amount or membership_type.amount
         cycles = int(total_paid // cycle_amount) if cycle_amount else 0
 
         if cycles <= 0:

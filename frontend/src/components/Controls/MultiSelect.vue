@@ -49,12 +49,12 @@
                       ]"
                       @click="
                         () => {
-                          addValue(option.value);
+                          addValue(option);
                           closeDropdown(close);
                         }
                       "
                     >
-                      <div class="flex flex-col gap-1 p-1">
+                      <div class="flex flex-col gap-1 p-1 min-w-32">
                         <div class="text-base font-medium text-ink-gray-8">
                           {{ option.label || option.value }}
                         </div>
@@ -99,14 +99,14 @@
 
     <div v-if="values.length" class="grid grid-cols-2 gap-2 mt-1">
       <div
-        v-for="value in values"
-        :key="value"
+        v-for="item in values"
+        :key="item.value"
         class="flex items-center justify-between break-all bg-surface-gray-2 text-ink-gray-7 word-wrap p-2 rounded-md mr-2"
       >
-        <span class="break-all">{{ value }}</span>
+        <span class="break-all">{{ item.label || item.value }}</span>
         <X
           class="size-4 stroke-1.5 cursor-pointer"
-          @click="removeValue(value)"
+          @click="removeValue(item.value)"
         />
       </div>
     </div>
@@ -114,7 +114,7 @@
     <CreateNewEntryDialog
       v-model="showCreateDialog"
       :doctype="props.doctype"
-      @created="(newName) => addValue(newName)"
+      @created="(newName) => addValue({ value: newName, label: newName })"
     />
   </div>
 </template>
@@ -164,7 +164,7 @@ const selectedValue = computed({
     if (val) {
       showOptions.value = false;
     }
-    val?.value && addValue(val.value);
+    val && addValue(val);
   },
 });
 
@@ -190,7 +190,7 @@ const filterOptions = createResource({
 const options = computed(() => {
   if (!filterOptions.data) return [];
   return filterOptions.data.filter(
-    (option) => !values.value?.includes(option.value)
+    (option) => !values.value?.some((item) => item.value === option.value)
   );
 });
 
@@ -201,23 +201,38 @@ function reload(val) {
   filterOptions.reload();
 }
 
-const addValue = (value) => {
+const addValue = (option) => {
   error.value = null;
-  if (value) {
-    const splitValues = value.split(",");
-    splitValues.forEach((v) => {
-      v = v.trim();
-      if (v && !values.value?.includes(v)) {
-        if (props.validate && !props.validate(v)) {
-          error.value = props.errorMessage(v);
-          return;
-        }
-        if (!values.value) values.value = [v];
-        else values.value.push(v);
-        emit("change", values.value);
-        showOptions.value = false;
+  if (option) {
+    let valueToAdd, labelToAdd;
+
+    if (typeof option === "string") {
+      valueToAdd = option.trim();
+      labelToAdd = option.trim();
+    } else {
+      valueToAdd = option.value;
+      labelToAdd = option.label || option.value;
+    }
+
+    if (
+      valueToAdd &&
+      !values.value?.some((item) => item.value === valueToAdd)
+    ) {
+      if (props.validate && !props.validate(valueToAdd)) {
+        error.value = props.errorMessage(valueToAdd);
+        return;
       }
-    });
+
+      const newItem = { value: valueToAdd, label: labelToAdd };
+
+      if (!values.value) {
+        values.value = [newItem];
+      } else {
+        values.value.push(newItem);
+      }
+      emit("change", values.value);
+      showOptions.value = false;
+    }
     !error.value && (query.value = "");
   }
 };
@@ -228,7 +243,7 @@ const closeDropdown = (closeFunction) => {
 };
 
 const removeValue = (value) => {
-  values.value = values.value.filter((v) => v !== value);
+  values.value = values.value.filter((item) => item.value !== value);
   emit("change", values.value);
 };
 
