@@ -1,6 +1,6 @@
 <template>
   <Card
-    class="flex flex-col w-full rounded-2xl p-6 h-full shadow-sm hover:shadow-md transition-all duration-300 group cursor-pointer"
+    class="flex flex-col w-full rounded-2xl p-4 h-full shadow-sm hover:shadow-md transition-all duration-500 group cursor-pointer"
   >
     <!-- Membership Info -->
     <div class="mb-4">
@@ -8,17 +8,6 @@
         <h3 class="text-lg font-semibold text-gray-800 mb-2">
           {{ membershipType.membership_type }}
         </h3>
-
-        <div class="flex items-center gap-2">
-          <span class="text-sm text-gray-500">Category:</span>
-          <Badge
-            variant="subtle"
-            size="lg"
-            class="border border-red-200 text-red-700 bg-red-50"
-          >
-            {{ membershipType.name }}
-          </Badge>
-        </div>
       </div>
     </div>
 
@@ -34,10 +23,13 @@
       </div>
 
       <div class="flex flex-col sm:col-span-2">
-        <span class="text-gray-500">Features</span>
-        <ul class="list-disc list-inside text-gray-700 space-y-1 mt-1">
-          <li>Full membership access</li>
-          <li>All benefits included</li>
+        <span class="text-gray-500">Benefits</span>
+        <ul
+          class="list-disc list-inside text-left text-gray-700 space-y-1 mt-1"
+        >
+          <li v-for="benefit in membershipType.benefits" :key="benefit">
+            {{ benefit }}
+          </li>
         </ul>
       </div>
     </div>
@@ -56,6 +48,7 @@ interface MembershipType {
   name: string;
   membership_type: string;
   amount: number;
+  benefits: string[];
 }
 
 defineProps<{
