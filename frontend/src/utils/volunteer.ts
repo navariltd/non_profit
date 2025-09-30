@@ -55,3 +55,8 @@ export function resetSignUpForm(form: SignUp) {
   form.gender = "";
   form.phone = "";
 }
+
+export function isValidPhone(phone: string) {
+  const regex = /^\+254\d{9}$/;
+  return regex.test(phone);
+}
