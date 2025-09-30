@@ -37,21 +37,23 @@ frappe.ui.form.on("Personnel Deployment Assignment", {
         ["name"],
         (r) => {
           if (r && !r.name) {
-            frm.add_custom_button(__("Create Contract"), () => {
-              frappe.model.with_doctype("Contract", () => {
-                let contract = frappe.model.get_new_doc("Contract");
-                contract.party_type = "Employee";
-                contract.party_name = frm.doc.employee;
-                contract.start_date = frm.doc.expected_start_date;
-                contract.end_date = frm.doc.expected_end_date;
-                contract.project = frm.doc.project;
-                contract.task = frm.doc.task;
-                contract.personnel_deployment_assignment = frm.doc.name;
-                contract.personnel_deployment_request = frm.doc.deployment;
+            frm
+              .add_custom_button(__("Create Contract"), () => {
+                frappe.model.with_doctype("Contract", () => {
+                  let contract = frappe.model.get_new_doc("Contract");
+                  contract.party_type = "Employee";
+                  contract.party_name = frm.doc.employee;
+                  contract.start_date = frm.doc.expected_start_date;
+                  contract.end_date = frm.doc.expected_end_date;
+                  contract.project = frm.doc.project;
+                  contract.task = frm.doc.task;
+                  contract.personnel_deployment_assignment = frm.doc.name;
+                  contract.personnel_deployment_request = frm.doc.deployment;
 
-                frappe.set_route("Form", "Contract", contract.name);
-              });
-            });
+                  frappe.set_route("Form", "Contract", contract.name);
+                });
+              })
+              .addClass("btn-primary");
           }
         }
       );
@@ -124,7 +126,6 @@ frappe.ui.form.on("Personnel Deployment Assignment", {
         "advance_approver",
         "deployment_approver",
         "terms_of_reference",
-        "term_details",
         "require_contract_before_deployment",
         "expected_start_date",
         "expected_end_date",
@@ -141,8 +142,6 @@ frappe.ui.form.on("Personnel Deployment Assignment", {
             frm.set_value("deployment_approver", r.message.deployment_approver);
           if (r.message.terms_of_reference)
             frm.set_value("terms_of_reference", r.message.terms_of_reference);
-          if (r.message.term_details)
-            frm.set_value("term_details", r.message.term_details);
           if (r.message.require_contract_before_deployment !== undefined)
             frm.set_value(
               "require_contract_before_deployment",
@@ -164,28 +163,6 @@ frappe.ui.form.on("Personnel Deployment Assignment", {
           project: frm.doc.project || "",
         },
       };
-    });
-  },
-
-  terms_of_reference: function (frm) {
-    if (!frm.doc.terms_of_reference) {
-      frm.set_value("term_details", "");
-      return;
-    }
-    frappe.call({
-      method: "frappe.client.get_value",
-      args: {
-        doctype: "Terms and Conditions",
-        fieldname: "terms",
-        filters: {
-          name: frm.doc.terms_of_reference,
-        },
-      },
-      callback: function (r) {
-        if (r.message && r.message.terms) {
-          frm.set_value("term_details", r.message.terms);
-        }
-      },
     });
   },
 });

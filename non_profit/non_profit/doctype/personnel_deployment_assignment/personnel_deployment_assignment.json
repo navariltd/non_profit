@@ -64,7 +64,8 @@
    "in_standard_filter": 1,
    "label": "Employee",
    "options": "Employee",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "bold": 1,
@@ -87,7 +88,8 @@
    "in_standard_filter": 1,
    "label": "Project",
    "options": "Project",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "task",
@@ -151,7 +153,6 @@
    "label": "Notes"
   },
   {
-   "collapsible": 1,
    "fieldname": "terms_section",
    "fieldtype": "Section Break",
    "label": "Terms"
@@ -218,12 +219,19 @@
   {
    "fieldname": "terms_of_reference",
    "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Terms of Reference",
-   "options": "Terms and Conditions"
+   "options": "Personnel Terms of Reference",
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "term_details",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "label": "Term Details"
   },
   {
@@ -285,7 +293,7 @@
    "link_fieldname": "personnel_deployment_assignment"
   }
  ],
- "modified": "2025-09-26 06:44:06.151658",
+ "modified": "2025-09-30 08:20:54.616184",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Assignment",

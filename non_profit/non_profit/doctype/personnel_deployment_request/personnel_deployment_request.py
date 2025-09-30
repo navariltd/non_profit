@@ -47,6 +47,26 @@ class PersonnelDeploymentRequest(Document):
 
         for employee in employees:
             try:
+                existing = frappe.get_all(
+                    "Personnel Deployment Assignment",
+                    filters={
+                        "employee": employee,
+                        "deployment": self.name,
+                        "status": ["in", ["Pending", "Accepted"]],
+                        "docstatus": 1,
+                    },
+                    fields=["name", "status"],
+                )
+
+                if existing:
+                    failure.append(
+                        {
+                            "employee": employee,
+                            "reason": f"Existing {existing[0].status} assignment (<a href='{frappe.utils.get_url_to_form('Personnel Deployment Assignment', existing[0].name)}' target='_blank'>{existing[0].name}</a>) found.",
+                        }
+                    )
+                    continue
+
                 frappe.db.savepoint(savepoint)
                 assignment = frappe.new_doc("Personnel Deployment Assignment")
 
@@ -60,7 +80,6 @@ class PersonnelDeploymentRequest(Document):
                     "notes": self.notes,
                     "require_contract_before_deployment": self.require_contract_before_deployment,
                     "terms_of_reference": self.terms_of_reference,
-                    "term_details": self.term_details,
                     "expense_approver": self.expense_approver,
                     "advance_approver": self.advance_approver,
                     "deployment_approver": self.deployment_approver,
@@ -79,7 +98,6 @@ class PersonnelDeploymentRequest(Document):
                     assignment.set(field, value)
 
                 assignment.insert()
-
                 assignment.submit()
 
                 success.append(
@@ -97,15 +115,7 @@ class PersonnelDeploymentRequest(Document):
                     f"Personnel Deployment Assignment failed for employee {employee}.",
                     str(e),
                 )
-                failure.append(employee)
-
-        frappe.clear_messages()
-        frappe.publish_realtime(
-            "completed_bulk_deployment_assignment",
-            message={"success": success, "failure": failure},
-            doctype="Personnel Deployment Request",
-            after_commit=True,
-        )
+                failure.append({"employee": employee, "reason": str(e)})
 
         return {"success": success, "failure": failure}
 

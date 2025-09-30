@@ -113,28 +113,6 @@ frappe.ui.form.on("Personnel Deployment Request", {
     });
   },
 
-  terms_of_reference: function (frm) {
-    if (!frm.doc.terms_of_reference) {
-      frm.set_value("term_details", "");
-      return;
-    }
-    frappe.call({
-      method: "frappe.client.get_value",
-      args: {
-        doctype: "Terms and Conditions",
-        fieldname: "terms",
-        filters: {
-          name: frm.doc.terms_of_reference,
-        },
-      },
-      callback: function (r) {
-        if (r.message && r.message.terms) {
-          frm.set_value("term_details", r.message.terms);
-        }
-      },
-    });
-  },
-
   companies: function (frm) {
     frm.trigger("get_employees");
   },
@@ -368,13 +346,31 @@ frappe.ui.form.on("Personnel Deployment Request", {
           const { success, failure } = r.message;
 
           let message = "";
+
           if (success && success.length > 0) {
             message += __("Successfully sent {0} request(s)", [success.length]);
           }
+
           if (failure && failure.length > 0) {
-            message +=
-              (message ? "<br>" : "") +
-              __("Failed to create {0} request(s)", [failure.length]);
+            if (message) message += "<br>";
+            message += __("Failed to create {0} request(s):", [failure.length]);
+            message += "<ul>";
+            failure.forEach((f) => {
+              const employeeData =
+                frm.employees_datatable.datamanager.data.find(
+                  (d) => d.employee === f.employee
+                );
+              const employeeName =
+                (employeeData && employeeData.employee_name) ||
+                f.employee_name ||
+                "";
+              message += `<li><a href="/app/employee/${
+                f.employee
+              }" target="_blank">${employeeName || f.employee}</a>: ${
+                f.reason || "Unknown reason"
+              }</li>`;
+            });
+            message += "</ul>";
           }
 
           if (message) {

@@ -54,7 +54,8 @@
    "in_standard_filter": 1,
    "label": "Project",
    "options": "Project",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "task",
@@ -228,7 +229,6 @@
    "options": "Volunteer Skill"
   },
   {
-   "collapsible": 1,
    "fieldname": "terms_section",
    "fieldtype": "Section Break",
    "label": "Terms"
@@ -236,12 +236,19 @@
   {
    "fieldname": "terms_of_reference",
    "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Terms of Reference",
-   "options": "Terms and Conditions"
+   "options": "Personnel Terms of Reference",
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "term_details",
    "fieldtype": "Text Editor",
+   "hidden": 1,
    "label": "Term Details"
   },
   {
@@ -318,7 +325,7 @@
    "link_fieldname": "personnel_deployment_request"
   }
  ],
- "modified": "2025-09-26 06:20:17.591058",
+ "modified": "2025-09-30 08:19:43.759601",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Request",

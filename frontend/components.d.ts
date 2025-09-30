@@ -43,6 +43,7 @@ declare module 'vue' {
     PendingApproval: typeof import('./src/components/PendingApproval.vue')['default']
     Play: typeof import('./src/components/Icons/Play.vue')['default']
     ProgressBar: typeof import('./src/components/ProgressBar.vue')['default']
+    ProgressSpinner: typeof import('./src/components/Common/ProgressSpinner.vue')['default']
     ProjectCard: typeof import('./src/components/ProjectCard.vue')['default']
     Rating: typeof import('./src/components/Controls/Rating.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
