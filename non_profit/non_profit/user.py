@@ -8,6 +8,7 @@ from frappe.utils.password import update_password
 def create_user(**kwargs):
 
     try:
+        frappe.db.begin()
         if frappe.db.exists("User", {"email": kwargs.get("email")}):
             frappe.throw("User already exists with this email")
 
@@ -31,12 +32,14 @@ def create_user(**kwargs):
                 "gender": kwargs.get("gender"),
                 "enabled": 1,
                 "default_app": "non_profit",
-                "role_profile_name": "Member",
-                "module_profile": "Member",
             }
         )
 
+
         user.insert(ignore_permissions=True)
+
+        user.add_roles("Vmms Guest")
+
 
         user_permission = frappe.get_doc(
             {
@@ -50,7 +53,10 @@ def create_user(**kwargs):
 
         user_permission.insert(ignore_permissions=True)
 
+        frappe.db.commit()
+
     except Exception as e:
+        frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), "Error signing up")
         frappe.throw("Error signing up")
 
@@ -90,6 +96,8 @@ def create_membership(**kwargs):
             member = frappe.get_doc("Member", member)
 
         user = frappe.get_doc("User", {"email": member.email_id})
+        user.role_profile_name = "Member"
+        user.module_profile = "Member"
 
         user.save(ignore_permissions=True)
 
