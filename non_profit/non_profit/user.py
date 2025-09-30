@@ -35,11 +35,9 @@ def create_user(**kwargs):
             }
         )
 
-
         user.insert(ignore_permissions=True)
 
         user.add_roles("Vmms Guest")
-
 
         user_permission = frappe.get_doc(
             {
@@ -47,7 +45,7 @@ def create_user(**kwargs):
                 "user": user.name,
                 "allow": "User",
                 "for_value": user.name,
-                "is_default": 1
+                "is_default": 1,
             }
         )
 
@@ -120,7 +118,7 @@ def create_membership(**kwargs):
             )
 
             membership.insert(ignore_permissions=True)
-        
+
         frappe.db.commit()
 
     except Exception as e:
