@@ -249,7 +249,7 @@ fixtures = [
     {
         "doctype": "Role",
         "filters": [
-            ["name", "in", ["Volunteer", "Branch Coordinator"]],
+            ["name", "in", ["Volunteer", "Vmms Guest"]],
         ],
     },
     {
@@ -274,12 +274,6 @@ fixtures = [
         "doctype": "Property Setter",
         "filters": [
             ["module", "=", "Non Profit"],
-        ],
-    },
-    {
-        "doctype": "Notification",
-        "filters": [
-            ["name", "=", "Volunteer Signup"],
         ],
     },
 ]

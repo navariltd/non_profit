@@ -192,6 +192,7 @@ import Member from "../components/MemberPlan.vue";
 import EmptyState from "../components/EmptyState.vue";
 import Link from "../components/Controls/Link.vue";
 import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
+import { isValidPhone } from "../utils/volunteer";
 
 const { membershipTypes, currentMembership } = membershipStore();
 const user = inject<any>("$user");
@@ -257,11 +258,6 @@ function payMembership() {
   alert(
     `Paying for membership with phone number: ${membershipForm.phone_number}`
   );
-}
-
-function isValidPhone(phone: string) {
-  const regex = /^\+254\d{9}$/;
-  return regex.test(phone);
 }
 
 watch(registerDialog, (newValue) => {
