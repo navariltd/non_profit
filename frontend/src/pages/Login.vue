@@ -150,7 +150,12 @@ import { computed, onMounted, reactive, ref } from "vue";
 import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
 import { createResource, Select } from "frappe-ui";
 import Dialog from "frappe-ui/src/components/Dialog/Dialog.vue";
-import { SignUp, initialForm, resetSignUpForm } from "../utils/volunteer";
+import {
+  SignUp,
+  initialForm,
+  isValidPhone,
+  resetSignUpForm,
+} from "../utils/volunteer";
 import { useRoute, useRouter } from "vue-router";
 import { Eye, EyeOff } from "lucide-vue-next";
 
@@ -204,11 +209,6 @@ const createSignUp = createResource({
     router.replace({ hash: "#login" });
   },
 });
-
-function isValidPhone(phone: string) {
-  const regex = /^\+254\d{9}$/;
-  return regex.test(phone);
-}
 
 function submit() {
   if (isLogin.value) {
