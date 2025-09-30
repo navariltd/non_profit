@@ -187,7 +187,7 @@
             variant="solid"
             class="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-lg"
           >
-            Submit Application
+            Save Application
           </Button>
         </div>
       </form>

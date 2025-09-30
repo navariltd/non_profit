@@ -227,18 +227,45 @@ class PersonnelDeploymentRequest(Document):
         self, employees: list, expected_start_date, expected_end_date
     ) -> list:
         available_employees = []
+
         for emp in employees:
-            overlap = frappe.get_all(
-                "Volunteer Availability Slot",
+            schedules = frappe.get_all(
+                "Personnel Availability Schedule",
                 filters={
                     "employee": emp.get("employee"),
-                    "company": emp.get("company"),
-                    "starts_on": ["<=", expected_end_date],
-                    "ends_on": [">=", expected_start_date],
+                    "start_date": ["<=", expected_end_date],
+                    "end_date": [">=", expected_start_date],
                 },
-                limit=1,
+                fields=["name", "start_date", "end_date"],
             )
-            if overlap:
+
+            found_overlap = False
+
+            for schedule in schedules:
+                shifts = frappe.get_all(
+                    "Schedule",
+                    filters={"parent": schedule.name},
+                    fields=["day", "shift_type"],
+                )
+
+                for shift in shifts:
+                    shift_details = frappe.db.get_value(
+                        "Shift Type",
+                        shift.shift_type,
+                        ["start_time", "end_time"],
+                        as_dict=True,
+                    )
+
+                    if not shift_details:
+                        continue
+
+                    found_overlap = True
+                    break
+
+                if found_overlap:
+                    break
+
+            if found_overlap:
                 available_employees.append(emp)
 
         return available_employees

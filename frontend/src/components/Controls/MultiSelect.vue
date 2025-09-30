@@ -168,6 +168,11 @@ const selectedValue = computed({
   },
 });
 
+const serializeFilters = (f) => {
+  if (!f) return "{}";
+  return typeof f === "string" ? f : JSON.stringify(f);
+};
+
 watchDebounced(
   query,
   (val) => {
@@ -182,9 +187,13 @@ watchDebounced(
 const filterOptions = createResource({
   url: "non_profit.non_profit.api.custom_search_link",
   method: "POST",
-  cache: [text.value, props.doctype],
+  cache: [text.value, props.doctype, serializeFilters(props.filters)],
   auto: true,
-  params: { txt: text.value, doctype: props.doctype, filters: props.filters },
+  params: {
+    txt: text.value,
+    doctype: props.doctype,
+    filters: serializeFilters(props.filters),
+  },
 });
 
 const options = computed(() => {
@@ -196,7 +205,11 @@ const options = computed(() => {
 
 function reload(val) {
   filterOptions.update({
-    params: { txt: val, doctype: props.doctype },
+    params: {
+      txt: val,
+      doctype: props.doctype,
+      filters: serializeFilters(props.filters),
+    },
   });
   filterOptions.reload();
 }
