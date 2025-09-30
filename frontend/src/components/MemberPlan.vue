@@ -127,34 +127,54 @@
     </template>
 
     <template #body-content>
-      <form @submit.prevent="renewMembership" class="space-y-6">
-        <FormControl
-          :type="'password'"
+      <form @submit.prevent="payMembership" class="space-y-3">
+        <Input
+          required
+          :type="'text'"
           :ref_for="true"
           size="sm"
           variant="subtle"
-                    placeholder="+254123456789"
-
+          placeholder="+254123456789"
           :disabled="false"
           label="Phone Number"
           v-model="phoneNumber"
         />
+        <ErrorMessage v-if="errorMessage" :message="errorMessage" />
+        <Button
+          type="button"
+          variant="solid"
+          theme="red"
+          icon-right="credit-card"
+          class="rounded-lg px-6"
+          @click="payMembership"
+        >
+          Pay Now
+        </Button>
       </form>
     </template>
   </Dialog>
 </template>
 
 <script lang="ts" setup>
-import { Badge, Card, createResource, Dialog, FormControl } from "frappe-ui";
-import Button from "frappe-ui/src/components/Button/Button.vue";
+import {
+  Badge,
+  Card,
+  createResource,
+  Dialog,
+  Button,
+  Input,
+  ErrorMessage,
+} from "frappe-ui";
 import { RouterLink } from "vue-router";
 import { usersStore } from "../stores/user";
 import { ref } from "vue";
+import { isValidPhone } from "../utils/volunteer";
 
 const { roleResource } = usersStore();
 
 const payNow = ref(false);
 const phoneNumber = ref("");
+const errorMessage = ref("");
 
 interface Membership {
   name?: string;
@@ -198,9 +218,19 @@ function formatDate(dateStr?: string): string {
   });
 }
 
-function renewMembership() {
-  // Logic to renew membership
-  console.log("Renewing membership with phone number:", phoneNumber.value);
-  
+function payMembership() {
+  if (!phoneNumber.value) {
+    errorMessage.value = "Please enter your phone number";
+    return;
+  }
+
+  if (!isValidPhone(phoneNumber.value)) {
+    errorMessage.value =
+      "Please enter a valid Kenyan phone number.eg. (+254123456789)";
+    return;
+  }
+
+  errorMessage.value = "";
+  alert(`Paying for membership with phone number: ${phoneNumber.value}`);
 }
 </script>
