@@ -1,7 +1,7 @@
 <template>
   <FrappeUIProvider>
     <Layout>
-      <div class="text-base md:max-w-7xl md:mx-auto">
+      <div class="text-base">
         <router-view />
       </div>
     </Layout>
