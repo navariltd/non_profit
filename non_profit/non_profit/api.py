@@ -268,7 +268,7 @@ def get_membership_types():
     memberships = frappe.get_all(
         "Membership Type",
         fields=["name", "membership_type", "amount"],
-        order_by="amount desc",
+        order_by="amount asc",
     )
     for membership in memberships:
         membership_benefits = frappe.get_all(

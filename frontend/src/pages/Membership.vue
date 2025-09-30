@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-4 max-w-7xl mx-auto px-4">
+  <div class="space-y-4 mx-auto px-4">
     <ProgressSpinner
       v-if="currentMembership.loading || membershipTypes.loading"
       class="mt-6"
@@ -127,7 +127,7 @@
             <span
               class="text-center text-blue-800 border rounded-md p-2 border-blue-500 bg-blue-50 text-sm"
             >
-              Registration successful! Please proceed to pay for your membership
+              Registration Initiated! Please proceed to pay for your membership
               below.
             </span>
 
