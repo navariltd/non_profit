@@ -110,23 +110,23 @@ const shifts = createListResource({
 });
 
 const daysList = [
-  { label: "Monday", value: "monday" },
-  { label: "Tuesday", value: "tuesday" },
-  { label: "Wednesday", value: "wednesday" },
-  { label: "Thursday", value: "thursday" },
-  { label: "Friday", value: "friday" },
-  { label: "Saturday", value: "saturday" },
-  { label: "Sunday", value: "sunday" },
+  { label: "Monday", value: "Monday" },
+  { label: "Tuesday", value: "Tuesday" },
+  { label: "Wednesday", value: "Wednesday" },
+  { label: "Thursday", value: "Thursday" },
+  { label: "Friday", value: "Friday" },
+  { label: "Saturday", value: "Saturday" },
+  { label: "Sunday", value: "Sunday" },
 ];
 
 const availability = reactive({
-  monday: [],
-  tuesday: [],
-  wednesday: [],
-  thursday: [],
-  friday: [],
-  saturday: [],
-  sunday: [],
+  Monday: [],
+  Tuesday: [],
+  Wednesday: [],
+  Thursday: [],
+  Friday: [],
+  Saturday: [],
+  Sunday: [],
 });
 
 const newSlot = createResource({
@@ -138,6 +138,7 @@ const newSlot = createResource({
     availabilitySlots.reload();
     emit("success");
     presentSlots.reload();
+    setAvailability.value = false;
   },
 });
 
@@ -182,13 +183,13 @@ function cancel() {
 }
 
 function resetForm() {
-  availability.monday = [];
-  availability.tuesday = [];
-  availability.wednesday = [];
-  availability.thursday = [];
-  availability.friday = [];
-  availability.saturday = [];
-  availability.sunday = [];
+  availability.Monday = [];
+  availability.Tuesday = [];
+  availability.Wednesday = [];
+  availability.Thursday = [];
+  availability.Friday = [];
+  availability.Saturday = [];
+  availability.Sunday = [];
   newSlot.error = "";
 }
 

@@ -272,13 +272,11 @@ def get_membership_types():
     )
     for membership in memberships:
         membership_benefits = frappe.get_all(
-            "Membership Benefit",
-            {"parent": membership.name},
-            ["benefit"]
+            "Membership Benefit", {"parent": membership.name}, ["benefit"]
         )
 
         if membership_benefits:
-            membership["benefits"] = [b.benefit for b in membership_benefits]   
+            membership["benefits"] = [b.benefit for b in membership_benefits]
 
     return memberships
 
@@ -299,20 +297,56 @@ def get_job_openings(filters=None, orFilters=None):
     if user == "Guest":
         filters["opportunity_type"] = "Guest"
 
-    region = filters.pop("region", None)
-    companies = filters.pop("company", None)
+    regions = None
+    if "region" in filters:
+        region_value = filters.pop("region")
+        if (
+            isinstance(region_value, list)
+            and region_value
+            and isinstance(region_value[0], dict)
+        ):
+            regions = [item.get("value") for item in region_value if item.get("value")]
+        else:
+            regions = region_value
 
-    if region:
-        children = frappe.get_all(
-            "Company",
-            filters={"parent_company": region},
-            pluck="name",
-        )
+    companies = None
+    if "company" in filters:
+        companies_value = filters.pop("company")
+        if (
+            isinstance(companies_value, list)
+            and companies_value
+            and isinstance(companies_value[0], dict)
+        ):
+            companies = [
+                item.get("value") for item in companies_value if item.get("value")
+            ]
+        else:
+            companies = companies_value
+
+    company_list = []
+
+    if regions:
+        children = []
+
+        if isinstance(regions, list):
+            for region in regions:
+                region_children = frappe.get_all(
+                    "Company",
+                    filters={"parent_company": region},
+                    pluck="name",
+                )
+                children.extend(region_children)
+        else:
+            children = frappe.get_all(
+                "Company",
+                filters={"parent_company": regions},
+                pluck="name",
+            )
 
         if companies:
-            company_list = [region] + companies
+            company_list = regions + companies
         else:
-            company_list = [region] + children
+            company_list = regions + children
 
         filters["company"] = ["in", company_list]
     elif companies:
@@ -1100,9 +1134,9 @@ def create_availability_schedule(slot_data):
         personal_schedule_name = create_personal_schedule(employee, fiscal_year)
         create_schedule(personal_schedule_name, weekly_availability)
 
-        generate_weekly_patterns(
-            personal_schedule_name, weekly_availability, fiscal_year
-        )
+        # generate_weekly_patterns(
+        #     personal_schedule_name, weekly_availability, fiscal_year
+        # )
 
         return {"employee": employee}
     except Exception as e:

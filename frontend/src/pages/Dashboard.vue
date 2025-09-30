@@ -105,8 +105,6 @@ const user = userResource;
 import { onMounted } from "vue";
 
 onMounted(() => {
-  console.log("isLoggedIn", isLoggedIn);
-
   if (isLoggedIn) {
     roleResource.reload();
     currentMembership.reload();

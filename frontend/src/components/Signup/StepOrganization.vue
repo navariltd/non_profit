@@ -173,6 +173,7 @@ const bloodGroupOptions = [
   { label: "AB-", value: "AB-" },
   { label: "O+", value: "O+" },
   { label: "O-", value: "O-" },
+  { label: "Don't Know", value: "Don't Know" },
 ];
 
 const yesNoOptions = [
