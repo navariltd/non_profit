@@ -7,9 +7,9 @@ frappe.ui.form.on("Employee", {
       fetchJobApplicantDetails(frm);
     }
 
-    // if (frm.doc.volunteer_signup) {
-    //   fetchVolunteerSignupDetails(frm);
-    // }
+    if (!frm.doc.date_of_joining) {
+      frm.set_value("date_of_joining", frappe.datetime.get_today());
+    }
 
     frappe.db
       .get_value("Member", { email_id: frm.doc.personal_email }, "name")

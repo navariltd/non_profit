@@ -42,7 +42,7 @@
     </div>
 
     <div
-      class="flex flex-col gap-2 md:p-8 md:w-3/4 mx-auto"
+      class="flex flex-col gap-2 md:p-8 mx-auto"
       v-if="
         roleResource?.data &&
         (roleResource?.data?.is_volunteer || roleResource?.data?.is_member)
