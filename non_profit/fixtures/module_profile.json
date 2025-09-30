@@ -1,476 +1,476 @@
 [
-  {
-    "block_modules": [
-      {
-        "module": "Accounts",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Assets",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Automation",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Bulk Transaction",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Buying",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Communication",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Contacts",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Core",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "CRM",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Custom",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "EDI",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Education",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Email",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "ERPNext Integrations",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Geo",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Integrations",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Job",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "LMS",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Maintenance",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Manufacturing",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "nl-grebe",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Payroll",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Portal",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Printing",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Quality Management",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Regional",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Selling",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Setup",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Social",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Stock",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Subcontracting",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Telephony",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Utilities",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Website",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Workflow",
-        "parent": "Volunteer",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      }
-    ],
-    "docstatus": 0,
-    "doctype": "Module Profile",
-    "modified": "2025-08-27 12:58:19.521376",
-    "module_profile_name": "Volunteer",
-    "name": "Volunteer"
-  },
-  {
-    "block_modules": [
-      {
-        "module": "Accounts",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Assets",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Automation",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Bulk Transaction",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Buying",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Communication",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Contacts",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Core",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "CRM",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Custom",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Desk",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "EDI",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Education",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Email",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "ERPNext Integrations",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Gameplan",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Geo",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Helpdesk",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "HR",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Integrations",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Job",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "LMS",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Maintenance",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Manufacturing",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "nl-grebe",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Payroll",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Portal",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Printing",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Projects",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Quality Management",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Regional",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Selling",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Setup",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Social",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Stock",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Subcontracting",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Support",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Telephony",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Utilities",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Website",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      },
-      {
-        "module": "Workflow",
-        "parent": "Member",
-        "parentfield": "block_modules",
-        "parenttype": "Module Profile"
-      }
-    ],
-    "docstatus": 0,
-    "doctype": "Module Profile",
-    "modified": "2025-08-27 16:17:14.207172",
-    "module_profile_name": "Member",
-    "name": "Member"
-  }
+ {
+  "block_modules": [
+   {
+    "module": "Accounts",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Assets",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Automation",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Bulk Transaction",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Buying",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Communication",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Contacts",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Core",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "CRM",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Custom",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "EDI",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Education",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Email",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "ERPNext Integrations",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Geo",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Integrations",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Job",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "LMS",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Maintenance",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Manufacturing",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "nl-grebe",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Payroll",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Portal",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Printing",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Quality Management",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Regional",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Selling",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Setup",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Social",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Stock",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Subcontracting",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Telephony",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Utilities",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Website",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Workflow",
+    "parent": "Volunteer",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Module Profile",
+  "modified": "2025-08-27 12:58:19.521376",
+  "module_profile_name": "Volunteer",
+  "name": "Volunteer"
+ },
+ {
+  "block_modules": [
+   {
+    "module": "Accounts",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Assets",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Automation",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Bulk Transaction",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Buying",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Communication",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Contacts",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Core",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "CRM",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Custom",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Desk",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "EDI",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Education",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Email",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "ERPNext Integrations",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Gameplan",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Geo",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Helpdesk",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "HR",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Integrations",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Job",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "LMS",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Maintenance",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Manufacturing",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "nl-grebe",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Payroll",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Portal",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Printing",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Projects",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Quality Management",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Regional",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Selling",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Setup",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Social",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Stock",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Subcontracting",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Support",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Telephony",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Utilities",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Website",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   },
+   {
+    "module": "Workflow",
+    "parent": "Member",
+    "parentfield": "block_modules",
+    "parenttype": "Module Profile"
+   }
+  ],
+  "docstatus": 0,
+  "doctype": "Module Profile",
+  "modified": "2025-08-27 16:17:14.207172",
+  "module_profile_name": "Member",
+  "name": "Member"
+ }
 ]
