@@ -2,33 +2,30 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "prompt",
- "creation": "2025-09-25 12:50:41.451846",
+ "creation": "2025-10-01 07:06:13.167220",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "disability_category",
-  "description"
+  "section_break_yjom"
  ],
  "fields": [
   {
-   "fieldname": "description",
-   "fieldtype": "Small Text",
-   "label": "Description"
-  },
-  {
-   "fieldname": "disability_category",
-   "fieldtype": "Link",
-   "label": "Disability Category",
-   "options": "Disability Category"
+   "fieldname": "section_break_yjom",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2025-10-01 07:07:50.667523",
+ "links": [
+  {
+   "link_doctype": "Disability",
+   "link_fieldname": "disability_category"
+  }
+ ],
+ "modified": "2025-10-01 07:08:14.812991",
  "modified_by": "Administrator",
  "module": "Non Profit",
- "name": "Disability",
+ "name": "Disability Category",
  "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
