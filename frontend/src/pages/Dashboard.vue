@@ -16,7 +16,7 @@
       {{ "Login to View Dashboard" }}
     </Button>
   </div>
-  <div v-else>
+<div v-else class="max-w-7xl mx-auto">
     <div class="flex flex-col">
       <h1 class="text-3xl font-bold px-4 mt-5">
         Welcome, {{ user?.data?.full_name }}
