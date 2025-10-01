@@ -34,7 +34,7 @@
   {
    "columns": 2,
    "fieldname": "institution",
-   "fieldtype": "Date",
+   "fieldtype": "Data",
    "in_filter": 1,
    "in_list_view": 1,
    "in_preview": 1,
@@ -89,7 +89,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-25 23:43:23.130524",
+ "modified": "2025-09-30 11:46:48.968293",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Licence",

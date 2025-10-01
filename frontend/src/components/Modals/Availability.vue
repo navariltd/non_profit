@@ -160,6 +160,8 @@ const availabilitySlots = createResource({
   url: "non_profit.non_profit.api.get_availability_slots",
   auto: true,
   onSuccess(data) {
+    console.log("Fetched availability slots:", data);
+
     if (data && Array.isArray(data) && data.length > 0) {
       data.forEach((slot) => {
         const day = slot.day.toLowerCase();

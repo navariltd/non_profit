@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoggedIn" class="text-center py-20">
+  <div v-if="!user?.data" class="text-center py-20">
     <LogIn class="w-16 h-16 text-gray-400 mx-auto mb-4" />
     <h2 class="text-3xl font-bold text-gray-900 mb-4">
       Authentication Required
@@ -16,7 +16,7 @@
       {{ "Login to View Dashboard" }}
     </Button>
   </div>
-  <div v-if="user?.data">
+  <div v-else>
     <div class="flex flex-col">
       <h1 class="text-3xl font-bold px-4 mt-5">
         Welcome, {{ user?.data?.full_name }}
