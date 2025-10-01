@@ -237,55 +237,43 @@ website_route_rules = [
 ]
 
 fixtures = [
-    # {
-    #     "doctype": "Calendar View",
-    #     "filters": [
-    #         ["name", "=", "Volunteer Availability"],
-    #     ],
-    # },
-    # {"doctype": "Volunteer Status"},
-    # {"doctype": "Volunteer Deployment Criteria"},
-    # {"doctype": "Translation"},
-    # {
-    #     "doctype": "Role",
-    #     "filters": [
-    #         ["name", "in", ["Volunteer", "Vmms Guest"]],
-    #     ],
-    # },
-    # {
-    #     "doctype": "Role Profile",
-    #     "filters": [
-    #         ["name", "in", ["Volunteer", "Member"]],
-    #     ],
-    # },
-    # {
-    #     "doctype": "Module Profile",
-    #     "filters": [
-    #         ["name", "in", ["Volunteer", "Member"]],
-    #     ],
-    # },
-    # {
-    #     "doctype": "Designation",
-    #     "filters": [
-    #         ["name", "=", "Volunteer"],
-    #     ],
-    # },
-    # {
-    #     "doctype": "Property Setter",
-    #     "filters": [
-    #         ["module", "=", "Non Profit"],
-    #     ],
-    # },
     {
-        "doctype": "Custom Field",
+        "doctype": "Calendar View",
         "filters": [
-            [
-                "dt",
-                "in",
-                [
-                    "User",
-                ],
-            ]
+            ["name", "=", "Volunteer Availability"],
+        ],
+    },
+    {"doctype": "Volunteer Status"},
+    {"doctype": "Volunteer Deployment Criteria"},
+    {"doctype": "Translation"},
+    {
+        "doctype": "Role",
+        "filters": [
+            ["name", "in", ["Volunteer", "Vmms Guest"]],
+        ],
+    },
+    {
+        "doctype": "Role Profile",
+        "filters": [
+            ["name", "in", ["Volunteer", "Member"]],
+        ],
+    },
+    {
+        "doctype": "Module Profile",
+        "filters": [
+            ["name", "in", ["Volunteer", "Member"]],
+        ],
+    },
+    {
+        "doctype": "Designation",
+        "filters": [
+            ["name", "=", "Volunteer"],
+        ],
+    },
+    {
+        "doctype": "Property Setter",
+        "filters": [
+            ["module", "=", "Non Profit"],
         ],
     },
 ]
