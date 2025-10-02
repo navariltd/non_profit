@@ -132,8 +132,8 @@ const options = createResource({
   method: "POST",
   auto: true,
   params: {
-    txt: text.value,
     doctype: props.doctype,
+    txt: text.value,
     filters: serializeFilters(props.filters),
   },
   transform: (data) => {
@@ -150,8 +150,8 @@ const options = createResource({
 const reload = (val = autocomplete.value?.query || "") => {
   options.update({
     params: {
-      txt: val,
       doctype: props.doctype,
+      txt: val,
       filters: serializeFilters(props.filters),
     },
   });
