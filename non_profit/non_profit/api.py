@@ -272,13 +272,11 @@ def get_membership_types():
     )
     for membership in memberships:
         membership_benefits = frappe.get_all(
-            "Membership Benefit",
-            {"parent": membership.name},
-            ["benefit"]
+            "Membership Benefit", {"parent": membership.name}, ["benefit"]
         )
 
         if membership_benefits:
-            membership["benefits"] = [b.benefit for b in membership_benefits]   
+            membership["benefits"] = [b.benefit for b in membership_benefits]
 
     return memberships
 
@@ -928,24 +926,24 @@ def check_app_permission():
 @frappe.whitelist()
 def get_events():
     events = frappe.get_all(
-        "Event",
+        "FE Event",
         fields=[
             "name",
-            "subject",
-            "event_category",
-            "event_type",
-            "starts_on",
-            "ends_on",
-            "status",
-            "description",
-            "color",
+            "title",
+            "short_description",
+            "start_date",
+            "start_time",
+            "venue",
+            "banner_image",
         ],
-        filters=[{"status": "Open"}],
+        filters=[{"start_date": [">=", datetime.now().date()]}],
     )
 
     for event in events:
-        event.description = (
-            frappe.utils.strip_html_tags(event.description) if event.description else ""
+        event.short_description = (
+            frappe.utils.strip_html_tags(event.short_description)
+            if event.short_description
+            else ""
         )
 
     return events

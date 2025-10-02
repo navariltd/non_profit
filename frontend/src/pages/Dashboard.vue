@@ -50,17 +50,21 @@
     >
       <div class="flex items-center justify-between m-2 p-2">
         <h1 class="text-xl font-semibold text-gray-900">Upcoming Events</h1>
-
         <div class="flex justify-center flex-1">
-          <Button variant="solid" theme="red" @click="toggleEventViews">
-            {{ toggleEventView ? "List" : "Calendar" }} View
-          </Button>
+          <router-link to="/events">
+            <button
+              class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200"
+            >
+              View All Events
+              <ChevronRight class="w-4 h-4 ml-1.5" />
+            </button>
+          </router-link>
         </div>
       </div>
 
       <div
         v-if="events?.data && events?.data.length > 0 && !toggleEventView"
-        class="p-2 grid grid-cols-1 lg:grid-cols-3 gap-4"
+        class="md:max-w-3xl md:mx-auto"
       >
         <EventCard
           v-for="event in events?.data.slice(0, 3)"
@@ -82,7 +86,7 @@
 <script lang="ts" setup>
 import { provide, ref, watch } from "vue";
 import EmptyState from "../components/EmptyState.vue";
-import { LogIn } from "lucide-vue-next";
+import { LogIn, ChevronRight } from "lucide-vue-next";
 import EventCard from "../components/EventCard.vue";
 import Member from "../components/MemberPlan.vue";
 import Volunteer from "../components/Volunteer.vue";

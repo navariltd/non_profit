@@ -3,7 +3,7 @@
     <div class="max-w-3xl mx-auto space-y-2">
       <!-- Event Item -->
       <div
-        class="flex flex-col md:flex-row items-stretch rounded-lg shadow-sm overflow-hidden bg-white"
+        class="flex flex-col md:flex-row items-stretch rounded-lg shadow-sm overflow-hidden bg-white cursor-pointer"
       >
         <!-- Date Badge -->
         <div

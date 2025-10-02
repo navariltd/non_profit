@@ -4,14 +4,12 @@
       class="flex justify-between items-center mt-5 md:max-w-7xl md:mx-auto"
     >
       <h1 class="text-3xl font-bold">Events</h1>
-      <Button variant="solid" theme="red" @click="toggleEventViews">
+      <!-- <Button variant="solid" theme="red" @click="toggleEventViews">
         {{ toggleEventView ? "List" : "Calendar" }} View</Button
-      >
+      > -->
     </header>
   </div>
-  <div
-    class="md:max-w-7xl md:mx-auto p-8 grid grid-cols-1 lg:grid-cols-3 gap-4"
-  >
+  <div class="md:max-w- md:mx-auto">
     <EventCard
       v-if="!toggleEventView"
       v-for="event in events.data"

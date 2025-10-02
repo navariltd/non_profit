@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { createListResource, createResource } from "frappe-ui";
+import { createResource } from "frappe-ui";
 
 export const membershipStore = defineStore("membership", () => {
   const membershipTypes = createResource({
@@ -13,8 +13,6 @@ export const membershipStore = defineStore("membership", () => {
     auto: true,
     cache: ["events"],
   });
-
-
 
   const currentMembership = createResource({
     url: "non_profit.non_profit.api.get_current_membership",
