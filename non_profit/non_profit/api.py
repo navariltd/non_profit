@@ -1005,52 +1005,6 @@ def confirm_event_status():
 
 
 @frappe.whitelist()
-def attend_event(**kwargs):
-    try:
-
-        user_info = get_user_info()
-
-        reference_doctype = reference_docname = ""
-
-        if user_info.get("employee"):
-            reference_doctype = "Employee"
-            reference_docname = user_info.get("employee")
-        else:
-            frappe.throw("Only employees can attend events")
-
-        if frappe.db.exists(
-            "Event Participants",
-            {
-                "reference_doctype": reference_doctype,
-                "reference_docname": reference_docname,
-                "parent": kwargs.get("name"),
-                "email": user_info.get("email"),
-            },
-        ):
-            frappe.throw("You are already registered for this event")
-
-        event_participant = frappe.get_doc(
-            {
-                "doctype": "Event Participants",
-                "reference_doctype": reference_doctype,
-                "reference_docname": reference_docname,
-                "email": user_info.get("email"),
-                "parent": kwargs.get("name"),
-                "parentfield": "event_participants",
-                "parenttype": "Event",
-            }
-        )
-
-        event_participant.insert(ignore_permissions=True)
-        frappe.db.commit()
-
-    except Exception as e:
-        frappe.db.rollback()
-        frappe.log_error(frappe.get_traceback(), "Attend Event Error")
-        frappe.throw("Attend Event Error")
-
-
-@frappe.whitelist()
 def get_projects():
     return frappe.get_all(
         "Project",
@@ -1887,3 +1841,45 @@ def get_job_application(name=None):
     except Exception as e:
         frappe.log_error(str(e), "Error fetching job application")
         return {"error": "Failed to retrieve application details"}
+
+
+@frappe.whitelist()
+def get_event_details(event_name):
+
+    try:
+        event = frappe.get_doc("FE Event", event_name).as_dict()
+
+        event["description"] = (
+            frappe.utils.strip_html_tags(event["description"])
+            if event.get("description")
+            else ""
+        )
+
+        event["about"] = (
+            frappe.utils.strip_html_tags(event["about"]) if event.get("about") else ""
+        )
+
+        return event
+
+    except Exception as e:
+        frappe.log_error(str(e), "Error fetching event details")
+        return {"error": "Failed to retrieve event details"}
+
+
+@frappe.whitelist()
+def get_speaker_profiles(event_speakers):
+    try:
+        speakers_list = json.loads(event_speakers)
+
+        speaker_profiles = []
+        for speaker in speakers_list:
+
+            speaker_profile = frappe.get_doc(
+                "Speaker Profile", speaker.get("speaker")
+            ).as_dict()
+            speaker_profiles.append(speaker_profile)
+
+        return speaker_profiles
+    except Exception as e:
+        frappe.log_error(title="Speaker Profile Fetch Error", message=str(e))
+        frappe.throw("Error fetching speaker profiles")

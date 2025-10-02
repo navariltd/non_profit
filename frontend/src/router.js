@@ -83,6 +83,12 @@ const routes = [
     component: () => import("@/pages/AssignmentDetail.vue"),
     props: true,
   },
+  {
+    name: "EventDetail",
+    path: "/event/:id",
+    component: () => import("@/pages/EventDetail.vue"),
+    props: true,
+  },
 ];
 
 let router = createRouter({

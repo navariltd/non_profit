@@ -87,36 +87,38 @@
         roleResource.data &&
         !roleResource.data.is_volunteer
       "
-      class="rounded-3xl border border-red-200 bg-gradient-to-br from-red-50 to-white p-10 text-center shadow-lg"
+      class="flex flex-col md:flex-row items-center justify-between gap-6 rounded-2xl border border-red-200 bg-gradient-to-r from-red-50 to-white p-6 md:p-8 shadow-md"
     >
-      <!-- Heading -->
-      <h2 class="text-3xl font-extrabold text-gray-900 mb-4">
-        Become a <span class="text-red-600">Volunteer</span>
-      </h2>
+      <!-- Left Section -->
+      <div class="text-center md:text-left flex-1">
+        <!-- Heading -->
+        <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2">
+          Become a <span class="text-red-600">Volunteer</span>
+        </h2>
 
-      <!-- Subtext -->
-      <p class="text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
-        Join the <span class="font-semibold">Kenya Red Cross Society</span> as a
-        volunteer and play an active role in supporting your community.
-        Contribute to
-        <span class="text-red-600 font-medium">life-saving services</span>, gain
-        valuable skills through <span class="font-medium">training</span>, and
-        be part of a
-        <span class="italic">global humanitarian movement</span> dedicated to
-        making a difference.
-      </p>
+        <!-- Subtext -->
+        <p class="text-gray-700 max-w-2xl leading-relaxed">
+          Join the <span class="font-semibold">Kenya Red Cross Society</span> as
+          a volunteer and support your community. Contribute to
+          <span class="text-red-600 font-medium">life-saving services</span>,
+          gain valuable <span class="font-medium">skills</span>, and be part of
+          a <span class="italic">global humanitarian movement</span>.
+        </p>
+      </div>
 
-      <!-- Call to Action -->
-      <RouterLink :to="{ name: 'VolunteerSignup' }">
-        <Button
-          variant="solid"
-          theme="red"
-          icon-right="arrow-right"
-          class="px-10 py-4 rounded-2xl text-lg font-semibold shadow-md hover:shadow-xl transition-all"
-        >
-          Register as Volunteer
-        </Button>
-      </RouterLink>
+      <!-- Right Section (CTA) -->
+      <div class="flex-shrink-0">
+        <RouterLink :to="{ name: 'VolunteerSignup' }">
+          <Button
+            variant="solid"
+            theme="red"
+            icon-right="arrow-right"
+            class="px-8 py-3 rounded-xl text-base font-semibold shadow-md hover:shadow-lg transition-all"
+          >
+            Register
+          </Button>
+        </RouterLink>
+      </div>
     </div>
   </div>
   <Dialog v-model="payNow">
