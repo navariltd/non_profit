@@ -23,29 +23,27 @@
 
 <script lang="ts" setup>
 import { Calendar, toast } from "frappe-ui";
-import { Event } from "./EventCard.vue";
 import { computed, inject, ref } from "vue";
 import AttendEventModal from "./Modals/AttendEventModal.vue";
 
 const props = defineProps<{
-  event: Event[];
+  event: Array<any>;
 }>();
 const reloadConfirmStatus = inject<() => void>("reloadConfirmStatus");
 
-const selectedEvent = ref<Event>();
+const selectedEvent = ref<any>();
 const attendModal = ref(false);
 
 const calendarEvents = computed(() =>
   props.event.map((ev) => ({
-    title: ev.subject,
+    title: ev.title,
     participant: ev.event_category,
     id: ev.name,
-    venue: ev.event_type,
-    fromDate: ev.starts_on,
-    toDate: ev.ends_on,
-    fromTime: ev.starts_on,
-    toTime: ev.ends_on,
-    color: ev.color ? ev.color : "blue",
+    venue: ev.venue,
+    fromDate: ev.start_date,
+    toDate: ev.end_date,
+    fromTime: ev.start_time,
+    toTime: ev.end_time,
     originalEvent: ev,
   }))
 );

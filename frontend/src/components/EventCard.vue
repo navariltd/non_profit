@@ -1,72 +1,86 @@
 <template>
-  <div
-    class="flex flex-col border cursor-pointer border-gray-200 rounded-xl p-5 h-full bg-white hover:border-red-300 hover:shadow-md transition-all duration-300 group"
-  >
-    <!-- Event Header -->
-    <div class="flex items-center justify-between mb-3">
-      <h3
-        class="text-lg font-semibold text-gray-900 group-hover:text-red-600 transition-colors"
+  <div class="bg-gray-50 py-2 px-4">
+    <div class="max-w-3xl mx-auto space-y-2">
+      <!-- Event Item -->
+      <div
+        class="flex flex-col md:flex-row items-stretch rounded-lg shadow-sm overflow-hidden bg-white cursor-pointer"
       >
-        {{ event.subject }}
-      </h3>
-      <Badge
-        v-if="event.confirmStatus"
-        theme="green"
-        size="sm"
-        variant="solid"
-        class="shadow-sm"
-      >
-        Confirmed
-      </Badge>
-    </div>
+        <!-- Date Badge -->
+        <div
+          class="flex flex-col items-center justify-center bg-red-50 px-6 py-4 border-b md:border-b-0 md:border-r border-gray-100 w-full md:w-40"
+        >
+          <div class="text-3xl font-bold text-red-600">
+            {{ new Date(event.start_date).getDate() }}
+          </div>
+          <div class="text-sm text-gray-500">
+            {{
+              new Date(event.start_date).toLocaleString("default", {
+                month: "short",
+                year: "numeric",
+              })
+            }}
+          </div>
+          <img :src="event.banner_image" alt="" class="mt-1 rounded-md p-1" />
+        </div>
 
-    <!-- Dates & Times -->
-    <div class="flex items-center space-x-2 text-sm text-gray-600 mb-1">
-      <Calendar class="w-4 h-4 text-red-500" />
-      <span class="font-medium">Kick Off:</span>
-      <span>{{ event.starts_on }}</span>
-    </div>
+        <!-- Event Details -->
+        <div class="flex-1 p-5">
+          <div
+            class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-2"
+          >
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-gray-900 mb-1">
+                {{ event.title }}
+              </h3>
+              <p class="text-sm text-gray-600 mb-2 line-clamp-2">
+                {{ event.short_description }}
+              </p>
+              <div class="flex items-center text-sm text-gray-500 mb-2">
+                <MapPin class="w-4 h-4 mr-1.5 flex-shrink-0" />
+                <span class="truncate">{{ event.venue }}</span>
+              </div>
+            </div>
+            <span
+              v-if="event.confirmStatus"
+              class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+            >
+              Confirmed
+            </span>
+          </div>
 
-    <div class="flex items-center space-x-2 text-sm text-gray-600">
-      <Clock class="w-4 h-4 text-red-500" />
-      <span class="font-medium">Adjourn:</span>
-      <span>{{ event.ends_on }}</span>
-    </div>
+          <!-- Time + Date -->
+          <div
+            class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+          >
+            <div
+              class="flex flex-wrap items-center gap-4 text-sm text-gray-600"
+            >
+              <div class="flex items-center">
+                <Clock class="w-4 h-4 mr-1.5 text-red-500" />
+                <span>{{ event.start_time }}</span>
+              </div>
+              <div class="flex items-center">
+                <Calendar class="w-4 h-4 mr-1.5 text-red-500" />
+                <span>{{ event.start_date }}</span>
+              </div>
+            </div>
 
-    <!-- Tags -->
-    <div
-      class="flex flex-wrap gap-2 mt-auto pt-4 border-t border-gray-100 text-xs"
-    >
-      <Badge class="bg-red-50 text-red-700 border border-red-200">
-        {{ event.event_type }}
-      </Badge>
-    </div>
-
-    <!-- Action Button -->
-    <div class="mt-4">
-      <Button
-        variant="solid"
-        theme="red"
-        size="sm"
-        class="w-full rounded-lg"
-        @click="attendModal = true"
-      >
-        View Event
-      </Button>
+            <button
+              @click="attendModal = true"
+              class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200 w-full sm:w-auto"
+            >
+              <ChevronRight class="w-4 h-4 ml-1.5" />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <!-- Modal -->
-  <AttendEventModal
-    v-model="attendModal"
-    :event="event"
-    @confirmed="handleConfirmed"
-  />
 </template>
 
 <script lang="ts" setup>
 import { Badge, Button, toast } from "frappe-ui";
-import { Calendar, Clock } from "lucide-vue-next";
+import { Calendar, Clock, MapPin, ChevronRight } from "lucide-vue-next";
 import { inject, onMounted, ref } from "vue";
 import { membershipStore } from "../stores/membership";
 import AttendEventModal from "./Modals/AttendEventModal.vue";
@@ -77,21 +91,8 @@ const reloadConfirmStatus = inject<() => void>("reloadConfirmStatus");
 
 onMounted(() => {});
 
-export interface Event {
-  name: string;
-  subject: string;
-  event_category: string;
-  event_type: string;
-  starts_on: Date;
-  ends_on: Date;
-  status: string;
-  description: string;
-  confirmStatus?: boolean;
-  color?: string;
-}
-
 defineProps<{
-  event: Event;
+  event;
 }>();
 
 function handleConfirmed() {
