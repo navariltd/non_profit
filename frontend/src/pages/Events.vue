@@ -10,11 +10,23 @@
     </header>
   </div>
   <div class="md:max-w- md:mx-auto">
-    <EventCard
-      v-if="!toggleEventView"
-      v-for="event in events.data"
-      :event="event"
+    <ProgressSpinner v-if="events.loading" />
+    <ErrorMessage
+      v-if="events.error"
+      class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm my-auto mt-20"
+      message="Failed to load Events"
     />
+    <div>
+      <EventCard
+        v-if="events.data && events.data.length > 0"
+        v-for="event in events.data"
+        :event="event"
+      />
+      <EmptyState
+        v-if="!events.data || events.data.length === 0"
+        type="Events"
+      />
+    </div>
   </div>
   <div class="px-8">
     <EventCalendar v-if="toggleEventView" :event="events.data" />
@@ -25,34 +37,15 @@
 import { onMounted, provide, ref } from "vue";
 import EventCard from "../components/EventCard.vue";
 import { membershipStore } from "../stores/membership";
-import { Button, createResource } from "frappe-ui";
+import { createResource } from "frappe-ui";
+import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
+import EmptyState from "../components/EmptyState.vue";
+import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
 
 const { events } = membershipStore();
 const toggleEventView = ref(false);
 
-onMounted(() => {
-  confirmEventStatus.data;
-});
-
-const confirmEventStatus = createResource({
-  url: "non_profit.non_profit.api.confirm_event_status",
-  auto: true,
-  onSuccess(data) {
-    if (events.data) {
-      events.data = events.data.map((e) => {
-        const match = data.find((d: any) => d.event.name === e.name);
-        return {
-          ...e,
-          confirmStatus: match ? match.confirmed : false,
-        };
-      });
-    }
-  },
-});
-
 function toggleEventViews() {
   toggleEventView.value = !toggleEventView.value;
 }
-
-provide("reloadConfirmStatus", () => confirmEventStatus.reload());
 </script>
