@@ -1,6 +1,6 @@
 <template>
-  <div class="bg-white border-b border-gray-200 shadow-sm">
-    <h1 class="text-3xl font-bold text-center text-red-700 py-6">
+  <div class="">
+    <h1 class="text-3xl font-bold text-center text-red-700 py-3">
       {{ __("Volunteer Signup") }}
     </h1>
   </div>
@@ -36,8 +36,8 @@
     "
     class="min-h-screen flex flex-col"
   >
-    <main class="flex-1 container mx-auto px-6 py-10">
-      <div class="bg-white shadow-lg rounded-2xl p-8">
+    <main class="flex-1 container mx-auto px-4 py-4">
+      <div class="bg-white shadow-lg rounded p-6">
         <div class="w-full mb-10">
           <div
             v-if="alreadyApplied && applicationStatus === 'Draft'"
@@ -55,41 +55,66 @@
             <div
               v-for="(step, i) in steps"
               :key="i"
-              class="flex-1 flex flex-col items-center text-center relative group"
+              class="flex-1 flex flex-col items-center text-center relative group cursor-pointer"
+              @click="goToStep(i)"
             >
               <div
                 v-if="i < steps.length"
-                class="absolute top-6 left-1/2 w-full h-1 -translate-x-1/2"
+                class="absolute top-6 w-full h-1 -translate-y-1/2"
                 :class="i < currentStep ? 'bg-red-600' : 'bg-gray-300'"
               ></div>
 
               <div
-                class="relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-500 ease-in-out"
+                class="relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ease-in-out"
                 :class="[
                   i < currentStep
-                    ? 'bg-red-600 border-red-600 text-white shadow-md'
+                    ? 'bg-red-600 border-red-600 text-white shadow-md hover:shadow-lg'
                     : i === currentStep
-                      ? 'bg-white border-red-600 text-red-600 font-bold shadow-md scale-110'
-                      : 'bg-gray-200 border-gray-300 text-gray-500',
+                      ? 'bg-white border-red-600 text-red-600 font-bold shadow-lg scale-110 ring-4 ring-red-100'
+                      : 'bg-gray-200 border-gray-300 text-gray-500 hover:border-gray-400 hover:bg-gray-300',
                 ]"
               >
                 <span class="text-lg">{{ i + 1 }}</span>
               </div>
             </div>
           </div>
+
+          <!-- <div class="my-4">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm font-semibold text-gray-700">Progress</span>
+              <span class="text-sm font-bold text-red-600"
+                >{{ Math.round(progressPercentage) }}%</span
+              >
+            </div>
+            <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                class="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all duration-500 ease-out"
+                :style="{ width: `${progressPercentage}%` }"
+              ></div>
+            </div>
+          </div> -->
         </div>
 
         <section v-if="currentStep === 0">
-          <StepOrganization v-model="form" :errors="errors" />
+          <StepOrganization
+            v-model="form"
+            :errors="errors"
+            @change="trackChanges"
+          />
         </section>
         <section v-if="currentStep === 1">
-          <StepAdditional v-model="form" :errors="errors" />
+          <StepAdditional
+            v-model="form"
+            :errors="errors"
+            @change="trackChanges"
+          />
         </section>
         <section v-if="currentStep === 2">
           <StepDocuments
             v-model="form"
             :documents="documents"
             :errors="errors"
+            @change="trackChanges"
           />
         </section>
 
@@ -101,7 +126,7 @@
             <div
               v-for="(value, key) in summaryData"
               :key="key"
-              class="p-4 border rounded-md"
+              class="p-4 border rounded-md hover:border-red-300 transition-colors"
             >
               <p class="text-sm font-semibold text-gray-500 capitalize">
                 {{ formatLabel(key) }}
@@ -111,31 +136,37 @@
           </div>
         </section>
 
-        <div class="flex justify-end gap-4 mt-10">
-          <Button v-if="currentStep > 0" @click="prevStep">
-            {{ __("Back") }}
-          </Button>
-          <Button
-            v-if="currentStep < steps.length - 1"
-            @click="nextStep"
-            variant="solid"
-            :loading="saveInProgress"
-          >
-            {{ __("Save & Continue") }}
-          </Button>
-          <Button
-            v-if="currentStep === steps.length - 1"
-            class="bg-red-700 text-white"
-            variant="solid"
-            :loading="saveInProgress"
-            @click="showSubmitDialog = true"
-          >
-            {{
-              alreadyApplied && applicationStatus === "Draft"
-                ? __("Submit Application")
-                : __("Submit Application")
-            }}
-          </Button>
+        <div class="flex justify-between items-center gap-4 mt-10">
+          <div>
+            <span
+              v-if="hasUnsavedChanges"
+              class="text-sm text-orange-600 font-medium"
+            >
+              <!-- Unsaved changes -->
+            </span>
+          </div>
+          <div class="flex gap-4">
+            <Button v-if="currentStep > 0" @click="prevStep">
+              {{ __("Back") }}
+            </Button>
+            <Button
+              v-if="currentStep < steps.length - 1"
+              @click="nextStep"
+              variant="solid"
+              :loading="saveInProgress"
+            >
+              {{ __("Save & Continue") }}
+            </Button>
+            <Button
+              v-if="currentStep === steps.length - 1"
+              class="bg-red-700 text-white"
+              variant="solid"
+              :loading="saveInProgress"
+              @click="showSubmitDialog = true"
+            >
+              {{ __("Submit Application") }}
+            </Button>
+          </div>
         </div>
       </div>
     </main>
@@ -182,9 +213,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from "vue";
+import { ref, reactive, computed, watch, onMounted, onUnmounted } from "vue";
 import { Button, toast, createResource, Dialog } from "frappe-ui";
-import { LogIn } from "lucide-vue-next";
+import { LogIn, FeatherIcon } from "lucide-vue-next";
 import PendingApproval from "@/components/PendingApproval.vue";
 import StepOrganization from "@/components/Signup/StepOrganization.vue";
 import StepAdditional from "@/components/Signup/StepAdditional.vue";
@@ -213,12 +244,19 @@ const documents = ref([]);
 const saveInProgress = ref(false);
 const showSubmitDialog = ref(false);
 
+const originalFormData = ref({});
+const hasUnsavedChanges = ref(false);
+const changedFields = ref(new Set());
+
 const form = reactive({
   company: "",
   mpesa_mobile_phone: "",
   date_of_birth: "",
   id_number: "",
   passport_number: "",
+  location: "",
+  sub_county: "",
+  citizenship: "",
   marital_status: "",
   education: "",
   profession: "",
@@ -234,6 +272,8 @@ const form = reactive({
   blood_group: "",
   additional_skills: "",
   ward: "",
+  _current_step: 0,
+  _current_progress: 0,
 });
 
 const errors = reactive({});
@@ -251,12 +291,14 @@ const stepFields = {
     "blood_group",
     "has_insurance",
     "citizenship",
-    "education",
+    "location",
+    "sub_county",
   ],
   1: [
     "access_to_internet",
     "profession",
     "languages",
+    "education",
     "disabilities",
     "reason_to_join",
     "driving_licences",
@@ -265,11 +307,62 @@ const stepFields = {
   2: ["documents"],
 };
 
-function getCurrentStepData() {
+const progressPercentage = computed(() => {
+  const totalSteps = steps.length;
+  const baseProgress = (currentStep.value / totalSteps) * 100;
+
+  const currentStepFields = stepFields[currentStep.value] || [];
+  let filledFields = 0;
+
+  currentStepFields.forEach((field) => {
+    const value = form[field];
+    if (value && (Array.isArray(value) ? value.length > 0 : value !== "")) {
+      filledFields++;
+    }
+  });
+
+  const currentStepProgress =
+    currentStepFields.length > 0
+      ? (filledFields / currentStepFields.length) * (100 / totalSteps)
+      : 0;
+
+  return Math.min(baseProgress + currentStepProgress, 100);
+});
+
+function trackChanges(field) {
+  const currentValue = JSON.stringify(form[field]);
+  const originalValue = JSON.stringify(originalFormData.value[field]);
+
+  if (currentValue !== originalValue) {
+    changedFields.value.add(field);
+    hasUnsavedChanges.value = true;
+  } else {
+    changedFields.value.delete(field);
+    hasUnsavedChanges.value = changedFields.value.size > 0;
+  }
+}
+
+watch(
+  form,
+  () => {
+    Object.keys(form).forEach((key) => {
+      if (!key.startsWith("_")) {
+        trackChanges(key);
+      }
+    });
+  },
+  { deep: true }
+);
+
+function getCurrentStepData(onlyChanges = false) {
   const currentStepData = {};
   const currentStepFieldList = stepFields[currentStep.value] || [];
 
   currentStepFieldList.forEach((field) => {
+    if (onlyChanges && !changedFields.value.has(field)) {
+      return;
+    }
+
     if (field === "documents") {
       currentStepData.documents = documents.value;
     } else {
@@ -278,6 +371,9 @@ function getCurrentStepData() {
   });
 
   currentStepData.is_volunteer = true;
+  currentStepData._current_step = currentStep.value;
+  currentStepData._current_progress = Math.round(progressPercentage.value);
+
   if (user.data?.email) {
     currentStepData.email_id = user.data.email;
   }
@@ -309,6 +405,20 @@ const jobApplication = createResource({
 
       if (applicationStatus.value === "Draft") {
         populateForm(application);
+
+        if (
+          application._current_step !== undefined &&
+          application._current_step !== null &&
+          application._current_step > 0 &&
+          application._current_step < steps.length
+        ) {
+          currentStep.value = application._current_step;
+
+          if (currentStep.value) {
+            updateHash(application._current_step);
+          }
+        }
+
         toast.info("Continuing your draft application...");
       }
     } else {
@@ -334,6 +444,9 @@ const confirmSubmit = async () => {
         toast.success("Application submitted successfully");
         showSubmitDialog.value = false;
         alreadyApplied.value = true;
+        hasUnsavedChanges.value = false;
+        changedFields.value.clear();
+        window.location.hash = "";
       },
       onError: (err) => {
         toast.error(err.messages?.[0] || "Submission failed");
@@ -345,12 +458,16 @@ const confirmSubmit = async () => {
 const createApplication = createResource({
   url: "non_profit.non_profit.api.create_job_application",
   makeParams() {
-    return getCurrentStepData();
+    return getCurrentStepData(false);
   },
   onSuccess(data) {
     applicationId.value = data.name;
     toast.success("Application saved successfully");
     saveInProgress.value = false;
+
+    updateOriginalData();
+    hasUnsavedChanges.value = false;
+    changedFields.value.clear();
   },
   onError(error) {
     console.error("Create application error:", error);
@@ -362,7 +479,7 @@ const createApplication = createResource({
 const updateApplication = createResource({
   url: "non_profit.non_profit.api.update_job_application",
   makeParams() {
-    const stepData = getCurrentStepData();
+    const stepData = getCurrentStepData(true);
     return {
       id: applicationId.value,
       ...stepData,
@@ -371,6 +488,10 @@ const updateApplication = createResource({
   onSuccess(data) {
     toast.success("Application updated successfully");
     saveInProgress.value = false;
+
+    updateOriginalData();
+    hasUnsavedChanges.value = false;
+    changedFields.value.clear();
   },
   onError(error) {
     console.error("Update application error:", error);
@@ -430,6 +551,12 @@ function populateForm(data) {
   if (data.documents && Array.isArray(data.documents)) {
     documents.value = data.documents;
   }
+
+  updateOriginalData();
+}
+
+function updateOriginalData() {
+  originalFormData.value = JSON.parse(JSON.stringify(form));
 }
 
 function redirectToLogin() {
@@ -445,20 +572,62 @@ function validateStep(stepIndex) {
       errors.company = __("Branch is required");
       valid = false;
     }
-    if (!form.mpesa_mobile_phone) {
-      errors.mpesa_mobile_phone = __("Phone number is required");
+
+    if (form.mpesa_mobile_phone) {
+      const phone = form.mpesa_mobile_phone.toString().replace(/\s+/g, "");
+      const phoneRegex = /^(?:\+254|0)(7\d{8}|1\d{8})$/;
+      if (!phoneRegex.test(phone)) {
+        errors.mpesa_mobile_phone = __("Enter a valid phone number");
+        valid = false;
+      }
+    }
+    if (!form.location) {
+      errors.location = __("This field is required");
       valid = false;
     }
-  }
-
-  if (stepIndex === 1) {
+    if (!form.sub_county) {
+      errors.sub_county = __("This field is required");
+      valid = false;
+    }
+    if (!form.citizenship) {
+      errors.citizenship = __("This field is required");
+      valid = false;
+    }
     if (!form.date_of_birth) {
       errors.date_of_birth = __("Date of birth is required");
       valid = false;
+    } else {
+      const dob = new Date(form.date_of_birth);
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+
+      if (age < 7 || age > 100) {
+        errors.date_of_birth = __("Age must be between 7 and 100 years");
+        valid = false;
+      }
     }
+
     if (!form.id_number && !form.passport_number) {
-      errors.id_number = __("Passport / ID number is required");
+      errors.id_number = __("Passport or ID number is required");
       valid = false;
+    }
+
+    if (form.id_number) {
+      if (!/^\d{7,9}$/.test(form.id_number)) {
+        errors.id_number = __("ID number must be 7–9 digits");
+        valid = false;
+      }
+    }
+
+    if (form.passport_number) {
+      if (!/^[A-Z0-9]{6,9}$/i.test(form.passport_number)) {
+        errors.passport_number = __("Invalid passport number format");
+        valid = false;
+      }
     }
   }
 
@@ -466,6 +635,10 @@ function validateStep(stepIndex) {
 }
 
 async function saveApplication() {
+  if (!hasUnsavedChanges.value && applicationId.value) {
+    return;
+  }
+
   saveInProgress.value = true;
 
   try {
@@ -480,6 +653,51 @@ async function saveApplication() {
   }
 }
 
+function updateHash(step) {
+  window.location.hash = `step-${step + 1}`;
+}
+
+function readHashAndNavigate() {
+  const hash = window.location.hash.slice(1);
+  const match = hash.match(/step-(\d+)/);
+
+  if (match) {
+    const step = parseInt(match[1]) - 1;
+    if (step >= 0 && step < steps.length) {
+      currentStep.value = step;
+    }
+  }
+}
+
+function goToStep(stepIndex) {
+  if (stepIndex === currentStep.value) return;
+
+  if (stepIndex < currentStep.value) {
+    currentStep.value = stepIndex;
+    updateHash(stepIndex);
+    return;
+  }
+
+  if (!validateStep(currentStep.value)) {
+    toast.error("Please fix errors before proceeding.");
+    return;
+  }
+
+  let canProceed = true;
+  for (let i = currentStep.value; i < stepIndex; i++) {
+    if (!validateStep(i)) {
+      canProceed = false;
+      toast.error(`Please complete step ${i + 1} first.`);
+      break;
+    }
+  }
+
+  if (canProceed) {
+    currentStep.value = stepIndex;
+    updateHash(stepIndex);
+  }
+}
+
 async function nextStep() {
   if (!validateStep(currentStep.value)) {
     toast.error("Please fix errors before continuing.");
@@ -490,30 +708,33 @@ async function nextStep() {
 
   if (!saveInProgress.value && currentStep.value < steps.length - 1) {
     currentStep.value++;
+    updateHash(currentStep.value);
   }
 }
 
 function prevStep() {
   if (currentStep.value > 0) {
     currentStep.value--;
+    updateHash(currentStep.value);
   }
 }
 
-async function submitResume() {
-  for (let i = 0; i < steps.length - 1; i++) {
-    if (!validateStep(i)) {
-      currentStep.value = i;
-      toast.error("Please complete required fields.");
-      return;
-    }
-  }
-
-  await saveApplication();
-
-  if (!saveInProgress.value) {
-    toast.success("Application submitted successfully!");
-
-    jobApplication.reload();
-  }
+function handleHashChange() {
+  readHashAndNavigate();
 }
+
+onMounted(() => {
+  readHashAndNavigate();
+  window.addEventListener("hashchange", handleHashChange);
+  updateOriginalData();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("hashchange", handleHashChange);
+});
+
+watch(currentStep, (newStep) => {
+  form._current_step = newStep;
+  form._current_progress = Math.round(progressPercentage.value);
+});
 </script>

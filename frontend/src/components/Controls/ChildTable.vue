@@ -93,6 +93,7 @@
             <div
               v-for="field in visibleFields.slice(0, 3)"
               :key="field.fieldname"
+              v-show="!field.hidden"
               class="flex flex-col gap-1"
             >
               <label class="text-xs text-ink-gray-5 font-medium">
@@ -101,7 +102,11 @@
 
               <div
                 class="w-full cursor-pointer min-h-[32px] flex items-center"
-                @click="startEditing(rowIndex, field.fieldname)"
+                @click="
+                  field.read_only
+                    ? null
+                    : startEditing(rowIndex, field.fieldname)
+                "
               >
                 <component
                   v-if="
@@ -113,6 +118,8 @@
                   @blur="stopEditing"
                   ref="editInputRef"
                   class="w-full text-sm"
+                  :readonly="!!field.read_only"
+                  @update:model-value="handleLinkedFieldChange(rowIndex, field)"
                 />
 
                 <div v-else class="text-sm text-ink-gray-7 truncate">
@@ -258,8 +265,11 @@
 
           <template v-for="field in visibleFields" :key="field.fieldname">
             <div
-              class="w-full cursor-pointer"
-              @click="startEditing(rowIndex, field.fieldname)"
+              class="w-full"
+              :class="{ 'cursor-pointer': !field.read_only }"
+              @click="
+                field.read_only ? null : startEditing(rowIndex, field.fieldname)
+              "
             >
               <component
                 v-if="
@@ -270,6 +280,9 @@
                 v-bind="getFieldProps(field, rowIndex)"
                 @blur="stopEditing"
                 ref="editInputRef"
+                :readonly="!!field.read_only"
+                :required="!!field.reqd"
+                @update:model-value="handleLinkedFieldChange(rowIndex, field)"
               />
 
               <div
@@ -429,6 +442,7 @@
                   <div
                     v-for="field in col"
                     :key="field.fieldname"
+                    v-show="!field.hidden"
                     class="mb-3 sm:mb-4"
                   >
                     <template v-if="field.fieldtype === 'Check'">
@@ -437,6 +451,14 @@
                           :type="'checkbox'"
                           v-model="editModalData[field.fieldname]"
                           v-bind="getFieldProps(field)"
+                          :readonly="!!field.read_only"
+                          @update:model-value="
+                            handleLinkedFieldChange(
+                              editModalRowIndex,
+                              field,
+                              editModalData
+                            )
+                          "
                         />
                         <label class="text-sm text-ink-gray-7">
                           {{ field.label }}
@@ -457,7 +479,15 @@
                         v-bind="getFieldProps(field)"
                         :rows="field.fieldtype === 'Long Text' ? 8 : 4"
                         :required="field.reqd"
+                        :readonly="!!field.read_only"
                         class="text-sm"
+                        @update:model-value="
+                          handleLinkedFieldChange(
+                            editModalRowIndex,
+                            field,
+                            editModalData
+                          )
+                        "
                       />
                     </template>
                   </div>
@@ -506,19 +536,45 @@ import Uploader from "./Uploader.vue";
 import LinkControl from "./Link.vue";
 import { Plus, Trash2, Copy, Edit, X } from "lucide-vue-next";
 
+interface DocField {
+  fieldname: string;
+  fieldtype: string;
+  label: string;
+  options?: string;
+  description?: string;
+  get_query?: any;
+  in_list_view: number | boolean;
+  idx: number;
+
+  read_only?: number | boolean;
+  hidden?: number | boolean;
+  reqd?: number | boolean;
+  fetch_from?: string;
+  default?: any;
+}
+
+type RowData = Record<string, any>;
+
 const props = withDefaults(
   defineProps<{
-    modelValue?: Record<string, any>[];
+    modelValue?: RowData[];
     doctype: string;
     label?: string;
+    fieldQueries?: Record<
+      string,
+      (row: RowData, allRows: RowData[], formData?: any) => any
+    >;
+    formData?: RowData;
+    autoEditGrid?: boolean;
   }>(),
-  { modelValue: () => [], label: "" }
+  { modelValue: () => [], label: "", fieldQueries: () => ({}) }
 );
+
 const emit = defineEmits<{
-  (e: "update:modelValue", value: Record<string, any>[]): void;
+  (e: "update:modelValue", value: RowData[]): void;
 }>();
 
-const rowsRef = ref<Record<string, any>[]>([]);
+const rowsRef = ref<RowData[]>([]);
 const tableRef = ref<HTMLElement | null>(null);
 const selectedRows = ref(new Set<number>());
 const editingRow = ref<number | null>(null);
@@ -526,8 +582,9 @@ const editingField = ref<string | null>(null);
 const editInputRef = ref<any>(null);
 const editModalOpen = ref(false);
 const editModalRowIndex = ref<number | null>(null);
-const editModalData = ref<Record<string, any>>({});
+const editModalData = ref<RowData>({});
 const isUpdating = ref(false);
+const editableGrid = ref(false);
 
 const fieldComponentMap: Record<string, any> = {
   Attach: Uploader,
@@ -571,7 +628,7 @@ const fieldComponentMap: Record<string, any> = {
   Time: "time",
 };
 
-function getFieldComponent(field: any) {
+function getFieldComponent(field: DocField) {
   const comp = fieldComponentMap[field.fieldtype];
 
   const formControlTypes = [
@@ -587,6 +644,7 @@ function getFieldComponent(field: any) {
     "Tel",
     "Search",
     "Check",
+    "Select",
   ];
 
   if (comp && typeof comp !== "string") return comp;
@@ -595,8 +653,11 @@ function getFieldComponent(field: any) {
   return comp || FormControl;
 }
 
-function getFieldProps(field: any, rowIndex?: number) {
-  const props: Record<string, any> = {};
+function getFieldProps(field: DocField, rowIndex?: number) {
+  const props: Record<string, any> = {
+    readonly: !!field.read_only,
+    required: !!field.reqd,
+  };
 
   switch (field.fieldtype) {
     case "Data":
@@ -645,6 +706,30 @@ function getFieldProps(field: any, rowIndex?: number) {
       props.options = getSelectOptions(field);
       break;
 
+    case "Link":
+    case "Dynamic Link":
+      props.doctype = field.options;
+      props.description = field.description || "";
+
+      let baseFilters =
+        typeof field.get_query === "function"
+          ? field.get_query()
+          : field.get_query || {};
+
+      if (props.fieldQueries && props.fieldQueries[field.fieldname]) {
+        const row = rowIndex !== undefined ? rowsRef.value[rowIndex] : {};
+        const dynamicFilters = props.fieldQueries[field.fieldname](
+          row,
+          rowsRef.value,
+          props.formData
+        );
+        baseFilters = { ...baseFilters, ...dynamicFilters };
+      }
+
+      props.filters = baseFilters;
+
+      break;
+
     case "Attach":
     case "Attach Image":
     case "Image":
@@ -661,13 +746,113 @@ function getFieldProps(field: any, rowIndex?: number) {
   return props;
 }
 
+async function fetchLinkedFieldData(
+  linkDoctype: string,
+  linkName: string,
+  targetField: string
+): Promise<any> {
+  if (!linkName) return null;
+
+  const linkedDoc = createResource({
+    url: "non_profit.non_profit.api.search_doctype",
+    params: {
+      doctype: linkDoctype,
+      name: linkName,
+      fields: [targetField],
+      ignore_permissions: 1,
+    },
+    auto: false,
+  });
+
+  try {
+    const response = await linkedDoc.fetch();
+
+    if (response && !Array.isArray(response)) {
+      return response?.[targetField] ?? null;
+    }
+
+    if (Array.isArray(response) && response.length > 0) {
+      return response[0]?.[targetField] ?? null;
+    }
+
+    return null;
+  } catch (error) {
+    console.error(
+      `Error fetching linked field: ${linkDoctype}/${linkName}.${targetField}`,
+      error
+    );
+    return null;
+  }
+}
+
+async function handleLinkedFieldChange(
+  rowIndex: number | null,
+  changedField: DocField,
+  dataRef?: RowData
+) {
+  if (rowIndex === null) return;
+
+  const currentRow = dataRef || rowsRef.value[rowIndex];
+
+  const fieldsToUpdate = doctypeFields.value.filter(
+    (f) => f.fetch_from && f.fetch_from.startsWith(`${changedField.fieldname}.`)
+  );
+
+  for (const field of fieldsToUpdate) {
+    const [sourceLinkField, targetField] = field.fetch_from!.split(".");
+
+    if (
+      sourceLinkField === changedField.fieldname &&
+      currentRow[changedField.fieldname]
+    ) {
+      const linkDoctype = changedField.options as string;
+      const linkName = currentRow[changedField.fieldname];
+
+      if (linkDoctype && linkName) {
+        const fetchedValue = await fetchLinkedFieldData(
+          linkDoctype,
+          linkName,
+          targetField
+        );
+
+        if (dataRef) {
+          dataRef[field.fieldname] = fetchedValue;
+        } else {
+          rowsRef.value[rowIndex][field.fieldname] = fetchedValue;
+        }
+      }
+    }
+  }
+
+  if (changedField.fetch_from && changedField.fieldtype === "Link") {
+    const [sourceLinkField, targetField] = changedField.fetch_from!.split(".");
+    if (sourceLinkField === changedField.fieldname) {
+      const linkDoctype = changedField.options as string;
+      const linkName = currentRow[changedField.fieldname];
+
+      if (linkDoctype && linkName) {
+        const fetchedValue = await fetchLinkedFieldData(
+          linkDoctype,
+          linkName,
+          targetField
+        );
+        if (dataRef) {
+          dataRef[changedField.fieldname] = fetchedValue;
+        } else {
+          rowsRef.value[rowIndex][changedField.fieldname] = fetchedValue;
+        }
+      }
+    }
+  }
+}
+
 const doctypeMeta = createResource({
   url: "frappe.desk.form.load.getdoctype",
-  params: { doctype: props.doctype, with_parent: 1 },
+  params: { doctype: props.doctype, with_parent: 1, ignore_permissions: 1 },
   auto: true,
 });
 
-const doctypeFields = computed(() => {
+const doctypeFields = computed<DocField[]>(() => {
   if (!doctypeMeta.data?.docs) return [];
 
   const targetDoc = doctypeMeta.data.docs.find(
@@ -675,14 +860,25 @@ const doctypeFields = computed(() => {
   );
   if (!targetDoc?.fields) return [];
 
-  const fields = targetDoc.fields.filter((f: any) => !f.hidden);
+  const fields: DocField[] = targetDoc.fields.map((f: any) => ({
+    ...f,
+
+    read_only: f.read_only == 1,
+    hidden: f.hidden == 1,
+    reqd: f.reqd == 1,
+  }));
+
+  const fieldsToShow = fields.filter((f) => !f.hidden);
+
+  const editableGridVal = targetDoc.editable_grid;
+  editableGrid.value = editableGridVal === 1 || editableGridVal === "1";
 
   const fieldOrder = targetDoc.field_order
     ? targetDoc.field_order.split("\n").map((f: string) => f.trim())
     : [];
 
   if (fieldOrder.length > 0) {
-    return fields.sort((a: any, b: any) => {
+    return fieldsToShow.sort((a, b) => {
       const posA = fieldOrder.indexOf(a.fieldname);
       const posB = fieldOrder.indexOf(b.fieldname);
 
@@ -697,20 +893,18 @@ const doctypeFields = computed(() => {
     });
   }
 
-  return fields.sort((a: any, b: any) => (a.idx || 0) - (b.idx || 0));
+  return fieldsToShow.sort((a, b) => (a.idx || 0) - (b.idx || 0));
 });
 
 const visibleFields = computed(() => {
   const vf = doctypeFields.value.filter(
-    (f: any) =>
+    (f) =>
       f.in_list_view && !["Section Break", "Column Break"].includes(f.fieldtype)
   );
   return vf.length > 0
     ? vf
     : doctypeFields.value
-        .filter(
-          (f: any) => !["Section Break", "Column Break"].includes(f.fieldtype)
-        )
+        .filter((f) => !["Section Break", "Column Break"].includes(f.fieldtype))
         .slice(0, 5);
 });
 
@@ -749,9 +943,9 @@ function initializeRows() {
   rowsRef.value = (props.modelValue || []).map((r) => ensureRowShape(r));
 }
 
-function ensureRowShape(row: Record<string, any>) {
-  const shaped: Record<string, any> = { ...(row || {}) };
-  doctypeFields.value.forEach((field: any) => {
+function ensureRowShape(row: RowData): RowData {
+  const shaped: RowData = { ...(row || {}) };
+  doctypeFields.value.forEach((field) => {
     if (
       !["Section Break", "Column Break"].includes(field.fieldtype) &&
       !(field.fieldname in shaped)
@@ -762,7 +956,7 @@ function ensureRowShape(row: Record<string, any>) {
   return shaped;
 }
 
-function getDefaultValue(field: any) {
+function getDefaultValue(field: DocField) {
   if (field.fieldtype === "Check") return 0;
   if (["Int", "Float", "Currency"].includes(field.fieldtype)) return 0;
 
@@ -799,10 +993,13 @@ watch(
     if (isUpdating.value) return;
     isUpdating.value = true;
     nextTick(() => {
-      emit(
-        "update:modelValue",
-        nv.map((r) => ({ ...r }))
-      );
+      const cleanedRows = nv.map((r) => {
+        const cleaned: RowData = { ...r };
+        delete cleaned.__is_editing;
+        return cleaned;
+      });
+
+      emit("update:modelValue", cleanedRows);
       nextTick(() => {
         isUpdating.value = false;
       });
@@ -812,13 +1009,19 @@ watch(
 );
 
 function addRow() {
-  const newRow: Record<string, any> = {};
-  doctypeFields.value.forEach((field: any) => {
+  const newRow: RowData = {};
+  doctypeFields.value.forEach((field) => {
     if (!["Section Break", "Column Break"].includes(field.fieldtype)) {
       newRow[field.fieldname] = getDefaultValue(field);
     }
   });
+
   rowsRef.value.push(newRow);
+
+  if (!editableGrid.value || props.autoEditGrid) {
+    const newIndex = rowsRef.value.length - 1;
+    openEditModal(newIndex);
+  }
 }
 
 function duplicateSelected() {
@@ -859,6 +1062,9 @@ function toggleSelectAll() {
 }
 
 function startEditing(rowIndex: number, fieldname: string) {
+  const field = doctypeFields.value.find((f) => f.fieldname === fieldname);
+  if (field?.read_only) return;
+
   editingRow.value = rowIndex;
   editingField.value = fieldname;
   nextTick(() => {
@@ -889,12 +1095,27 @@ function closeEditModal() {
 
 function saveEditModal() {
   if (editModalRowIndex.value !== null) {
-    rowsRef.value[editModalRowIndex.value] = { ...editModalData.value };
+    const isValid = modalLayout.value.every((section) =>
+      section.columns.every((col: DocField[]) =>
+        col.every((field) => {
+          if (field.reqd && !editModalData.value[field.fieldname]) {
+            console.warn(`Required field missing: ${field.label}`);
+            return false;
+          }
+          return true;
+        })
+      )
+    );
+
+    if (isValid) {
+      rowsRef.value[editModalRowIndex.value] = { ...editModalData.value };
+      closeEditModal();
+    } else {
+    }
   }
-  closeEditModal();
 }
 
-function getSelectOptions(field: any) {
+function getSelectOptions(field: DocField) {
   if (field.options) {
     return field.options.split("\n").map((opt: string) => ({
       label: opt.trim(),
@@ -904,7 +1125,7 @@ function getSelectOptions(field: any) {
   return [];
 }
 
-function formatFieldValue(value: any, field: any) {
+function formatFieldValue(value: any, field: DocField) {
   if (value === null || value === undefined || value === "") return "";
 
   if (field.fieldtype === "Currency") {

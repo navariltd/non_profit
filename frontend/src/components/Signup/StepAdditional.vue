@@ -16,42 +16,50 @@
         :label="__('Profession')"
         doctype="Profession"
       />
+
+      <FormControl
+        v-model="localModel.reason_to_join"
+        :label="__('Reason for Joining')"
+        type="select"
+        :options="reasonsOptions"
+      />
       <MultiSelect
         v-model="localModel.languages"
         doctype="Language"
         :label="__('Languages')"
       />
       <MultiSelect
-        v-model="localModel.disabilities"
-        :label="__('Disabilities')"
-        doctype="Disability"
-      />
-      <FormControl
-        v-model="localModel.reason_to_join"
-        :label="__('Reason for Joining')"
-        type="textarea"
-        :rows="8"
-      />
-
-      <MultiSelect
         v-model="localModel.driving_licences"
         :label="__('Driving Licence')"
         doctype="Driving Licence Class"
       />
+
       <div class="w-full md:col-span-2 space-y-6">
+        <ChildTable
+          v-model="localModel.disabilities"
+          doctype="Employee Disability"
+          label="Disabilities"
+          :autoEditGrid="true"
+          :field-queries="disabilityQueries"
+          :form-data="localModel"
+        />
+
         <ChildTable
           v-model="localModel.education"
           :doctype="'Employee Education'"
+          :autoEditGrid="true"
           label="Education"
         />
         <ChildTable
           v-model="localModel.licences"
           :doctype="'Personnel Licence'"
+          :autoEditGrid="true"
           label="Licences"
         />
         <ChildTable
           v-model="localModel.certifications"
           :doctype="'Certification'"
+          :autoEditGrid="true"
           label="Certifications"
         />
       </div>
@@ -77,9 +85,23 @@ const localModel = computed({
   set: (val) => emit("update:modelValue", val),
 });
 
+const reasonsOptions = [
+  { label: "Humanitarian", value: "Humanitarian" },
+  { label: "Social Cohesion", value: "Social Cohesion" },
+  { label: "Personal", value: "Personal" },
+];
+
 const internetOptions = [
   { label: "Yes", value: "Yes" },
   { label: "No", value: "No" },
   { label: "Sometimes", value: "Sometimes" },
 ];
+
+const disabilityQueries = {
+  disability: (row, allRows, formData) => {
+    return {
+      disability_category: row.disability_category || null,
+    };
+  },
+};
 </script>

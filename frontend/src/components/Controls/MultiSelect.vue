@@ -198,8 +198,8 @@ const filterOptions = createResource({
 
 const options = computed(() => {
   if (!filterOptions.data) return [];
-  return filterOptions.data.filter(
-    (option) => !values.value?.some((item) => item.value === option.value)
+  return filterOptions?.data?.filter(
+    (option) => !values?.value?.some((item) => item.value === option.value)
   );
 });
 
