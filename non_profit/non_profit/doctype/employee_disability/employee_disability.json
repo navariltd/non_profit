@@ -18,7 +18,8 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Disability",
-   "options": "Disability"
+   "options": "Disability",
+   "reqd": 1
   },
   {
    "fetch_from": "disability.disability_category",
@@ -41,7 +42,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-01 18:37:13.615787",
+ "modified": "2025-10-02 17:13:58.803898",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Employee Disability",

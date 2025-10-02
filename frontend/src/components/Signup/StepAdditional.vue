@@ -8,28 +8,33 @@
         v-model="localModel.access_to_internet"
         :label="__('Access to Internet')"
         type="select"
+        :required="true"
         :options="internetOptions"
       />
 
       <Link
         v-model="localModel.profession"
         :label="__('Profession')"
+        :required="true"
         doctype="Profession"
       />
 
       <FormControl
-        v-model="localModel.reason_to_join"
+        v-model="localModel.reason_to_join_krcs"
         :label="__('Reason for Joining')"
         type="select"
+        :required="true"
         :options="reasonsOptions"
       />
+
       <MultiSelect
         v-model="localModel.languages"
         doctype="Language"
         :label="__('Languages')"
       />
+
       <MultiSelect
-        v-model="localModel.driving_licences"
+        v-model="localModel.driving_licence"
         :label="__('Driving Licence')"
         doctype="Driving Licence Class"
       />
@@ -42,6 +47,7 @@
           :autoEditGrid="true"
           :field-queries="disabilityQueries"
           :form-data="localModel"
+          @validationErrors="onChildErrors('disabilities', $event)"
         />
 
         <ChildTable
@@ -49,18 +55,23 @@
           :doctype="'Employee Education'"
           :autoEditGrid="true"
           label="Education"
+          @validationErrors="onChildErrors('education', $event)"
         />
+
         <ChildTable
           v-model="localModel.licences"
           :doctype="'Personnel Licence'"
           :autoEditGrid="true"
           label="Licences"
+          @validationErrors="onChildErrors('licences', $event)"
         />
+
         <ChildTable
-          v-model="localModel.certifications"
+          v-model="localModel.certification"
           :doctype="'Certification'"
           :autoEditGrid="true"
           label="Certifications"
+          @validationErrors="onChildErrors('certification', $event)"
         />
       </div>
     </div>
@@ -78,12 +89,21 @@ const props = defineProps({
   modelValue: { type: Object, required: true },
   errors: { type: Object, default: () => ({}) },
 });
-const emit = defineEmits(["update:modelValue"]);
+
+const emit = defineEmits(["update:modelValue", "update:errors"]);
 
 const localModel = computed({
   get: () => props.modelValue,
   set: (val) => emit("update:modelValue", val),
 });
+
+function onChildErrors(tableName, errMap) {
+  const newErrors = {
+    ...props.errors,
+    [tableName]: Object.fromEntries(errMap),
+  };
+  emit("update:errors", newErrors);
+}
 
 const reasonsOptions = [
   { label: "Humanitarian", value: "Humanitarian" },

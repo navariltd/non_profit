@@ -10,6 +10,7 @@
         <Popover class="w-full" v-model:show="showOptions">
           <template #target="{ togglePopover }">
             <ComboboxInput
+              v-if="!props.readOnly"
               ref="search"
               class="search-input form-input w-full focus-visible:!ring-0"
               type="text"
@@ -25,6 +26,15 @@
               @keydown.delete.capture.stop="removeLastValue"
               :placeholder="props.label || 'Select...'"
             />
+
+            <div
+              v-else
+              class="w-full min-h-[2.5rem] border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-700 flex items-center"
+            >
+              <span class="text-ink-gray-5">
+                {{ props.label }}
+              </span>
+            </div>
           </template>
 
           <template #body="{ isOpen, close }">
@@ -105,6 +115,7 @@
       >
         <span class="break-all">{{ item.label || item.value }}</span>
         <X
+          v-if="!props.readOnly"
           class="size-4 stroke-1.5 cursor-pointer"
           @click="removeValue(item.value)"
         />
@@ -144,6 +155,7 @@ const props = defineProps({
   },
   required: Boolean,
   allowCreate: { type: Boolean, default: false },
+  readOnly: { type: Boolean, default: false },
 });
 
 const values = defineModel();

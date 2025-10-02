@@ -106,6 +106,7 @@
           <StepAdditional
             v-model="form"
             :errors="errors"
+            @update:errors="handleErrorsUpdate"
             @change="trackChanges"
           />
         </section>
@@ -117,23 +118,8 @@
             @change="trackChanges"
           />
         </section>
-
-        <section v-if="currentStep === 3" class="space-y-6">
-          <h2 class="text-2xl font-bold text-red-700">
-            {{ __("Review Your Application") }}
-          </h2>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
-            <div
-              v-for="(value, key) in summaryData"
-              :key="key"
-              class="p-4 border rounded-md hover:border-red-300 transition-colors"
-            >
-              <p class="text-sm font-semibold text-gray-500 capitalize">
-                {{ formatLabel(key) }}
-              </p>
-              <p class="mt-1">{{ formatValue(value) }}</p>
-            </div>
-          </div>
+        <section v-if="currentStep === 3">
+          <ReviewApplication :form="form" />
         </section>
 
         <div class="flex justify-between items-center gap-4 mt-10">
@@ -223,6 +209,7 @@ import StepDocuments from "@/components/Signup/StepDocuments.vue";
 import { usersStore } from "../stores/user";
 import { sessionStore } from "../stores/session";
 import { useRouter } from "vue-router";
+import ReviewApplication from "../components/Signup/ReviewApplication.vue";
 
 const { userResource } = usersStore();
 const { isLoggedIn } = sessionStore();
@@ -254,7 +241,7 @@ const form = reactive({
   date_of_birth: "",
   id_number: "",
   passport_number: "",
-  location: "",
+  administrative_location: "",
   sub_county: "",
   citizenship: "",
   marital_status: "",
@@ -263,15 +250,19 @@ const form = reactive({
   access_to_internet: "",
   citizenship: "",
   number_of_dependants: null,
-  reason_to_join: "",
+  reason_to_join_krcs: "",
   disabilities: "",
   has_insurance: "",
   languages: [],
-  driving_licences: [],
+  driving_licence: [],
   licences: [],
   blood_group: "",
+  certification: [],
+  supporting_documents: [],
   additional_skills: "",
+  county: "",
   ward: "",
+  profile_photo: null,
   _current_step: 0,
   _current_progress: 0,
 });
@@ -291,8 +282,9 @@ const stepFields = {
     "blood_group",
     "has_insurance",
     "citizenship",
-    "location",
+    "administrative_location",
     "sub_county",
+    "county",
   ],
   1: [
     "access_to_internet",
@@ -300,11 +292,12 @@ const stepFields = {
     "languages",
     "education",
     "disabilities",
-    "reason_to_join",
-    "driving_licences",
+    "reason_to_join_krcs",
+    "driving_licence",
+    "certification",
     "licences",
   ],
-  2: ["documents"],
+  2: ["profile_photo", "supporting_documents"],
 };
 
 const progressPercentage = computed(() => {
@@ -382,7 +375,7 @@ function getCurrentStepData(onlyChanges = false) {
 }
 
 const jobApplication = createResource({
-  url: "non_profit.non_profit.api.get_list",
+  url: "non_profit.non_profit.api.search_doctype",
   makeParams() {
     return {
       doctype: "Job Applicant",
@@ -390,14 +383,15 @@ const jobApplication = createResource({
         email_id: user.data?.email,
         is_volunteer: true,
       },
-      fields: ["*"],
+      first: true,
     };
   },
   auto: true,
   reloadOn: () => !!user.data?.email,
   onSuccess(data) {
-    if (data?.length) {
-      const application = data[0];
+    if (data?.name) {
+      const application = data;
+
       alreadyApplied.value = true;
       applicationStatus.value =
         application.status || application.workflow_state;
@@ -405,19 +399,6 @@ const jobApplication = createResource({
 
       if (applicationStatus.value === "Draft") {
         populateForm(application);
-
-        if (
-          application._current_step !== undefined &&
-          application._current_step !== null &&
-          application._current_step > 0 &&
-          application._current_step < steps.length
-        ) {
-          currentStep.value = application._current_step;
-
-          if (currentStep.value) {
-            updateHash(application._current_step);
-          }
-        }
 
         toast.info("Continuing your draft application...");
       }
@@ -510,11 +491,11 @@ const summaryData = computed(() => ({
   profession: form.profession,
   citizenship: form.citizenship,
   access_to_internet: form.access_to_internet,
-  reason: form.reason_to_join,
+  reason: form.reason_to_join_krcs,
   disabilities: form.disabilities,
   languages: form.languages,
   number_of_dependants: form.number_of_dependants,
-  driving_licences: form.driving_licences,
+  driving_licence: form.driving_licence,
   has_insurance: form.has_insurance,
   blood_group: form.blood_group,
   additional_skills: form.additional_skills,
@@ -541,8 +522,8 @@ function populateForm(data) {
   if (data.languages && Array.isArray(data.languages)) {
     form.languages = data.languages;
   }
-  if (data.driving_licences && Array.isArray(data.driving_licences)) {
-    form.driving_licences = data.driving_licences;
+  if (data.driving_licence && Array.isArray(data.driving_licence)) {
+    form.driving_licence = data.driving_licence;
   }
   if (data.licences && Array.isArray(data.licences)) {
     form.licences = data.licences;
@@ -563,8 +544,37 @@ function redirectToLogin() {
   router.push("/login");
 }
 
+function handleErrorsUpdate(newErrors = {}) {
+  Object.keys(errors).forEach((k) => delete errors[k]);
+
+  Object.entries(newErrors || {}).forEach(([k, v]) => {
+    let normalized;
+
+    if (v instanceof Map) {
+      normalized = Object.fromEntries(v);
+    } else if (typeof v === "object" && v !== null) {
+      normalized = JSON.parse(JSON.stringify(v));
+    } else {
+      normalized = v;
+    }
+
+    if (
+      normalized &&
+      (typeof normalized !== "object" || Object.keys(normalized).length > 0)
+    ) {
+      errors[k] = normalized;
+    }
+  });
+}
+
 function validateStep(stepIndex) {
   let valid = true;
+
+  if (errors && Object.keys(errors).length > 0) {
+    toast.error("Please fix the errors before proceeding.");
+    return false;
+  }
+
   Object.keys(errors).forEach((k) => (errors[k] = ""));
 
   if (stepIndex === 0) {
@@ -581,8 +591,8 @@ function validateStep(stepIndex) {
         valid = false;
       }
     }
-    if (!form.location) {
-      errors.location = __("This field is required");
+    if (!form.administrative_location) {
+      errors.administrative_location = __("This field is required");
       valid = false;
     }
     if (!form.sub_county) {
@@ -628,6 +638,21 @@ function validateStep(stepIndex) {
         errors.passport_number = __("Invalid passport number format");
         valid = false;
       }
+    }
+  }
+
+  if (stepIndex === 1) {
+    if (!form.reason_to_join_krcs) {
+      errors.reason_to_join_krcs = __("This field is required");
+      valid = false;
+    }
+    if (!form.profession) {
+      errors.profession = __("This field is required");
+      valid = false;
+    }
+    if (!form.access_to_internet) {
+      errors.access_to_internet = __("This field is required");
+      valid = false;
     }
   }
 
