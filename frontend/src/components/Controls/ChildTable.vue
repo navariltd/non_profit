@@ -65,6 +65,10 @@
               ? 'bg-blue-50 border-blue-200'
               : 'bg-white',
             editingRow === rowIndex ? 'ring-2 ring-blue-300' : '',
+            validationErrors.has(rowIndex) &&
+            Object.keys(validationErrors.get(rowIndex) || {}).length > 0
+              ? 'border-red-500'
+              : '',
           ]"
         >
           <div class="flex items-center justify-between mb-3">
@@ -89,6 +93,16 @@
             </Button>
           </div>
 
+          <div
+            v-if="
+              validationErrors.has(rowIndex) &&
+              Object.keys(validationErrors.get(rowIndex) || {}).length > 0
+            "
+            class="absolute top-2 right-2 p-1 bg-red-500 rounded-full"
+          >
+            <X class="size-3 text-white" />
+          </div>
+
           <div class="space-y-2">
             <div
               v-for="field in visibleFields.slice(0, 3)"
@@ -98,6 +112,7 @@
             >
               <label class="text-xs text-ink-gray-5 font-medium">
                 {{ field.label }}
+                <span v-if="field.reqd" class="text-red-500">*</span>
               </label>
 
               <div
@@ -115,7 +130,7 @@
                   :is="getFieldComponent(field)"
                   v-model="row[field.fieldname]"
                   v-bind="getFieldProps(field, rowIndex)"
-                  @blur="stopEditing"
+                  @blur="stopEditingAndValidate(rowIndex, field.fieldname)"
                   ref="editInputRef"
                   class="w-full text-sm"
                   :readonly="!!field.read_only"
@@ -154,6 +169,12 @@
                   </template>
                 </div>
               </div>
+              <p
+                v-if="validationErrors.get(rowIndex)?.[field.fieldname]"
+                class="text-xs text-red-500 mt-1"
+              >
+                {{ validationErrors.get(rowIndex)?.[field.fieldname] }}
+              </p>
             </div>
 
             <div v-if="visibleFields.length > 3" class="pt-1">
@@ -239,6 +260,7 @@
             :title="field.label"
           >
             {{ field.label }}
+            <span v-if="field.reqd" class="text-red-500">*</span>
           </div>
           <div class="w-8"></div>
         </div>
@@ -251,6 +273,10 @@
             rowIndex % 2 === 0 ? 'bg-white' : 'bg-surface-white',
             selectedRows.has(rowIndex) ? 'bg-blue-50' : '',
             editingRow === rowIndex ? 'ring-2 ring-blue-300' : '',
+            validationErrors.has(rowIndex) &&
+            Object.keys(validationErrors.get(rowIndex) || {}).length > 0
+              ? 'border-l-4 border-red-500'
+              : '',
           ]"
           :style="{ gridTemplateColumns: gridColumnsStyle }"
         >
@@ -278,17 +304,25 @@
                 :is="getFieldComponent(field)"
                 v-model="row[field.fieldname]"
                 v-bind="getFieldProps(field, rowIndex)"
-                @blur="stopEditing"
+                @blur="stopEditingAndValidate(rowIndex, field.fieldname)"
                 ref="editInputRef"
                 :readonly="!!field.read_only"
                 :required="!!field.reqd"
                 @update:model-value="handleLinkedFieldChange(rowIndex, field)"
+                :class="{
+                  'border-red-500':
+                    validationErrors.get(rowIndex)?.[field.fieldname],
+                }"
               />
 
               <div
                 v-else
                 class="text-sm text-ink-gray-7 truncate min-h-[32px] flex items-center"
                 :title="formatFieldValue(row[field.fieldname], field) || '-'"
+                :class="{
+                  'border-2 border-red-500 rounded-md p-1':
+                    validationErrors.get(rowIndex)?.[field.fieldname],
+                }"
               >
                 <template v-if="field.fieldtype === 'Check'">
                   <input
@@ -320,6 +354,12 @@
                   {{ formatFieldValue(row[field.fieldname], field) || "-" }}
                 </template>
               </div>
+              <p
+                v-if="validationErrors.get(rowIndex)?.[field.fieldname]"
+                class="text-xs text-red-500 mt-1"
+              >
+                {{ validationErrors.get(rowIndex)?.[field.fieldname] }}
+              </p>
             </div>
           </template>
 
@@ -370,7 +410,12 @@
       </div>
 
       <div class="mt-3 flex items-center justify-between">
-        <Button @click="addRow" variant="solid" size="sm">
+        <Button
+          v-if="!props.readOnly"
+          @click="addRow"
+          variant="solid"
+          size="sm"
+        >
           <template #prefix><Plus class="size-4" /></template>
           Add Row
         </Button>
@@ -380,6 +425,7 @@
             >{{ selectedRows.size }} selected</span
           >
           <Button
+            v-if="!props.readOnly && selectedRows.size > 0"
             @click="duplicateSelected"
             variant="ghost"
             size="sm"
@@ -387,7 +433,9 @@
           >
             <Copy class="size-4 text-ink-gray-7" />
           </Button>
+
           <Button
+            v-if="!props.readOnly && selectedRows.size > 0"
             @click="deleteSelected"
             variant="ghost"
             size="sm"
@@ -411,7 +459,7 @@
           class="flex items-center justify-between p-3 sm:p-4 border-b bg-surface-gray-1"
         >
           <h3 class="text-base sm:text-lg font-semibold text-ink-gray-7">
-            Edit Row
+            Edit Row {{ (editModalRowIndex || 0) + 1 }}
           </h3>
           <button
             @click="closeEditModal"
@@ -488,7 +536,26 @@
                             editModalData
                           )
                         "
+                        :class="{
+                          'border-red-500': validationErrors.get(
+                            editModalRowIndex || -1
+                          )?.[field.fieldname],
+                        }"
                       />
+                      <p
+                        v-if="
+                          validationErrors.get(editModalRowIndex || -1)?.[
+                            field.fieldname
+                          ]
+                        "
+                        class="text-xs text-red-500 mt-1"
+                      >
+                        {{
+                          validationErrors.get(editModalRowIndex || -1)?.[
+                            field.fieldname
+                          ]
+                        }}
+                      </p>
                     </template>
                   </div>
                 </div>
@@ -509,10 +576,10 @@
             Cancel
           </Button>
           <Button
+            v-if="!props.readOnly"
             @click="saveEditModal"
             variant="solid"
             size="sm"
-            class="flex-1 sm:flex-none"
           >
             Save Changes
           </Button>
@@ -566,12 +633,14 @@ const props = withDefaults(
     >;
     formData?: RowData;
     autoEditGrid?: boolean;
+    readOnly?: boolean;
   }>(),
-  { modelValue: () => [], label: "", fieldQueries: () => ({}) }
+  { modelValue: () => [], label: "", fieldQueries: () => ({}), readOnly: false }
 );
 
 const emit = defineEmits<{
   (e: "update:modelValue", value: RowData[]): void;
+  (e: "validationErrors", errors: Map<number, Record<string, string>>): void;
 }>();
 
 const rowsRef = ref<RowData[]>([]);
@@ -585,6 +654,12 @@ const editModalRowIndex = ref<number | null>(null);
 const editModalData = ref<RowData>({});
 const isUpdating = ref(false);
 const editableGrid = ref(false);
+
+const validationErrors = ref(new Map<number, Record<string, string>>());
+
+defineExpose({
+  validateBeforeSave,
+});
 
 const fieldComponentMap: Record<string, any> = {
   Attach: Uploader,
@@ -746,6 +821,28 @@ function getFieldProps(field: DocField, rowIndex?: number) {
   return props;
 }
 
+function getSelectOptions(field: DocField) {
+  if (field.options) {
+    return field.options
+      .split("\n")
+      .map((o) => o.trim())
+      .filter((o) => o);
+  }
+  return [];
+}
+
+function formatFieldValue(value: any, field: DocField) {
+  if (field.fieldtype === "Check") return value ? "Yes" : "No";
+  return value;
+}
+function handleUploadSuccess(rowIndex: number, fieldname: string, file: any) {
+  if (rowIndex !== undefined && rowsRef.value[rowIndex]) {
+    rowsRef.value[rowIndex][fieldname] = file;
+
+    validateRow(rowIndex);
+  }
+}
+
 async function fetchLinkedFieldData(
   linkDoctype: string,
   linkName: string,
@@ -819,6 +916,12 @@ async function handleLinkedFieldChange(
           dataRef[field.fieldname] = fetchedValue;
         } else {
           rowsRef.value[rowIndex][field.fieldname] = fetchedValue;
+        }
+      } else {
+        if (dataRef) {
+          dataRef[field.fieldname] = getDefaultValue(field);
+        } else {
+          rowsRef.value[rowIndex][field.fieldname] = getDefaultValue(field);
         }
       }
     }
@@ -941,6 +1044,8 @@ const gridColumnsStyle = computed(() => {
 function initializeRows() {
   if (isUpdating.value) return;
   rowsRef.value = (props.modelValue || []).map((r) => ensureRowShape(r));
+
+  validateAllRows();
 }
 
 function ensureRowShape(row: RowData): RowData {
@@ -974,6 +1079,17 @@ onMounted(() => {
 });
 
 watch(
+  () => rowsRef.value.map((row) => ({ ...row })),
+  () => {
+    rowsRef.value.forEach((_, idx) => {
+      validateRow(idx);
+    });
+    emit("validationErrors", validationErrors.value);
+  },
+  { deep: true, immediate: true }
+);
+
+watch(
   () => props.modelValue,
   (nv) => {
     if (isUpdating.value) return;
@@ -981,6 +1097,7 @@ watch(
       const newRows = nv.map((r: any) => ensureRowShape(r));
       if (JSON.stringify(newRows) !== JSON.stringify(rowsRef.value)) {
         rowsRef.value = newRows;
+        validateAllRows();
       }
     }
   },
@@ -1008,6 +1125,71 @@ watch(
   { deep: true }
 );
 
+function validateRow(rowIndex: number): Record<string, string> {
+  const row = rowsRef.value[rowIndex];
+  if (!row) return {};
+
+  const errors: Record<string, string> = {};
+
+  for (const field of doctypeFields.value) {
+    if (field.reqd) {
+      const value = row[field.fieldname];
+      const isEmpty = value === null || value === undefined || value === "";
+
+      if (
+        isEmpty ||
+        (field.fieldtype === "Link" && value === "") ||
+        (field.fieldtype === "Check" && value === 0)
+      ) {
+        errors[field.fieldname] = `${field.label} is required.`;
+      }
+    }
+  }
+
+  if (Object.keys(errors).length > 0) {
+    validationErrors.value.set(rowIndex, errors);
+  } else {
+    validationErrors.value.delete(rowIndex);
+  }
+
+  emit("validationErrors", new Map(validationErrors.value));
+
+  return errors;
+}
+
+function validateAllRows(): boolean {
+  validationErrors.value.clear();
+  let allValid = true;
+
+  rowsRef.value.forEach((_, rowIndex) => {
+    const errors = validateRow(rowIndex);
+    if (Object.keys(errors).length > 0) {
+      allValid = false;
+    }
+  });
+
+  validationErrors.value = new Map(validationErrors.value);
+
+  emit("validationErrors", new Map(validationErrors.value));
+
+  return allValid;
+}
+
+function validateBeforeSave(): boolean {
+  const result = validateAllRows();
+  emit("validationErrors", new Map(validationErrors.value));
+  return result;
+}
+
+function stopEditingAndValidate(rowIndex: number, fieldname: string) {
+  setTimeout(() => {
+    editingRow.value = null;
+    editingField.value = null;
+
+    validateRow(rowIndex);
+  }, 150);
+}
+
 function addRow() {
   const newRow: RowData = {};
   doctypeFields.value.forEach((field) => {
@@ -1017,26 +1199,39 @@ function addRow() {
   });
 
   rowsRef.value.push(newRow);
+  const newIndex = rowsRef.value.length - 1;
+
+  validateRow(newIndex);
 
   if (!editableGrid.value || props.autoEditGrid) {
-    const newIndex = rowsRef.value.length - 1;
     openEditModal(newIndex);
   }
 }
 
 function duplicateSelected() {
   const indices = Array.from(selectedRows.value).sort((a, b) => b - a);
+  const newIndices: number[] = [];
+
   indices.forEach((idx) => {
     const duplicate = { ...rowsRef.value[idx] };
     rowsRef.value.splice(idx + 1, 0, duplicate);
+    newIndices.push(idx + 1);
   });
+
   selectedRows.value.clear();
+
+  newIndices.forEach(validateRow);
 }
 
 function deleteSelected() {
   const indices = Array.from(selectedRows.value).sort((a, b) => b - a);
-  indices.forEach((idx) => rowsRef.value.splice(idx, 1));
+  indices.forEach((idx) => {
+    rowsRef.value.splice(idx, 1);
+    validationErrors.value.delete(idx);
+  });
   selectedRows.value.clear();
+
+  validateAllRows();
 }
 
 function toggleRowSelection(idx: number) {
@@ -1074,16 +1269,10 @@ function startEditing(rowIndex: number, fieldname: string) {
   });
 }
 
-function stopEditing() {
-  setTimeout(() => {
-    editingRow.value = null;
-    editingField.value = null;
-  }, 150);
-}
-
 function openEditModal(idx: number) {
   editModalRowIndex.value = idx;
-  editModalData.value = { ...rowsRef.value[idx] };
+
+  editModalData.value = JSON.parse(JSON.stringify(rowsRef.value[idx]));
   editModalOpen.value = true;
 }
 
@@ -1094,70 +1283,53 @@ function closeEditModal() {
 }
 
 function saveEditModal() {
-  if (editModalRowIndex.value !== null) {
-    const isValid = modalLayout.value.every((section) =>
-      section.columns.every((col: DocField[]) =>
-        col.every((field) => {
-          if (field.reqd && !editModalData.value[field.fieldname]) {
-            console.warn(`Required field missing: ${field.label}`);
-            return false;
-          }
-          return true;
-        })
-      )
-    );
+  const rowIndex = editModalRowIndex.value;
+  if (rowIndex === null) return;
 
-    if (isValid) {
-      rowsRef.value[editModalRowIndex.value] = { ...editModalData.value };
-      closeEditModal();
-    } else {
+  const errors = validateModalData(rowIndex, editModalData.value);
+
+  if (Object.keys(errors).length > 0) {
+    return;
+  }
+
+  rowsRef.value[rowIndex] = {
+    ...rowsRef.value[rowIndex],
+    ...editModalData.value,
+  };
+
+  validationErrors.value.delete(rowIndex);
+
+  closeEditModal();
+}
+
+function validateModalData(
+  rowIndex: number,
+  data: RowData
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+
+  for (const field of doctypeFields.value) {
+    if (field.reqd) {
+      const value = data[field.fieldname];
+      const isEmpty = value === null || value === undefined || value === "";
+
+      if (
+        isEmpty ||
+        (field.fieldtype === "Link" && value === "") ||
+        (field.fieldtype === "Check" && value === 0)
+      ) {
+        errors[field.fieldname] = `${field.label} is required.`;
+      }
     }
   }
-}
 
-function getSelectOptions(field: DocField) {
-  if (field.options) {
-    return field.options.split("\n").map((opt: string) => ({
-      label: opt.trim(),
-      value: opt.trim(),
-    }));
+  if (Object.keys(errors).length > 0) {
+    validationErrors.value.set(rowIndex, errors);
+  } else {
+    validationErrors.value.delete(rowIndex);
   }
-  return [];
+  validationErrors.value = new Map(validationErrors.value);
+
+  return errors;
 }
-
-function formatFieldValue(value: any, field: DocField) {
-  if (value === null || value === undefined || value === "") return "";
-
-  if (field.fieldtype === "Currency") {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value);
-  }
-
-  if (field.fieldtype === "Float") {
-    return parseFloat(value).toFixed(2);
-  }
-
-  return value;
-}
-
-function handleUploadSuccess(rowIndex: number, fieldname: string, file: any) {
-  if (rowsRef.value[rowIndex]) {
-    rowsRef.value[rowIndex][fieldname] = file;
-  }
-}
-
-defineExpose({
-  addRow,
-  rowsRef,
-  selectedRows,
-  doctypeFields,
-});
 </script>
-
-<style scoped>
-.group:hover {
-  background-color: #f8fafb;
-}
-</style>

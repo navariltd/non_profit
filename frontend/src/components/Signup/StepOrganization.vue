@@ -19,15 +19,23 @@
           </p>
         </div>
         <div>
-          <!-- <Link
-          v-model="localModel.company"
-          :label="__('County of Residence')"
-          doctype="County"
-          :required="true"
-        />
-        <p v-if="errors.county" class="text-sm text-red-600 mt-1">
-          {{ errors.county }}
-        </p> -->
+          <Link
+            v-if="false"
+            v-model="localModel.county"
+            :label="__('County of Residence')"
+            doctype="County"
+            :required="true"
+            :value="localModel.company"
+            @update:modelValue="
+              (val) => {
+                localModel.county = val;
+                localModel.company = val;
+              }
+            "
+          />
+          <p v-if="errors.county" class="text-sm text-red-600 mt-1">
+            {{ errors.county }}
+          </p>
         </div>
         <div v-if="localModel.company">
           <Link
@@ -43,14 +51,17 @@
         </div>
         <div v-if="localModel.sub_county">
           <Link
-            v-model="localModel.location"
+            v-model="localModel.administrative_location"
             :label="__('Location')"
             doctype="Administrative Location"
             :required="true"
             :filters="{ sub_county: localModel.sub_county }"
           />
-          <p v-if="errors.location" class="text-sm text-red-600 mt-1">
-            {{ errors.location }}
+          <p
+            v-if="errors.administrative_location"
+            class="text-sm text-red-600 mt-1"
+          >
+            {{ errors.administrative_location }}
           </p>
         </div>
         <div>

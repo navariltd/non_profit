@@ -1,44 +1,56 @@
 <template>
   <section>
     <h2 class="text-xl font-bold text-red-700 mb-4">
-      {{ __("Documents & Photo") }}
+      {{ __("Documents ") }}
     </h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <Uploader
-        label="Upload Profile Photo"
-        :fileTypes="['.jpg', '.png']"
-        :onSuccess="(f) => (localForm.profile_photo = f)"
-      />
-      <Uploader
-        label="Upload Resume"
-        :fileTypes="['.pdf', '.docx', '.doc']"
-        :onSuccess="(f) => (localForm.resume = f)"
-      />
-    </div>
+    <!-- <div class="grid grid-cols-1 gap-6">
+      <div class="space-y-2">
+        <span class="text-gray-700"> Profile Photo </span>
+        <Uploader
+          label="Upload Profile Photo"
+          :fileTypes="['.jpg', '.png']"
+          :onSuccess="(f) => (localModel.profile_photo = f)"
+        />
+      </div>
+    </div> -->
 
     <div class="mt-6">
-      <Uploader
-        label="Upload Supporting Documents"
-        :fileTypes="['.pdf', '.jpg', '.png']"
-        :multi="true"
-        :onSuccess="addDocument"
+      <ChildTable
+        v-model="localModel.supporting_documents"
+        doctype="Supporting Document"
+        :autoEditGrid="true"
+        label="Supporting Documents"
+        @validationErrors="onChildErrors('supporting_documents', $event)"
       />
     </div>
   </section>
 </template>
 
 <script setup>
-import { reactive, watch } from "vue";
-import { TextEditor } from "frappe-ui";
+import { computed } from "vue";
 import Uploader from "@/components/Controls/Uploader.vue";
+import ChildTable from "../Controls/ChildTable.vue";
 
-const props = defineProps({ modelValue: Object, documents: Array });
-const emit = defineEmits(["update:modelValue"]);
+const props = defineProps({
+  modelValue: { type: Object, required: true },
+  errors: { type: Object, default: () => ({}) },
+});
 
-const localForm = reactive({ ...props.modelValue });
-watch(localForm, (val) => emit("update:modelValue", val), { deep: true });
+const emit = defineEmits(["update:modelValue", "update:errors"]);
 
-function addDocument(file) {
-  props.documents.push(file);
+const localModel = computed({
+  get: () => props.modelValue,
+  set: (val) => emit("update:modelValue", val),
+});
+
+function onChildErrors(tableName, errMap) {
+  const tableErrors = Object.fromEntries(errMap);
+  const newErrors = { ...props.errors };
+  if (Object.keys(tableErrors).length > 0) {
+    newErrors[tableName] = tableErrors;
+  } else {
+    delete newErrors[tableName];
+  }
+  emit("update:errors", newErrors);
 }
 </script>
