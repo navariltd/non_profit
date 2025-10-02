@@ -1,25 +1,41 @@
 <template>
-  <div class="flex flex-col items-center justify-center mt-60">
-    <GraduationCap class="size-10 mx-auto stroke-1 text-ink-gray-5" />
-    <div class="text-lg font-semibold text-ink-gray-7 mb-2.5">
-      {{ __("No {0}").format(type?.toLowerCase()) }}
-    </div>
+  <div class="flex items-center justify-center min-h-[70vh] px-4">
     <div
-      class="leading-5 w-full md:w-2/5 text-base text-center text-ink-gray-7"
+      class="bg-white shadow-sm rounded-2xl p-8 max-w-lg w-full text-center border border-red-200"
     >
-      {{
-        __("There are no {0} currently.").format(
-          type?.toLowerCase()
-        )
-      }}
-      <span v-if="type === 'Membership'">
-        Please select a membership plan to continue.
-      </span>
+      <div
+        class="flex items-center justify-center w-16 h-16 mx-auto rounded-full bg-red-50 mb-4"
+      >
+        <FileX class="size-8 text-red-500" />
+      </div>
+
+      <h2 class="text-xl font-semibold text-red-600 mb-2">
+        {{ __("No {0}").format(type?.toLowerCase()) }}
+      </h2>
+
+      <p class="text-gray-700 leading-6">
+        {{ __("There are no {0} currently.").format(type?.toLowerCase()) }}
+        <span
+          v-if="type === 'Membership'"
+          class="block mt-2 text-red-600 font-medium"
+        >
+          Please select a membership plan to continue.
+        </span>
+      </p>
+
+      <div v-if="type === 'Membership'" class="mt-6">
+        <button
+          class="px-5 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition"
+        >
+          View Plans
+        </button>
+      </div>
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
-import { BookOpen, GraduationCap } from "lucide-vue-next";
+import { FileX, GraduationCap } from "lucide-vue-next";
 
 const props = defineProps({
   type: String,
