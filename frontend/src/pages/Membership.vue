@@ -6,45 +6,45 @@
     />
 
     <ErrorMessage
-      v-if="currentMembership.error || membershipTypes.error"
+      v-else-if="currentMembership.error || membershipTypes.error"
       class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm my-auto mt-20"
       message="Failed to get Membership Details"
     />
 
-    <template v-else>
-      <div class="w-full flex flex-col items-center">
-        <Member
-          v-if="currentMembership.data && currentMembership.data.length > 0"
-          :membershipStatus="currentMembership.data"
-        />
-        <EmptyState v-else type="Membership" class="mt-6" />
-      </div>
+    <div
+      v-else-if="currentMembership.data"
+      class="w-full flex flex-col items-center"
+    >
+      <Member
+        v-if="currentMembership.data.length > 0"
+        :membershipStatus="currentMembership.data"
+      />
+      <EmptyState v-else type="Membership" class="mt-6" />
+    </div>
 
-      <div
-        class="p-2 pt-2 md:p-8 bg-gray-50 rounded-2xl shadow-md text-center mb-20"
-      >
-        <h1 class="text-3xl font-bold text-gray-800">Select a New Plan</h1>
+    <div
+      class="p-2 pt-2 md:p-8 bg-gray-50 rounded-2xl shadow-md text-center mb-20"
+    >
+      <h1 class="text-3xl font-bold text-gray-800">Select a New Plan</h1>
 
-        <div v-if="membershipTypes.data?.length > 0" class="mt-10">
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div
-              v-for="membershipType in membershipTypes.data"
-              :key="membershipType.name"
-              class="flex justify-center"
-            >
-              <VmmsPortalCard
-                class="w-full max-w-sm transition hover:scale-105 hover:shadow-lg cursor-pointer"
-                :membershipType="membershipType"
-                @click="selectMembershipType(membershipType)"
-              />
-            </div>
+      <div v-if="membershipTypes.data?.length > 0" class="mt-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div
+            v-for="membershipType in membershipTypes.data"
+            :key="membershipType.name"
+            class="flex justify-center"
+          >
+            <VmmsPortalCard
+              class="w-full max-w-sm transition hover:scale-105 hover:shadow-lg cursor-pointer"
+              :membershipType="membershipType"
+              @click="selectMembershipType(membershipType)"
+            />
           </div>
         </div>
-
-        <EmptyState v-else type="Membership Type" class="mt-10" />
       </div>
-      <div></div>
-    </template>
+
+      <EmptyState v-else type="Membership Type" class="mt-10" />
+    </div>
 
     <Dialog
       v-model="registerDialog"
