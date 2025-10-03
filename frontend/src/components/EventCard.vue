@@ -1,10 +1,11 @@
 <template>
   <div class="py-2 px-4">
-    <div class="max-w-3xl mx-auto space-y-2" @click="navigateEvent(event)">
+    <div class="max-w-3xl mx-auto space-y-2">
       <div class="mb-2">
         <!-- Event Item -->
 
         <div
+          @click="navigateEvent(event)"
           class="flex flex-col md:flex-row items-stretch rounded-lg shadow-sm overflow-hidden bg-white cursor-pointer"
         >
           <!-- Date Badge -->
@@ -66,12 +67,7 @@
                 </div>
               </div>
 
-              <button
-                @click="attendModal = true"
-                class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200 w-full sm:w-auto"
-              >
-                <ChevronRight class="w-4 h-4 ml-1.5" />
-              </button>
+              <Button variant="solid" icon="arrow-right" theme="red"> </Button>
             </div>
           </div>
         </div>
@@ -81,7 +77,7 @@
 </template>
 
 <script lang="ts" setup>
-import { Badge } from "frappe-ui";
+import { Badge, Button } from "frappe-ui";
 import {
   Calendar,
   Clock,

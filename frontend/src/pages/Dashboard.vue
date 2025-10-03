@@ -1,6 +1,6 @@
 <template>
   <div
-    v-if="!user?.data"
+    v-if="user?.data == 'Guest'"
     class="flex flex-col items-center justify-center py-20 h-[75vh] bg-gray-50 m-8 md:m-16 text-center px-4"
   >
     <div class="bg-red-100 rounded-full p-6 mb-6 shadow-md">
@@ -18,7 +18,7 @@
 
     <div
       variant="solid"
-      class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 flex items-center gap-3 rounded-xl shadow-lg transition-transform transform hover:scale-105"
+      class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 flex items-center gap-3 rounded-xl shadow-lg cursor-pointer"
       @click="redirectToLogin"
     >
       <LogIn class="w-5 h-5" />
@@ -26,81 +26,81 @@
     </div>
   </div>
   <div v-if="user?.data && user?.data !== 'Guest'" class="max-w-7xl mx-auto">
-   
-
-
     <div class="flex flex-col gap-2 mb-6">
       <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
         👋 Welcome back, {{ user?.data?.full_name }}!
       </h1>
     </div>
 
-      <div v-if="roleResource?.loading" class="text-center py-20">
-        <p>Setting Up Dashboard...</p>
-        <ProgressSpinner />
-      </div>
+    <div v-if="roleResource?.loading" class="text-center py-20">
+      <p>Setting Up Dashboard...</p>
+      <ProgressSpinner />
+    </div>
 
-      <div v-else-if="roleResource?.data">
-        <Welcome
-          v-if="
-            !roleResource?.data?.is_volunteer && !roleResource?.data?.is_member
-          "
-        />
-    <div v-if="roleResource?.data" class="mb-8 h-full">
+    <div v-else-if="roleResource?.data">
       <Welcome
         v-if="
           !roleResource?.data?.is_volunteer && !roleResource?.data?.is_member
         "
       />
+      <div v-if="roleResource?.data" class="mb-8 h-full">
+        <Welcome
+          v-if="
+            !roleResource?.data?.is_volunteer && !roleResource?.data?.is_member
+          "
+        />
 
-      <Volunteer
-        v-else-if="roleResource?.data?.is_volunteer"
-        v-bind="dashboardStats?.data"
-      />
+        <Volunteer
+          v-else-if="roleResource?.data?.is_volunteer"
+          v-bind="dashboardStats?.data"
+        />
 
-      <Member
-        :membership-status="currentMembership?.data"
-        v-else-if="roleResource?.data?.is_member"
-      />
-    </div>
-
-    <section
-      v-if="
-        roleResource?.data &&
-        (roleResource?.data?.is_volunteer || roleResource?.data?.is_member)
-      "
-      class="flex flex-col gap-4 md:p-6 bg-white shadow rounded-lg"
-    >
-      <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-semibold text-gray-900">📅 Upcoming Events</h2>
-        <router-link to="/events">
-          <button
-            class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
-          >
-            View All
-            <ChevronRight class="w-4 h-4" />
-          </button>
-        </router-link>
-      </div>
-
-      <div
-        v-if="events?.data && events?.data.length > 0 && !toggleEventView"
-        class="grid md:grid-cols-3 gap-4"
-      >
-        <EventCard
-          v-for="event in events?.data.slice(0, 3)"
-          :key="event.name"
-          :event="event"
+        <Member
+          :membership-status="currentMembership?.data"
+          v-else-if="roleResource?.data?.is_member"
         />
       </div>
 
-      <EventCalendar v-if="toggleEventView" :event="events?.data" />
+      <section
+        v-if="
+          roleResource?.data &&
+          (roleResource?.data?.is_volunteer || roleResource?.data?.is_member)
+        "
+        class="flex flex-col gap-4 md:p-6 bg-white shadow rounded-lg"
+      >
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-semibold text-gray-900">
+            Upcoming Events
+          </h2>
+          <router-link to="/events">
+            <button
+              class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+            >
+              View All
+              <ChevronRight class="w-4 h-4" />
+            </button>
+          </router-link>
+        </div>
 
-      <EmptyState
-        v-if="events?.data && events?.data.length === 0"
-        type="Events"
-      />
-    </section>
+        <div
+          v-if="events?.data && events?.data.length > 0 && !toggleEventView"
+          class="grid md:grid-cols-3 gap-4"
+        >
+          <EventCard
+            v-for="event in events?.data.slice(0, 3)"
+            :key="event.name"
+            :event="event"
+          />
+        </div>
+
+        <EventCalendar v-if="toggleEventView" :event="events?.data" />
+
+        <EmptyState
+          v-if="events?.data && events?.data.length === 0"
+          type="Events"
+        />
+      </section>
+    </div>
   </div>
 </template>
 
@@ -128,7 +128,6 @@ const { isLoggedIn } = sessionStore();
 const toggleEventView = ref(false);
 const user = userResource;
 
-import { onMounted } from "vue";
 import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
 
 onMounted(() => {
