@@ -36,104 +36,134 @@
         </div>
       </div>
 
-      <div
-        class="border p-2 mt-3 rounded-lg space-y-2"
-        v-if="user.data === 'Guest'"
-      >
-        <span>Please fill out the following information:</span>
+      <div class="border p-2 mt-3 rounded-lg space-y-2">
+        <span v-if="user.data === 'Guest'"
+          >Please fill out the following information:</span
+        >
         <form action="" @submit.prevent="submit">
-          <Input
-            required
-            name="first_name"
-            type="text"
-            placeholder="John"
-            label="First Name"
-            v-model="attendData.first_name"
-          />
+          <div v-if="user.data === 'Guest'" class="space-y-2">
+            <Input
+              required
+              name="first_name"
+              type="text"
+              placeholder="John Doe"
+              label="Full Name"
+              v-model="attendData.full_name"
+            />
 
-          <Input
-            required
-            name="last_name"
-            type="text"
-            placeholder="Doe"
-            label="Last Name"
-            v-model="attendData.last_name"
-          />
+            <Input
+              required
+              name="email"
+              type="email"
+              placeholder="johndoe@email.com"
+              label="Email"
+              v-model="attendData.email"
+            />
 
-          <Input
-            required
-            name="email"
-            type="email"
-            placeholder="johndoe@email.com"
-            label="Email"
-            v-model="attendData.email"
-          />
+            <Input
+              required
+              name="phone"
+              type="text"
+              placeholder="+254712345678"
+              label="Phone Number"
+              v-model="attendData.phone"
+            />
+          </div>
 
-          <Input
-            required
-            name="phone"
-            type="text"
-            placeholder="+254712345678"
-            label="Phone Number"
-            v-model="attendData.phone"
+          <div class="flex my-4 space-x-2 justify-end">
+            <Button variant="outline" theme="red" size="sm" @click="close">
+              Cancel
+            </Button>
+            <Button
+              variant="solid"
+              theme="green"
+              size="sm"
+              type="submit"
+              :loading="confirmEvent.loading"
+            >
+              <span class="flex items-center gap-2">
+                <Check class="w-4 h-4" />
+                Confirm Attendance
+              </span>
+            </Button>
+          </div>
+          <ErrorMessage
+            v-if="confirmEvent.error"
+            :message="confirmEvent.error"
+            class="text-center border border-red-400 rounded-md p-2"
           />
         </form>
-      </div>
-    </template>
-
-    <template #actions="{ close }">
-      <div class="space-y-3">
-        <div class="flex space-x-2 justify-end">
-          <Button variant="outline" theme="gray" size="sm" @click="close">
-            Cancel
-          </Button>
-          <Button
-            variant="solid"
-            theme="green"
-            size="sm"
-            @click="submit"
-            :loading="confirmEvent.loading"
-          >
-            <span class="flex items-center gap-2">
-              <Check class="w-4 h-4" />
-              Confirm Attendance
-            </span>
-          </Button>
-        </div>
-        <ErrorMessage
-          v-if="confirmEvent.error"
-          :message="confirmEvent.error"
-          class="text-center border border-red-400 rounded-md p-2"
-        />
       </div>
     </template>
   </Dialog>
 </template>
 
 <script lang="ts" setup>
-import { Button, Dialog, ErrorMessage, createResource, Input } from "frappe-ui";
+import {
+  Button,
+  Dialog,
+  ErrorMessage,
+  createResource,
+  Input,
+  toast,
+} from "frappe-ui";
 import { CalendarCheck, Check } from "lucide-vue-next";
-import { inject, reactive, ref } from "vue";
+import { inject, reactive, ref, watch } from "vue";
 
 const isOpen = ref(false);
 const user = inject<any>("$user");
+const emit = defineEmits(["close"]);
 
+const props = defineProps({
+  dialogStatus: Boolean,
+  eventId: String,
+});
 const attendData = reactive({
-  event: "",
-  first_name: user.data !== "Guest" ? user.data.first_name : "",
-  last_name: user.data !== "Guest" ? user.data.last_name : "",
+  full_name: user.data !== "Guest" ? user.data.full_name : "",
   phone: user.data !== "Guest" ? user.data.phone : "",
   email: user.data !== "Guest" ? user.data.email : "",
 });
 
 const confirmEvent = createResource({
-  url: "non_profit.non_profit.api.attend_event",
-  onSuccess() {
-    isOpen.value = false;
+  url: "non_profit.non_profit.api.register_event",
+  makeParams() {
+    return {
+      event_name: props.eventId,
+      user: { ...attendData },
+    };
   },
 });
 
-function submit(event: Event) {
-  alert("Registration functionality to be implemented.");
+function submit() {
+  confirmEvent.submit(
+    {},
+    {
+      onSuccess() {
+        toast.success("You have successfully registered for the event.");
+        close();
+      },
+    }
+  );
 }
+
+function close() {
+  emit("close", false);
+
+  cleanForm();
+}
+
+function cleanForm() {
+  attendData.full_name = "";
+  attendData.phone = "";
+  attendData.email = "";
+}
+
+watch(
+  () => props.dialogStatus,
+  (newVal) => {
+    if (newVal === false) {
+      close();
+    }
+  }
+);
 </script>
