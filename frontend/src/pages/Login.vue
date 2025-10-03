@@ -196,10 +196,6 @@ const genderOptions = [
   { label: "Other", value: "Other" },
 ];
 
-const branches = createResource({
-  url: "non_profit.non_profit.api.get_branches",
-  auto: true,
-});
 
 const createSignUp = createResource({
   url: "non_profit.non_profit.user.create_user",
