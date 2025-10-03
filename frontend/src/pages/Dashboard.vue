@@ -16,13 +16,18 @@
       {{ "Login to View Dashboard" }}
     </Button>
   </div>
-  <div v-if="user?.data" class="max-w-7xl mx-auto">
+  <div v-if="user?.data && user?.data !== 'Guest'" class="max-w-7xl mx-auto">
     <div class="flex flex-col">
       <h1 class="text-3xl font-bold px-4 mt-5">
         Welcome, {{ user?.data?.full_name }}
       </h1>
 
-      <div v-if="roleResource?.data">
+      <div v-if="roleResource?.loading" class="text-center py-20">
+        <p>Setting Up Dashboard...</p>
+        <ProgressSpinner />
+      </div>
+
+      <div v-else-if="roleResource?.data">
         <Welcome
           v-if="
             !roleResource?.data?.is_volunteer && !roleResource?.data?.is_member
@@ -107,10 +112,9 @@ const toggleEventView = ref(false);
 const user = userResource;
 
 import { onMounted } from "vue";
+import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
 
 onMounted(() => {
-  console.log("isLoggedIn", isLoggedIn);
-
   if (isLoggedIn) {
     roleResource.reload();
     currentMembership.reload();
