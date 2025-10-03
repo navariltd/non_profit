@@ -23,7 +23,7 @@
         </div>
         <p class="text-gray-600 text-sm">
           Already have an account? Log in to view event details. New here?
-          Create an account in seconds to unlock access.
+          Create an account to unlock access.
         </p>
       </div>
     </template>
