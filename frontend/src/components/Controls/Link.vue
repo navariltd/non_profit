@@ -5,7 +5,7 @@
       <span class="text-ink-red-3" v-if="attrs.required">*</span>
     </label>
 
-    <div class="relative z-[9999]">
+    <div class="relative">
       <Autocomplete
         ref="autocomplete"
         :options="options.data"
@@ -15,7 +15,7 @@
         :placeholder="attrs.placeholder"
         :filterable="false"
         :readonly="attrs.readonly"
-        class="relative"
+        class="relative !z-100"
       >
         <template #target="{ open, togglePopover }">
           <slot name="target" v-bind="{ open, togglePopover }" />

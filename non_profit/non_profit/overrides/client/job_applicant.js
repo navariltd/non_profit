@@ -38,18 +38,11 @@ frappe.ui.form.on("Job Applicant", {
                 new_employee.date_of_joining = frappe.datetime.get_today();
 
                 const same_fields = [
-                  "branch",
                   "company",
                   "gender",
                   "blood_group",
                   "marital_status",
-                  "place_of_work",
                   "date_of_birth",
-                  "highest_level_of_education",
-                  "mpesa_mobile_phone",
-                  "ward",
-                  "profession",
-                  "reason_to_join",
                 ];
 
                 const field_mapping = {
@@ -57,7 +50,6 @@ frappe.ui.form.on("Job Applicant", {
                   other_names: "first_name",
                   email_id: "personal_email",
                   phone_number: "cell_number",
-                  idpassport_number: "id_passport_number",
                   cover_letter: "bio",
                   // profile_photo: "image",
                 };
@@ -85,39 +77,6 @@ frappe.ui.form.on("Job Applicant", {
                     new_employee.first_name = parts[0];
                   }
                 }
-
-                const table_fields = [
-                  "disabilities",
-                  "allergies",
-                  "trainings",
-                  "skills",
-                  "languages",
-                ];
-
-                table_fields.forEach((field) => {
-                  if (frm.doc[field] && frm.doc[field].length > 0) {
-                    frm.doc[field].forEach((row) => {
-                      let child = frappe.model.add_child(
-                        new_employee,
-                        field,
-                        field
-                      );
-                      Object.keys(row).forEach((key) => {
-                        if (
-                          ![
-                            "name",
-                            "parent",
-                            "parentfield",
-                            "parenttype",
-                            "idx",
-                          ].includes(key)
-                        ) {
-                          child[key] = row[key];
-                        }
-                      });
-                    });
-                  }
-                });
 
                 frappe.db.insert(new_employee).then((doc) => {
                   frappe.msgprint({

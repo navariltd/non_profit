@@ -44,14 +44,8 @@
         "
       />
       <div v-if="roleResource?.data" class="mb-8 h-full">
-        <Welcome
-          v-if="
-            !roleResource?.data?.is_volunteer && !roleResource?.data?.is_member
-          "
-        />
-
         <Volunteer
-          v-else-if="roleResource?.data?.is_volunteer"
+          v-if="roleResource?.data?.is_volunteer"
           v-bind="dashboardStats?.data"
         />
 
@@ -69,9 +63,7 @@
         class="flex flex-col gap-4 md:p-6 bg-white shadow"
       >
         <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-semibold text-gray-900">
-            Upcoming Events
-          </h2>
+          <h2 class="text-2xl font-semibold text-gray-900">Upcoming Events</h2>
           <router-link to="/events">
             <button
               class="inline-flex items-center gap-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
