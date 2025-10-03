@@ -90,6 +90,19 @@
         </div>
 
         <div v-if="localModel.citizenship !== 'Citizen'">
+          <Link
+            doctype="Country"
+            v-model="localModel.country_of_citizenship"
+            :label="__('Country of Citizenship')"
+          />
+          <p
+            v-if="errors[0]?.['Country of Citizenship']"
+            class="text-sm text-red-600 mt-1"
+          >
+            {{ errors[0]?.["Country of Citizenship"] }}
+          </p>
+        </div>
+        <div v-if="localModel.citizenship !== 'Citizen'">
           <FormControl
             v-model="localModel.passport_number"
             :label="__('Passport Number')"
