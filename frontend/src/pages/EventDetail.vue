@@ -213,6 +213,7 @@
       </div>
     </div>
   </div>
+  <AttendEventModal v-model="isOpen" />
 </template>
 <script setup>
 import { Button, createResource, toast } from "frappe-ui";
@@ -231,10 +232,12 @@ import {
   Youtube,
 } from "lucide-vue-next";
 import router from "../router";
+import AttendEventModal from "../components/Modals/AttendEventModal.vue";
 
 const route = useRoute();
 const eventName = ref(route.params.id);
 const user = inject("$user");
+const isOpen = ref(false);
 
 const eventDetail = createResource({
   url: "non_profit.non_profit.api.get_event_details",
@@ -298,7 +301,7 @@ const formatDate = (dateStr) => {
 };
 
 const handleRegister = () => {
-  alert("Registration functionality to be implemented.");
+  isOpen.value = true;
 };
 
 onMounted(() => {
