@@ -2025,3 +2025,52 @@ def get_speaker_profiles(event_speakers):
     except Exception as e:
         frappe.log_error(title="Speaker Profile Fetch Error", message=str(e))
         frappe.throw("Error fetching speaker profiles")
+
+
+@frappe.whitelist()
+def get_user_details():
+    """
+    Returns the logged-in user's details.
+    """
+    if not frappe.session.user or frappe.session.user == "Guest":
+        frappe.throw(
+            _("You must be logged in to access user details"), frappe.PermissionError
+        )
+
+    user_doc = frappe.get_doc("User", frappe.session.user)
+    user_info = user_doc.as_dict()
+
+    return user_info
+
+
+@frappe.whitelist()
+def update_user_details(data):
+    """
+    Updates the logged-in user's details.
+    `data` should be a dict of fields to update.
+    """
+    if not frappe.session.user or frappe.session.user == "Guest":
+        frappe.throw(
+            _("You must be logged in to update your profile"), frappe.PermissionError
+        )
+
+    if isinstance(data, str):
+        import json
+
+        try:
+            data = json.loads(data)
+        except Exception:
+            frappe.throw(_("Invalid data format"))
+
+    user_doc = frappe.get_doc("User", frappe.session.user)
+
+    for field, value in data.items():
+        if hasattr(user_doc, field):
+            setattr(user_doc, field, value)
+        else:
+            frappe.throw(_("Field {0} does not exist on User").format(field))
+
+    user_doc.save(ignore_permissions=True)
+    frappe.db.commit()
+
+    return {"message": _("Profile updated successfully")}
