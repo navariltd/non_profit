@@ -58,6 +58,7 @@ const routes = [
     name: "VolunteerSignup",
     path: "/volunteer/signup",
     component: () => import("@/pages/VolunteerSignup.vue"),
+    meta: { requiresAuth: true },
   },
   {
     name: "NewJobApplication",
@@ -82,6 +83,7 @@ const routes = [
     path: "/assignment/:id",
     component: () => import("@/pages/AssignmentDetail.vue"),
     props: true,
+    meta: { requiresAuth: true },
   },
   {
     name: "EventDetail",
