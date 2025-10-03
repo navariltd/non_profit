@@ -59,7 +59,7 @@
           :readOnly="true"
         />
 
-        <div class="w-full md:col-span-2 space-y-6">
+        <div class="w-full md:col-span-3 space-y-6">
           <ChildTable
             v-model="form.disabilities"
             doctype="Employee Disability"

@@ -462,7 +462,7 @@
             Edit Row {{ (editModalRowIndex || 0) + 1 }}
           </h3>
           <button
-            @click="closeEditModal"
+            @click="cancelEditModal"
             class="text-ink-gray-5 hover:text-ink-gray-7 transition-colors p-1"
           >
             <X class="size-4 sm:size-5" />
@@ -568,7 +568,7 @@
           class="flex items-center justify-end gap-2 p-3 sm:p-4 border-t bg-surface-gray-1 flex-wrap"
         >
           <Button
-            @click="closeEditModal"
+            @click="cancelEditModal"
             variant="ghost"
             size="sm"
             class="flex-1 sm:flex-none"
@@ -1282,6 +1282,19 @@ function closeEditModal() {
   editModalData.value = {};
 }
 
+function cancelEditModal() {
+  const rowIndex = editModalRowIndex.value;
+  if (rowIndex === null) return;
+
+  const errors = validateModalData(rowIndex, editModalData.value);
+
+  rowsRef.value[rowIndex] = {
+    ...rowsRef.value[rowIndex],
+    ...editModalData.value,
+  };
+
+  closeEditModal();
+}
 function saveEditModal() {
   const rowIndex = editModalRowIndex.value;
   if (rowIndex === null) return;
