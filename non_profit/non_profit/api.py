@@ -1790,7 +1790,7 @@ def get_event_details(event_name):
         return {"error": "Failed to retrieve event details"}
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_speaker_profiles(event_speakers):
     try:
         speakers_list = json.loads(event_speakers)
