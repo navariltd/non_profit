@@ -1,6 +1,10 @@
 <template>
-  <div v-if="!roleResource.data.is_pending_approval" class="h-screen bg-gray-50 flex items-center justify-center">
+  <div
+    v-if="!roleResource.data.is_pending_approval"
+    class="h-[75vh] bg-gray-50 flex items-center justify-center"
+  >
     <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 p-10">
+      <!-- Left Section: Message -->
       <div class="flex flex-col justify-center space-y-6 text-left">
         <h1
           class="text-3xl md:text-6xl font-extrabold text-red-600 leading-tight"
@@ -8,15 +12,22 @@
           Kenya Red Cross <br />
           <span class="text-gray-800">Society</span>
         </h1>
-        <p class="text-lg text-gray-600 max-w-lg">
-          Together, we can
+        <p class="text-lg text-gray-700 max-w-lg">
+          🌍 Together, we can
           <span class="font-semibold text-red-500">save lives</span>, support
-          communities, and create lasting impact. Become a
-          <span class="text-red-500 font-semibold">volunteer</span> or
-          <span class="text-red-500 font-semibold">member</span> today.
+          communities, and make a
+          <span class="font-semibold text-red-500">real difference</span>. Come
+          be part of our mission as a
+          <span class="font-semibold text-red-500">volunteer</span> ✨ or a
+          <span class="font-semibold text-red-500">member</span> 🤝!
+        </p>
+        <p class="text-gray-600 max-w-md">
+          Your time and passion can help change lives. Join us today and help
+          build stronger, safer communities for everyone.
         </p>
       </div>
 
+      <!-- Right Section: Actions -->
       <div class="flex flex-col items-center justify-center space-y-6">
         <div class="space-y-4 w-full max-w-sm">
           <Button
@@ -26,7 +37,7 @@
             class="w-full py-4 rounded-xl shadow-lg text-lg font-medium"
             @click="navigateTo('volunteer/signup')"
           >
-            Register as Volunteer
+            🙋‍♂️ Join as Volunteer
           </Button>
           <Button
             variant="outline"
@@ -35,24 +46,23 @@
             class="w-full py-4 rounded-xl shadow-md text-lg font-medium"
             @click="navigateTo('membership')"
           >
-            Register as Member
+            🏅 Join as Member
           </Button>
         </div>
       </div>
     </div>
   </div>
+
   <PendingApproval v-else-if="roleResource.data.is_pending_approval" />
 </template>
 
 <script lang="ts" setup>
 import { Button } from "frappe-ui";
 import router from "../router";
-import { inject } from "vue";
-import PendingApproval from "./PendingApproval.vue";
 import { usersStore } from "../stores/user";
+import PendingApproval from "./PendingApproval.vue";
 
 const { roleResource } = usersStore();
-const user = inject<any>("$user");
 
 function navigateTo(path: string) {
   router.push("/" + path);

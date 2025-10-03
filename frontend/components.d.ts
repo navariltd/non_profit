@@ -22,6 +22,7 @@ declare module 'vue' {
     DateRange: typeof import('./src/components/Common/DateRange.vue')['default']
     DesktopLayout: typeof import('./src/components/DesktopLayout.vue')['default']
     EmptyState: typeof import('./src/components/EmptyState.vue')['default']
+    ErrorModal: typeof import('./src/components/Modals/ErrorModal.vue')['default']
     Event: typeof import('./src/components/Modals/Event.vue')['default']
     EventCalendar: typeof import('./src/components/EventCalendar.vue')['default']
     EventCard: typeof import('./src/components/EventCard.vue')['default']

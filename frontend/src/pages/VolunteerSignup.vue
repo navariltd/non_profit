@@ -56,7 +56,6 @@
               v-for="(step, i) in steps"
               :key="i"
               class="flex-1 flex flex-col items-center text-center relative group cursor-pointer"
-              @click="goToStep(i)"
             >
               <div
                 v-if="i < steps.length"
@@ -78,27 +77,13 @@
               </div>
             </div>
           </div>
-
-          <!-- <div class="my-4">
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-sm font-semibold text-gray-700">Progress</span>
-              <span class="text-sm font-bold text-red-600"
-                >{{ Math.round(progressPercentage) }}%</span
-              >
-            </div>
-            <div class="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                class="h-full bg-gradient-to-r from-red-500 to-red-600 transition-all duration-500 ease-out"
-                :style="{ width: `${progressPercentage}%` }"
-              ></div>
-            </div>
-          </div> -->
         </div>
 
         <section v-if="currentStep === 0">
           <StepOrganization
             v-model="form"
             :errors="errors"
+            @update:errors="handleErrorsUpdate"
             @change="trackChanges"
           />
         </section>
@@ -128,7 +113,6 @@
               v-if="hasUnsavedChanges"
               class="text-sm text-orange-600 font-medium"
             >
-              <!-- Unsaved changes -->
             </span>
           </div>
           <div class="flex gap-4">
@@ -158,6 +142,7 @@
     </main>
   </div>
 
+  <!-- Submit Confirmation Dialog -->
   <Dialog v-model="showSubmitDialog">
     <template #body-title>
       <h2 class="text-lg font-bold text-gray-900">
@@ -196,6 +181,8 @@
       </div>
     </template>
   </Dialog>
+
+  <ErrorModal v-model="showErrorDialog" :errors="flatErrors" />
 </template>
 
 <script setup>
@@ -210,6 +197,7 @@ import { usersStore } from "../stores/user";
 import { sessionStore } from "../stores/session";
 import { useRouter } from "vue-router";
 import ReviewApplication from "../components/Signup/ReviewApplication.vue";
+import ErrorModal from "../components/Modals/ErrorModal.vue";
 
 const { userResource } = usersStore();
 const { isLoggedIn } = sessionStore();
@@ -230,10 +218,12 @@ const applicationStatus = ref(null);
 const documents = ref([]);
 const saveInProgress = ref(false);
 const showSubmitDialog = ref(false);
+const showErrorDialog = ref(false);
 
 const originalFormData = ref({});
 const hasUnsavedChanges = ref(false);
 const changedFields = ref(new Set());
+const flatErrors = ref("");
 
 const form = reactive({
   company: "",
@@ -259,6 +249,7 @@ const form = reactive({
   blood_group: "",
   certification: [],
   supporting_documents: [],
+  courses: [],
   additional_skills: "",
   county: "",
   ward: "",
@@ -296,6 +287,8 @@ const stepFields = {
     "driving_licence",
     "certification",
     "licences",
+    "additional_skills",
+    "courses",
   ],
   2: ["profile_photo", "supporting_documents"],
 };
@@ -399,8 +392,6 @@ const jobApplication = createResource({
 
       if (applicationStatus.value === "Draft") {
         populateForm(application);
-
-        toast.info("Continuing your draft application...");
       }
     } else {
       form.email_id = user.data?.email || "";
@@ -481,37 +472,6 @@ const updateApplication = createResource({
   },
 });
 
-const summaryData = computed(() => ({
-  company: form.company,
-  mpesa_mobile_phone: form.mpesa_mobile_phone,
-  date_of_birth: form.date_of_birth,
-  id_number: form.id_number,
-  passport_number: form.passport_number,
-  marital_status: form.marital_status,
-  profession: form.profession,
-  citizenship: form.citizenship,
-  access_to_internet: form.access_to_internet,
-  reason: form.reason_to_join_krcs,
-  disabilities: form.disabilities,
-  languages: form.languages,
-  number_of_dependants: form.number_of_dependants,
-  driving_licence: form.driving_licence,
-  has_insurance: form.has_insurance,
-  blood_group: form.blood_group,
-  additional_skills: form.additional_skills,
-  ward: form.ward,
-}));
-
-function formatLabel(key) {
-  return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
-}
-
-function formatValue(value) {
-  if (Array.isArray(value)) return value.join(", ");
-  if (typeof value === "object") return JSON.stringify(value);
-  return value || "—";
-}
-
 function populateForm(data) {
   Object.keys(form).forEach((key) => {
     if (data[key] !== undefined && data[key] !== null) {
@@ -570,91 +530,93 @@ function handleErrorsUpdate(newErrors = {}) {
 function validateStep(stepIndex) {
   let valid = true;
 
-  if (errors && Object.keys(errors).length > 0) {
-    toast.error("Please fix the errors before proceeding.");
+  if (flatErrors.value) {
+    console.log("Validation failed due to existing errors:", flatErrors.value);
+
     return false;
   }
 
-  Object.keys(errors).forEach((k) => (errors[k] = ""));
+  // Object.keys(errors).forEach((k) => (errors[k] = ""));
 
-  if (stepIndex === 0) {
-    if (!form.company) {
-      errors.company = __("Branch is required");
-      valid = false;
-    }
+  // if (stepIndex === 0) {
+  //   if (!form.company) {
+  //     errors.company = __("Branch is required");
+  //     valid = false;
+  //   }
 
-    if (form.mpesa_mobile_phone) {
-      const phone = form.mpesa_mobile_phone.toString().replace(/\s+/g, "");
-      const phoneRegex = /^(?:\+254|0)(7\d{8}|1\d{8})$/;
-      if (!phoneRegex.test(phone)) {
-        errors.mpesa_mobile_phone = __("Enter a valid phone number");
-        valid = false;
-      }
-    }
-    if (!form.administrative_location) {
-      errors.administrative_location = __("This field is required");
-      valid = false;
-    }
-    if (!form.sub_county) {
-      errors.sub_county = __("This field is required");
-      valid = false;
-    }
-    if (!form.citizenship) {
-      errors.citizenship = __("This field is required");
-      valid = false;
-    }
-    if (!form.date_of_birth) {
-      errors.date_of_birth = __("Date of birth is required");
-      valid = false;
-    } else {
-      const dob = new Date(form.date_of_birth);
-      const today = new Date();
-      const age = today.getFullYear() - dob.getFullYear();
-      const m = today.getMonth() - dob.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-        age--;
-      }
+  //   if (form.mpesa_mobile_phone) {
+  //     const phone = form.mpesa_mobile_phone.toString().replace(/\s+/g, "");
+  //     const phoneRegex = /^(?:\+254|0)(7\d{8}|1\d{8})$/;
+  //     if (!phoneRegex.test(phone)) {
+  //       errors.mpesa_mobile_phone = __("Enter a valid phone number");
+  //       valid = false;
+  //     }
+  //   }
 
-      if (age < 7 || age > 100) {
-        errors.date_of_birth = __("Age must be between 7 and 100 years");
-        valid = false;
-      }
-    }
+  //   if (!form.administrative_location) {
+  //     errors.administrative_location = __("This field is required");
+  //     valid = false;
+  //   }
+  //   if (!form.sub_county) {
+  //     errors.sub_county = __("This field is required");
+  //     valid = false;
+  //   }
+  //   if (!form.citizenship) {
+  //     errors.citizenship = __("This field is required");
+  //     valid = false;
+  //   }
 
-    if (!form.id_number && !form.passport_number) {
-      errors.id_number = __("Passport or ID number is required");
-      valid = false;
-    }
+  //   if (!form.date_of_birth) {
+  //     errors.date_of_birth = __("Date of birth is required");
+  //     valid = false;
+  //   } else {
+  //     const dob = new Date(form.date_of_birth);
+  //     const today = new Date();
+  //     let age = today.getFullYear() - dob.getFullYear();
+  //     const m = today.getMonth() - dob.getMonth();
+  //     if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+  //       age--;
+  //     }
 
-    if (form.id_number) {
-      if (!/^\d{7,9}$/.test(form.id_number)) {
-        errors.id_number = __("ID number must be 7–9 digits");
-        valid = false;
-      }
-    }
+  //     if (age < 7 || age > 100) {
+  //       errors.date_of_birth = __("Age must be between 7 and 100 years");
+  //       valid = false;
+  //     }
+  //   }
 
-    if (form.passport_number) {
-      if (!/^[A-Z0-9]{6,9}$/i.test(form.passport_number)) {
-        errors.passport_number = __("Invalid passport number format");
-        valid = false;
-      }
-    }
-  }
+  //   if (!form.id_number && !form.passport_number) {
+  //     errors.id_number = __("Passport or ID number is required");
+  //     valid = false;
+  //   }
 
-  if (stepIndex === 1) {
-    if (!form.reason_to_join_krcs) {
-      errors.reason_to_join_krcs = __("This field is required");
-      valid = false;
-    }
-    if (!form.profession) {
-      errors.profession = __("This field is required");
-      valid = false;
-    }
-    if (!form.access_to_internet) {
-      errors.access_to_internet = __("This field is required");
-      valid = false;
-    }
-  }
+  //   if (form.id_number && !/^\d{7,9}$/.test(form.id_number)) {
+  //     errors.id_number = __("ID number must be 7–9 digits");
+  //     valid = false;
+  //   }
+
+  //   if (
+  //     form.passport_number &&
+  //     !/^[A-Z0-9]{6,9}$/i.test(form.passport_number)
+  //   ) {
+  //     errors.passport_number = __("Invalid passport number format");
+  //     valid = false;
+  //   }
+  // }
+
+  // if (stepIndex === 1) {
+  //   if (!form.reason_to_join_krcs) {
+  //     errors.reason_to_join_krcs = __("This field is required");
+  //     valid = false;
+  //   }
+  //   if (!form.profession) {
+  //     errors.profession = __("This field is required");
+  //     valid = false;
+  //   }
+  //   if (!form.access_to_internet) {
+  //     errors.access_to_internet = __("This field is required");
+  //     valid = false;
+  //   }
+  // }
 
   return valid;
 }
@@ -704,7 +666,7 @@ function goToStep(stepIndex) {
   }
 
   if (!validateStep(currentStep.value)) {
-    toast.error("Please fix errors before proceeding.");
+    showErrorDialog.value = true;
     return;
   }
 
@@ -712,7 +674,7 @@ function goToStep(stepIndex) {
   for (let i = currentStep.value; i < stepIndex; i++) {
     if (!validateStep(i)) {
       canProceed = false;
-      toast.error(`Please complete step ${i + 1} first.`);
+      showErrorDialog.value = true;
       break;
     }
   }
@@ -725,7 +687,7 @@ function goToStep(stepIndex) {
 
 async function nextStep() {
   if (!validateStep(currentStep.value)) {
-    toast.error("Please fix errors before continuing.");
+    showErrorDialog.value = true;
     return;
   }
 
@@ -762,4 +724,13 @@ watch(currentStep, (newStep) => {
   form._current_step = newStep;
   form._current_progress = Math.round(progressPercentage.value);
 });
+
+watch(
+  errors,
+  (newErrors) => {
+    const stepErrors = newErrors[currentStep.value] || {};
+    flatErrors.value = Object.keys(stepErrors).length > 0 ? stepErrors : null;
+  },
+  { deep: true, immediate: true }
+);
 </script>
