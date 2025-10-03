@@ -829,7 +829,7 @@ def get_branches():
 @frappe.whitelist(allow_guest=True)
 def get_user_info():
     if frappe.session.user == "Guest":
-        return None
+        return "Guest"
 
     user = frappe.db.get_value(
         "User",
@@ -923,21 +923,32 @@ def check_app_permission():
     return False
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_events():
-    events = frappe.get_all(
-        "FE Event",
-        fields=[
-            "name",
-            "title",
-            "short_description",
-            "start_date",
-            "start_time",
-            "venue",
-            "banner_image",
-        ],
-        filters=[{"start_date": [">=", datetime.now().date()]}],
-    )
+    user_info = get_user_info()
+
+    fields = [
+        "name",
+        "title",
+        "short_description",
+        "start_date",
+        "start_time",
+        "venue",
+        "banner_image",
+        "event_access",
+    ]
+
+    base_filters = {"start_date": [">=", datetime.now().date()]}
+
+    if user_info == "Guest":
+        base_filters["event_access"] = ["in", ["Public", "Private"]]
+
+    elif user_info.get("is_member"):
+        pass
+    elif user_info.get("is_volunteer"):
+        base_filters["event_access"] = ["in", ["Public", "Private"]]
+
+    events = frappe.get_all("FE Event", fields=fields, filters=base_filters)
 
     for event in events:
         event.short_description = (
@@ -1807,7 +1818,7 @@ def get_job_application(name=None):
         return {"error": "Failed to retrieve application details"}
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_event_details(event_name):
 
     try:
