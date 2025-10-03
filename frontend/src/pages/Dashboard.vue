@@ -66,7 +66,7 @@
           roleResource?.data &&
           (roleResource?.data?.is_volunteer || roleResource?.data?.is_member)
         "
-        class="flex flex-col gap-4 md:p-6 bg-white shadow rounded-lg"
+        class="flex flex-col gap-4 md:p-6 bg-white shadow"
       >
         <div class="flex items-center justify-between">
           <h2 class="text-2xl font-semibold text-gray-900">
