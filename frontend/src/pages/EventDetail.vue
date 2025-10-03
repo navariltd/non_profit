@@ -215,9 +215,9 @@
   </div>
 </template>
 <script setup>
-import { Button, createResource } from "frappe-ui";
+import { Button, createResource, toast } from "frappe-ui";
 import { CalendarDays, Clock, MapPin, Users } from "lucide-vue-next";
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref, onMounted, onUnmounted, inject } from "vue";
 import { useRoute } from "vue-router";
 import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
 import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
@@ -230,9 +230,11 @@ import {
   Globe,
   Youtube,
 } from "lucide-vue-next";
+import router from "../router";
 
 const route = useRoute();
 const eventName = ref(route.params.id);
+const user = inject("$user");
 
 const eventDetail = createResource({
   url: "non_profit.non_profit.api.get_event_details",
@@ -244,6 +246,18 @@ const eventDetail = createResource({
   auto: true,
   cache: ["event", eventName.value],
   onSuccess(data) {
+    if (
+      user?.data == "Guest" &&
+      (eventDetail.data?.event_access === "Private" ||
+        eventDetail.data?.event_access === "Members Only")
+    ) {
+      setTimeout(() => {
+        toast.error(
+          "This is a private event. Please log in  to view event details."
+        );
+      }, 2000);
+      router.push({ name: "Login" });
+    }
     speakerProfiles.reload();
   },
 });

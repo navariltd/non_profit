@@ -1,14 +1,11 @@
 <template>
   <div class="py-2 px-4">
     <div class="max-w-3xl mx-auto space-y-2">
-      <!-- Event Item -->
-      <router-link
-        :to="{
-          name: 'EventDetail',
-          params: { id: event.name },
-        }"
-      >
+      <div class="mb-2">
+        <!-- Event Item -->
+
         <div
+          @click="navigateEvent(event)"
           class="flex flex-col md:flex-row items-stretch rounded-lg shadow-sm overflow-hidden bg-white cursor-pointer"
         >
           <!-- Date Badge -->
@@ -46,12 +43,6 @@
                   <span class="truncate">{{ event.venue }}</span>
                 </div>
               </div>
-              <span
-                v-if="event.confirmStatus"
-                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-              >
-                Confirmed
-              </span>
             </div>
 
             <!-- Time + Date -->
@@ -69,32 +60,53 @@
                   <Calendar class="w-4 h-4 mr-1.5 text-red-500" />
                   <span>{{ event.start_date }}</span>
                 </div>
+                <div class="flex items-center">
+                  <Badge :variant="'outline'" theme="blue">{{
+                    event.event_access
+                  }}</Badge>
+                </div>
               </div>
 
-              <button
-                @click="attendModal = true"
-                class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors duration-200 w-full sm:w-auto"
-              >
-                <ChevronRight class="w-4 h-4 ml-1.5" />
-              </button>
+              <Button variant="solid" icon="arrow-right" theme="red"> </Button>
             </div>
-          </div></div
-      ></router-link>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { toast } from "frappe-ui";
-import { Calendar, Clock, MapPin, ChevronRight } from "lucide-vue-next";
+import { Badge, Button } from "frappe-ui";
+import {
+  Calendar,
+  Clock,
+  MapPin,
+  ChevronRight,
+  ScanEye,
+} from "lucide-vue-next";
 import { inject, onMounted, ref } from "vue";
 import { membershipStore } from "../stores/membership";
+import { usersStore } from "../stores/user";
+import router from "../router";
 
 const attendModal = ref(false);
+
+const { userResource } = usersStore();
 
 onMounted(() => {});
 
 defineProps<{
   event;
 }>();
+
+function navigateEvent(event) {
+  if (event.event_access === "Private" && userResource.data == "Guest") {
+    alert(
+      "This is a private event. Please log in or register to view the event details."
+    );
+  } else {
+    router.push({ name: "EventDetail", params: { id: event.name } });
+  }
+}
 </script>
