@@ -2,13 +2,10 @@
   <div class="py-2 px-4">
     <div class="max-w-3xl mx-auto space-y-2">
       <div class="mb-2">
-        <!-- Event Item -->
-
         <div
           @click="navigateEvent(event)"
           class="flex flex-col md:flex-row items-stretch rounded-lg shadow-sm overflow-hidden bg-white cursor-pointer"
         >
-          <!-- Date Badge -->
           <div
             class="flex flex-col items-center justify-center bg-red-100 px-6 py-4 border-b md:border-b-0 md:border-r border-gray-100 w-full md:w-40"
           >
@@ -74,23 +71,18 @@
       </div>
     </div>
   </div>
+  <PrivateEvent v-model="dialog" />
 </template>
 
 <script lang="ts" setup>
-import { Badge, Button } from "frappe-ui";
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  ChevronRight,
-  ScanEye,
-} from "lucide-vue-next";
-import { inject, onMounted, ref } from "vue";
-import { membershipStore } from "../stores/membership";
+import { Badge, Button, Dialog } from "frappe-ui";
+import { Calendar, Clock, MapPin } from "lucide-vue-next";
+import { onMounted, ref } from "vue";
 import { usersStore } from "../stores/user";
 import router from "../router";
+import PrivateEvent from "./Modals/PrivateEvent.vue";
 
-const attendModal = ref(false);
+const dialog = ref(false);
 
 const { userResource } = usersStore();
 
@@ -102,9 +94,7 @@ defineProps<{
 
 function navigateEvent(event) {
   if (event.event_access === "Private" && userResource.data == "Guest") {
-    alert(
-      "This is a private event. Please log in or register to view the event details."
-    );
+    dialog.value = true;
   } else {
     router.push({ name: "EventDetail", params: { id: event.name } });
   }

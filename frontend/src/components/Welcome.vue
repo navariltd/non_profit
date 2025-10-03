@@ -4,7 +4,6 @@
     class="h-[75vh] bg-gray-50 flex items-center justify-center"
   >
     <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 p-10">
-      <!-- Left Section: Message -->
       <div class="flex flex-col justify-center space-y-6 text-left">
         <h1
           class="text-3xl md:text-6xl font-extrabold text-red-600 leading-tight"
