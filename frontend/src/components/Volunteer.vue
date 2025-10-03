@@ -122,19 +122,19 @@
 
   <div class="px-10">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 my-8">
-        <div
-          class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+      <div
+        class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+      >
+        <h4
+          class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
         >
-          <h4
-            class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
-          >
-            Total Projects
-          </h4>
-          <div class="text-3xl font-bold text-gray-900 mb-1">
-            {{ props.total_projects_deployed || 0 }}
-          </div>
-          <div class="text-xs text-gray-500">All assigned projects</div>
+          Total Projects
+        </h4>
+        <div class="text-3xl font-bold text-gray-900 mb-1">
+          {{ props.total_projects_deployed || 0 }}
         </div>
+        <div class="text-xs text-gray-500">All assigned projects</div>
+      </div>
 
       <div
         @click="showNotificationDialog = true"
@@ -151,33 +151,33 @@
         <div class="text-xs text-gray-500">Awaiting response</div>
       </div>
 
-        <div
-          class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+      <div
+        class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+      >
+        <h4
+          class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
         >
-          <h4
-            class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
-          >
-            Accepted
-          </h4>
-          <div class="text-3xl font-bold text-green-600 mb-1">
-            {{ props.accepted_projects || 0 }}
-          </div>
-          <div class="text-xs text-gray-500">Ongoing assignments</div>
+          Accepted
+        </h4>
+        <div class="text-3xl font-bold text-green-600 mb-1">
+          {{ props.accepted_projects || 0 }}
         </div>
+        <div class="text-xs text-gray-500">Ongoing assignments</div>
+      </div>
 
-        <div
-          class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+      <div
+        class="cursor-pointer p-6 flex flex-col w-full bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+      >
+        <h4
+          class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
         >
-          <h4
-            class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
-          >
-            Rejected
-          </h4>
-          <div class="text-3xl font-bold text-red-600 mb-1">
-            {{ props.rejected_projects || 0 }}
-          </div>
-          <div class="text-xs text-gray-500">Declined assignments</div>
+          Rejected
+        </h4>
+        <div class="text-3xl font-bold text-red-600 mb-1">
+          {{ props.rejected_projects || 0 }}
         </div>
+        <div class="text-xs text-gray-500">Declined assignments</div>
+      </div>
     </div>
   </div>
 
@@ -263,8 +263,6 @@ function updateAvailability(cancelled = false) {
   presentSlots.reload();
   toast.success("Availability updated successfully");
 
-  if (cancelled) {
-    setAvailability.value = false;
-  }
+  setAvailability.value = false;
 }
 </script>

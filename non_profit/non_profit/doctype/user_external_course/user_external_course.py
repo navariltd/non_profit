@@ -5,5 +5,5 @@
 from frappe.model.document import Document
 
 
-class EmployeeLMSCourse(Document):
+class UserExternalCourse(Document):
 	pass

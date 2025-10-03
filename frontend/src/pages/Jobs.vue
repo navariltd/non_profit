@@ -53,7 +53,7 @@
             <Link
               doctype="Employment Type"
               v-model="jobType"
-              :placeholder="__('Employment Type')"
+              :placeholder="__('Opportunity Type')"
               class="w-full"
               @change="updateJobs"
             />
@@ -75,11 +75,19 @@
               doctype="Company"
               v-model="selectedRegions"
               :label="__('Region')"
-              :filters="{ is_group: 1 }"
+              :filters="{ organisation_type: 'Region' }"
               class="w-full"
               @change="onRegionChange"
             />
-            <div class="col-span-1 lg:col-span-2" v-if="selectedRegions.length">
+            <MultiSelect
+              doctype="Company"
+              v-model="selectedBranches"
+              :label="__('Branch')"
+              :filters="branchFilters"
+              class="w-full"
+              @change="updateJobs"
+            />
+            <!-- <div class="col-span-1 lg:col-span-2" v-if="selectedRegions.length">
               <MultiSelectList
                 doctype="Company"
                 v-model="selectedBranches"
@@ -89,7 +97,7 @@
                 @change="updateJobs"
                 cols="6"
               />
-            </div>
+            </div> -->
             <Button
               variant="ghost"
               class="justify-center text-red-600 hover:bg-red-50 border border-red-200"
@@ -164,7 +172,7 @@ const jobTabs = computed(() => [
 ]);
 
 const branchFilters = computed(() => {
-  const baseFilter = { is_group: 0 };
+  const baseFilter = { organisation_type: "Branch" };
   if (selectedRegions.value?.length) {
     baseFilter.parent_company = ["in", selectedRegions.value];
   }
@@ -209,7 +217,7 @@ const updateFilters = () => {
   else delete filters.value.department;
 
   if (selectedRegions.value?.length) {
-    filters.value.region = ["in", selectedRegions.value];
+    filters.value.region = selectedRegions.value;
   } else {
     delete filters.value.region;
   }

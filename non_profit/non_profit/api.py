@@ -69,6 +69,7 @@ def search_doctype(
     doctype: str,
     name: str | None = None,
     filters: str | None | dict | list = None,
+    first: bool = False,
 ):
     """
     Search for a doctype by name or filters.
@@ -87,7 +88,50 @@ def search_doctype(
     if isinstance(filters, str):
         filters = json.loads(filters)
 
-    return frappe.get_all(doctype, filters=filters, as_list=False)
+    results = frappe.get_all(doctype, filters=filters, as_list=False)
+
+    if first:
+        data = frappe.get_doc(doctype, results[0].name) if results else None
+        return _convert_table_multiselect(data)
+
+    return results
+
+
+def _convert_table_multiselect(doc):
+    meta = frappe.get_meta(doc.doctype)
+    doc_dict = doc.as_dict()
+
+    for df in meta.fields:
+        if df.fieldtype == "Table MultiSelect":
+            child_doctype = df.options
+            child_meta = frappe.get_meta(child_doctype)
+
+            link_field = next(
+                (f.fieldname for f in child_meta.fields if f.fieldtype == "Link"),
+                None,
+            )
+            if not link_field:
+                continue
+
+            linked_doctype = next(
+                (f.options for f in child_meta.fields if f.fieldname == link_field),
+                None,
+            )
+            title_field = frappe.get_meta(linked_doctype).title_field or "name"
+
+            values = []
+            for row in doc_dict.get(df.fieldname, []):
+                link_value = row.get(link_field)
+                if link_value:
+                    label = (
+                        frappe.db.get_value(linked_doctype, link_value, title_field)
+                        or link_value
+                    )
+                    values.append({"value": link_value, "label": label})
+
+            doc_dict[df.fieldname] = values
+
+    return doc_dict
 
 
 @frappe.whitelist(allow_guest=True)
@@ -297,20 +341,56 @@ def get_job_openings(filters=None, orFilters=None):
     if user == "Guest":
         filters["opportunity_type"] = "Guest"
 
-    region = filters.pop("region", None)
-    companies = filters.pop("company", None)
+    regions = None
+    if "region" in filters:
+        region_value = filters.pop("region")
+        if (
+            isinstance(region_value, list)
+            and region_value
+            and isinstance(region_value[0], dict)
+        ):
+            regions = [item.get("value") for item in region_value if item.get("value")]
+        else:
+            regions = region_value
 
-    if region:
-        children = frappe.get_all(
-            "Company",
-            filters={"parent_company": region},
-            pluck="name",
-        )
+    companies = None
+    if "company" in filters:
+        companies_value = filters.pop("company")
+        if (
+            isinstance(companies_value, list)
+            and companies_value
+            and isinstance(companies_value[0], dict)
+        ):
+            companies = [
+                item.get("value") for item in companies_value if item.get("value")
+            ]
+        else:
+            companies = companies_value
+
+    company_list = []
+
+    if regions:
+        children = []
+
+        if isinstance(regions, list):
+            for region in regions:
+                region_children = frappe.get_all(
+                    "Company",
+                    filters={"parent_company": region},
+                    pluck="name",
+                )
+                children.extend(region_children)
+        else:
+            children = frappe.get_all(
+                "Company",
+                filters={"parent_company": regions},
+                pluck="name",
+            )
 
         if companies:
-            company_list = [region] + companies
+            company_list = regions + companies
         else:
-            company_list = [region] + children
+            company_list = regions + children
 
         filters["company"] = ["in", company_list]
     elif companies:
@@ -472,92 +552,190 @@ def handle_attachment_files(application, files_data):
     return application
 
 
+def set_field_value(doc, fieldname, value, fieldtype=None):
+    if not fieldtype:
+        fieldmeta = frappe.get_meta(doc.doctype).get_field(fieldname)
+        fieldtype = fieldmeta.fieldtype
+
+    if fieldtype == "Table MultiSelect":
+        child_table = frappe.get_meta(doc.doctype).get_field(fieldname).options
+        child_meta = frappe.get_meta(child_table)
+        link_field = next(
+            (df.fieldname for df in child_meta.fields if df.fieldtype == "Link"), None
+        )
+        if not link_field:
+            frappe.throw(f"No Link field found in child table {child_table}")
+        doc.set(fieldname, [])
+        if isinstance(value, list):
+            for item in value:
+                if isinstance(item, dict) and item.get("value"):
+                    doc.append(fieldname, {link_field: item["value"]})
+                elif isinstance(item, str) and item.strip():
+                    doc.append(fieldname, {link_field: item})
+        else:
+            frappe.throw(
+                f"Expected list of values for Table MultiSelect field {fieldname}"
+            )
+
+    elif fieldtype == "Table":
+        if isinstance(value, list):
+            doc.set(fieldname, [])
+            child_meta = frappe.get_meta(
+                frappe.get_meta(doc.doctype).get_field(fieldname).options
+            )
+            for row in value:
+                if isinstance(row, dict):
+                    processed_row = {}
+                    for k, v in row.items():
+                        if k.startswith("__"):
+                            continue
+                        df = child_meta.get_field(k)
+                        if not df:
+                            continue
+                        if df.fieldtype in ("Attach", "Attach Image"):
+                            if isinstance(v, dict) and v.get("file_url"):
+                                processed_row[k] = v["file_url"]
+                            elif isinstance(v, str) and v.strip():
+                                processed_row[k] = v
+                            else:
+                                processed_row[k] = None
+                        else:
+                            processed_row[k] = v
+                    has_values = any(
+                        val not in (None, "", []) for val in processed_row.values()
+                    )
+                    if has_values:
+                        doc.append(fieldname, processed_row)
+        else:
+            frappe.throw(f"Expected list of dicts for Table field {fieldname}")
+
+    elif fieldtype in ("Attach", "Attach Image"):
+        if isinstance(value, dict) and value.get("file_url"):
+            doc.set(fieldname, value["file_url"])
+        elif isinstance(value, str):
+            doc.set(fieldname, value)
+        elif value in (None, "", []):
+            doc.set(fieldname, None)
+        else:
+            frappe.throw(
+                f"Expected file url (string) or object with file_url for field {fieldname}"
+            )
+
+    else:
+        doc.set(fieldname, value)
+
+
 @frappe.whitelist(allow_guest=True)
 def update_job_application(id: str, **kwargs) -> dict:
     try:
-        files_data = {
-            "profile_photo": kwargs.pop("profile_photo", None),
-            "documents": kwargs.pop("documents", None),
-            "resume": kwargs.pop("resume", None),
-        }
 
         application = frappe.get_doc("Job Applicant", id)
-        meta = frappe.get_meta("Job Applicant")
 
-        table_fields = {
-            "disabilities": ("disability", None),
-            "allergies": ("allergy", None),
-            "skills": ("skill", None),
-            "driving_licences": ("course", "LMS Course"),
-            "licences": ("license_type", "Personnel License Type"),
-            "languages": ("language", "Language"),
-        }
-
-        table_data = {}
-        for key in table_fields:
-            if key in kwargs:
-                table_data[key] = kwargs.pop(key)
-
-        for key, value in kwargs.items():
-            if meta.has_field(key):
-                setattr(application, key, value)
-
-        table_fields = {
-            "disabilities": ("disability", None),
-            "allergies": ("allergy", None),
-            "skills": ("skill", None),
-            "driving_licences": (
-                "course",
-                "LMS Course",
-            ),
-            "licences": (None, "Personnel License Type"),
-            "languages": ("language", "Language"),
-        }
-
-        for key, (fieldname, linked_doctype) in table_fields.items():
-            if key in table_data and table_data[key]:
-                application.set(key, [])
-
-                value = table_data[key]
-                try:
-                    items = (
-                        frappe.parse_json(value) if isinstance(value, str) else value
-                    )
-                except Exception:
-                    items = str(value).split(",") if value else []
-
-                if not isinstance(items, list):
-                    items = [items]
-
-                for item in items:
-                    if fieldname is None:
-                        if isinstance(item, dict):
-                            application.append(key, item)
-
-                    else:
-                        item_value = item.strip() if isinstance(item, str) else item
-                        if item_value:
-                            if linked_doctype and not frappe.db.exists(
-                                linked_doctype, item_value
-                            ):
-                                frappe.get_doc(
-                                    {"doctype": linked_doctype, "name": item_value}
-                                ).insert(ignore_permissions=True)
-
-                            application.append(key, {fieldname: item_value})
-
-        application = handle_attachment_files(application, files_data)
+        for fieldname, value in kwargs.items():
+            if application.meta.has_field(fieldname):
+                fieldtype = application.meta.get_field(fieldname).fieldtype
+                set_field_value(application, fieldname, value, fieldtype)
 
         application.save(ignore_permissions=True)
         frappe.db.commit()
+
         return {
             "success": True,
             "message": "Application updated successfully",
             "name": application.name,
         }
+
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Job Application Update Error")
         return {"success": False, "error": str(e)}
+
+
+# @frappe.whitelist(allow_guest=True)
+# def update_job_application(id: str, **kwargs) -> dict:
+#     try:
+#         files_data = {
+#             "profile_photo": kwargs.pop("profile_photo", None),
+#             "documents": kwargs.pop("documents", None),
+#             "resume": kwargs.pop("resume", None),
+#         }
+
+#         application = frappe.get_doc("Job Applicant", id)
+#         meta = frappe.get_meta("Job Applicant")
+
+#         table_fields = {
+#             "disabilities": ("disability", None),
+#             "allergies": ("allergy", None),
+#             "skills": ("skill", None),
+#             "driving_licences": ("course", "LMS Course"),
+#             "licences": ("license_type", "Personnel License Type"),
+#             "languages": ("language", "Language"),
+#         }
+
+#         table_data = {}
+#         for key in table_fields:
+#             if key in kwargs:
+#                 table_data[key] = kwargs.pop(key)
+
+#         for key, value in kwargs.items():
+#             if meta.has_field(key):
+#                 setattr(application, key, value)
+
+#         table_fields = {
+#             "disabilities": ("disability", None),
+#             "allergies": ("allergy", None),
+#             "skills": ("skill", None),
+#             "driving_licences": (
+#                 "course",
+#                 "LMS Course",
+#             ),
+#             "licences": (None, "Personnel License Type"),
+#             "languages": ("language", "Language"),
+#         }
+
+#         for key, (fieldname, linked_doctype) in table_fields.items():
+#             if key in table_data and table_data[key]:
+#                 application.set(key, [])
+
+#                 value = table_data[key]
+#                 try:
+#                     items = (
+#                         frappe.parse_json(value) if isinstance(value, str) else value
+#                     )
+#                 except Exception:
+#                     items = str(value).split(",") if value else []
+
+#                 if not isinstance(items, list):
+#                     items = [items]
+
+#                 for item in items:
+#                     if fieldname is None:
+#                         if isinstance(item, dict):
+#                             application.append(key, item)
+
+#                     else:
+#                         item_value = item.strip() if isinstance(item, str) else item
+#                         if item_value:
+#                             if linked_doctype and not frappe.db.exists(
+#                                 linked_doctype, item_value
+#                             ):
+#                                 frappe.get_doc(
+#                                     {"doctype": linked_doctype, "name": item_value}
+#                                 ).insert(ignore_permissions=True)
+
+#                             application.append(key, {fieldname: item_value})
+
+#         application = handle_attachment_files(application, files_data)
+
+#         application.save(ignore_permissions=True)
+#         frappe.db.commit()
+#         return {
+#             "success": True,
+#             "message": "Application updated successfully",
+#             "name": application.name,
+#         }
+#     except Exception as e:
+#         frappe.log_error(frappe.get_traceback(), "Job Application Update Error")
+#         return {"success": False, "error": str(e)}
 
 
 @frappe.whitelist(allow_guest=True)
@@ -1063,9 +1241,9 @@ def create_availability_schedule(slot_data):
         personal_schedule_name = create_personal_schedule(employee, fiscal_year)
         create_schedule(personal_schedule_name, weekly_availability)
 
-        generate_weekly_patterns(
-            personal_schedule_name, weekly_availability, fiscal_year
-        )
+        # generate_weekly_patterns(
+        #     personal_schedule_name, weekly_availability, fiscal_year
+        # )
 
         return {"employee": employee}
     except Exception as e:

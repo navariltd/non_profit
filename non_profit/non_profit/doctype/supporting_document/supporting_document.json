@@ -1,48 +1,45 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-09-20 18:25:43.691959",
+ "creation": "2025-10-01 07:20:53.368422",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "course",
-  "column_break_jyfw",
+  "document_name",
+  "column_break_uwcf",
   "attachment"
  ],
  "fields": [
   {
-   "fieldname": "course",
-   "fieldtype": "Link",
+   "fieldname": "document_name",
+   "fieldtype": "Data",
    "in_filter": 1,
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Course",
-   "options": "LMS Course"
+   "label": "Document Name",
+   "reqd": 1
   },
   {
-   "fieldname": "column_break_jyfw",
+   "fieldname": "column_break_uwcf",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "attachment",
    "fieldtype": "Attach",
-   "in_filter": 1,
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Attachment"
+   "label": "Attachment",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-21 23:28:34.843200",
+ "modified": "2025-10-02 17:59:06.203334",
  "modified_by": "Administrator",
  "module": "Non Profit",
- "name": "Employee LMS Course",
+ "name": "Supporting Document",
  "owner": "Administrator",
  "permissions": [],
  "row_format": "Dynamic",
