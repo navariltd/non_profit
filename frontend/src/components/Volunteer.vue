@@ -1,26 +1,32 @@
 <template>
   <div>
-    <!-- Top Buttons -->
-    <div class="flex flex-row justify-end items-center m-6 md:space-x-4">
-      <div v-if="!presentSlots.data" class="flex items-center justify-center">
+    <div
+      class="flex flex-col md:flex-row md:justify-end md:items-center gap-3 md:gap-4 p-4 md:m-6"
+    >
+      <div
+        v-if="!presentSlots.data"
+        class="flex items-center justify-center order-2 md:order-1"
+      >
         <p
-          class="text-sm border border-blue-600 p-1 bg-blue-100 rounded-lg text-blue-600 font-medium"
+          class="text-sm text-center border border-blue-600 px-2 py-1 bg-blue-100 rounded-lg text-blue-600 font-medium"
         >
-          Action Required: Please set your availability to be deployed.
+          Action Required: Please set your availability.
         </p>
       </div>
-      <div class="flex flex-row space-x-4 items-center">
+
+      <div
+        class="flex flex-row justify-between md:justify-end items-center gap-3 md:gap-4 order-1 md:order-2"
+      >
         <Button
           variant="solid"
-          size="lg"
+          size="md"
           theme="red"
           @click="setAvailability = true"
-          class="rounded-xl shadow-md"
+          class="rounded-xl shadow-md w-full sm:w-auto"
         >
           Set Availability
         </Button>
 
-        <!-- Notification Bell -->
         <div
           class="relative cursor-pointer"
           @click="showNotificationDialog = true"
@@ -39,7 +45,6 @@
       </div>
     </div>
 
-    <!-- Notification Dialog -->
     <Dialog :options="{ size: 'lg' }" v-model="showNotificationDialog">
       <template #body-title>
         <div class="flex items-center justify-between">
@@ -49,7 +54,7 @@
             >
               <Bell class="h-5 w-5 text-red-600" />
             </div>
-            New Project Assignment
+            New  Assignment
           </h3>
 
           <Badge variant="outline" theme="red" class="ml-2">
@@ -98,7 +103,6 @@
           </div>
         </div>
 
-        <!-- Empty State -->
         <div
           v-else
           class="flex flex-col items-center justify-center text-center py-16"
@@ -116,8 +120,6 @@
         </div>
       </template>
     </Dialog>
-
-    <!-- Availability Dialog -->
   </div>
 
   <div class="px-10">
@@ -128,12 +130,12 @@
         <h4
           class="text-sm font-medium text-gray-600 uppercase tracking-wide mb-3"
         >
-          Total Projects
+          Total Assignments
         </h4>
         <div class="text-3xl font-bold text-gray-900 mb-1">
           {{ props.total_projects_deployed || 0 }}
         </div>
-        <div class="text-xs text-gray-500">All assigned projects</div>
+        <div class="text-xs text-gray-500">All assignments</div>
       </div>
 
       <div
