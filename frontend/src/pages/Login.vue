@@ -39,7 +39,7 @@
               @click="passWordVisible = !passWordVisible"
             />
           </div>
-          <button @click="forgotPassword">
+          <button type="button" @click="forgotPassword">
             <span class="text-sm text-right text-red-600 hover:underline"
               >Forgot Password?</span
             >
@@ -195,7 +195,6 @@ const genderOptions = [
   { label: "Female", value: "Female" },
   { label: "Other", value: "Other" },
 ];
-
 
 const createSignUp = createResource({
   url: "non_profit.non_profit.user.create_user",

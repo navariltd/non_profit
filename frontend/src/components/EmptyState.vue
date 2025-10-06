@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-center min-h-[70vh] px-4">
+  <div class="flex items-center justify-center px-4">
     <div
       class="bg-white shadow-sm rounded-2xl p-8 max-w-lg w-full text-center border border-red-200"
     >
@@ -22,14 +22,6 @@
           Please select a membership plan to continue.
         </span>
       </p>
-
-      <div v-if="type === 'Membership'" class="mt-6">
-        <button
-          class="px-5 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition"
-        >
-          View Plans
-        </button>
-      </div>
     </div>
   </div>
 </template>

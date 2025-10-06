@@ -1,33 +1,8 @@
 <template>
-  <div
-    v-if="user?.data == 'Guest'"
-    class="flex flex-col items-center justify-center py-20 h-[75vh] bg-gray-50 m-8 md:m-16 text-center px-4"
-  >
-    <div class="bg-red-100 rounded-full p-6 mb-6 shadow-md">
-      <LogIn class="w-12 h-12 text-red-600" />
-    </div>
-
-    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
-      🔒 Authentication Required
-    </h2>
-
-    <p class="text-gray-600 mb-8 max-w-md">
-      Please log in to access your personalized dashboard and continue exploring
-      our features.
-    </p>
-
-    <div
-      variant="solid"
-      class="bg-red-600 hover:bg-red-700 text-white px-8 py-3 flex items-center gap-3 rounded-xl shadow-lg cursor-pointer"
-      @click="redirectToLogin"
-    >
-      <LogIn class="w-5 h-5" />
-      Login
-    </div>
-  </div>
+  <NoPermission v-if="user?.data == 'Guest'" :page="'Dashboard'" />
   <div v-if="user?.data && user?.data !== 'Guest'" class="max-w-7xl mx-auto">
-    <div class="flex flex-col gap-2 mb-6">
-      <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
+    <div class="flex flex-col gap-2 my-4 md:mb-6">
+      <h1 class="text-xl md:text-3xl text-gray-900">
         👋 Welcome back, {{ user?.data?.full_name }}!
       </h1>
     </div>
@@ -97,9 +72,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, provide, onMounted } from "vue";
-import { LogIn, ChevronRight } from "lucide-vue-next";
-import { Button, createResource } from "frappe-ui";
+import { ref, onMounted } from "vue";
+import { ChevronRight } from "lucide-vue-next";
+import { createResource } from "frappe-ui";
 
 import EventCard from "../components/EventCard.vue";
 import EventCalendar from "../components/EventCalendar.vue";
@@ -113,14 +88,15 @@ import { usersStore } from "../stores/user";
 import { membershipStore } from "../stores/membership";
 import { sessionStore } from "../stores/session";
 
+import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
+import NoPermission from "../components/NoPermission.vue";
+
 const { roleResource, userResource } = usersStore();
 const { events, currentMembership } = membershipStore();
 const { isLoggedIn } = sessionStore();
 
 const toggleEventView = ref(false);
 const user = userResource;
-
-import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
 
 onMounted(() => {
   if (isLoggedIn) {
@@ -130,32 +106,10 @@ onMounted(() => {
   }
 });
 
-function redirectToLogin() {
-  router.push("/login");
-}
-
-const confirmEventStatus = createResource({
-  url: "non_profit.non_profit.api.confirm_event_status",
-  auto: true,
-  onSuccess(data: any) {
-    if (events?.data) {
-      events.data = events.data.map((e: any) => {
-        const match = data.find((d: any) => d.event.name === e.name);
-        return {
-          ...e,
-          confirmStatus: match ? match.confirmed : false,
-        };
-      });
-    }
-  },
-});
-
 const dashboardStats = createResource({
   url: "non_profit.non_profit.api.get_dashboard_stats",
   auto: true,
 });
-
-provide("reloadConfirmStatus", () => confirmEventStatus.reload());
 
 function toggleEventViews() {
   toggleEventView.value = !toggleEventView.value;
