@@ -52,7 +52,6 @@ const routes = [
     name: "Membership",
     path: "/membership",
     component: () => import("@/pages/Membership.vue"),
-    meta: { requiresAuth: true },
   },
   {
     name: "VolunteerSignup",
