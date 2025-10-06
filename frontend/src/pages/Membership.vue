@@ -1,5 +1,9 @@
 <template>
-  <div class="space-y-4 mx-auto px-4">
+  <NoPermission v-if="user?.data == 'Guest'" :page="'Membership'" />
+  <div
+    class="space-y-4 mx-auto px-4"
+    v-if="user?.data && user?.data !== 'Guest'"
+  >
     <ProgressSpinner
       v-if="currentMembership.loading || membershipTypes.loading"
       class="mt-6"
