@@ -1020,7 +1020,7 @@ def get_user_info():
             "full_name",
             "user_type",
             "username",
-            "phone"
+            "phone",
         ],
         as_dict=1,
     )
@@ -1164,7 +1164,7 @@ def register_event(event_name, user):
         EAR.parenttype = "Attendee Registration"
         EAR.parentfield = "event_attendees"
         EAR.email = user.get("email")
-        EAR.full_name =  user.get("full_name")
+        EAR.full_name = user.get("full_name")
         EAR.phone_number = user.get("phone")
         EAR.personnel_type = (
             "Guest"
@@ -1185,7 +1185,6 @@ def register_event(event_name, user):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Event Registration Error")
         frappe.throw("Event Registration Error")
-
 
 
 @frappe.whitelist()
@@ -1501,11 +1500,7 @@ def upload_file():
 
 @frappe.whitelist()
 def fetch_assigned_projects():
-    user = frappe.session.user
-
-    volunteer = frappe.db.get_value("Employee", {"user_id": user}, "name")
-    if not volunteer:
-        return []
+    volunteer = get_current_volunteer()
 
     assignees = frappe.get_all(
         "Personnel Deployment Assignment",
@@ -1522,10 +1517,8 @@ def fetch_assigned_projects():
 
     projects = []
     for assignee in assignees:
-        deployment_name = (
-            assignee.deployment
-        )  # deployment is the Personnel Deployment name
-        assignee_name = assignee.name  # childtable row name
+        deployment_name = assignee.deployment
+        assignee_name = assignee.name
 
         deployment = frappe.get_doc("Personnel Deployment Request", deployment_name)
         if not deployment or not deployment.project:
