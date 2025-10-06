@@ -4,13 +4,8 @@
     class="space-y-4 mx-auto px-4"
     v-if="user?.data && user?.data !== 'Guest'"
   >
-    <ProgressSpinner
-      v-if="currentMembership.loading || membershipTypes.loading"
-      class="mt-6"
-    />
-
     <ErrorMessage
-      v-else-if="currentMembership.error || membershipTypes.error"
+      v-if="currentMembership.error || membershipTypes.error"
       class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm my-auto mt-20"
       message="Failed to get Membership Details"
     />
@@ -27,6 +22,7 @@
     </div>
 
     <div
+      v-if="currentMembership.data"
       class="p-2 pt-2 md:p-8 bg-gray-50 rounded-2xl shadow-md text-center mb-20"
     >
       <h1 class="text-3xl font-bold text-gray-800">Select a New Plan</h1>
@@ -182,7 +178,7 @@
 </template>
 
 <script lang="ts" setup>
-import { inject, reactive, ref, watch } from "vue";
+import { inject, reactive, ref, watch, watchEffect } from "vue";
 import { membershipStore } from "../stores/membership";
 import {
   Dialog,
