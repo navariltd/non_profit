@@ -1,16 +1,4 @@
 frappe.ui.form.on("Job Opening", {
-  refresh: function (frm) {
-    if (
-      frm.fields_dict.required_attachments &&
-      frm.fields_dict.required_attachments.grid &&
-      frm.fields_dict.required_attachments.grid.fields_map &&
-      frm.fields_dict.required_attachments.grid.fields_map.attachment
-    ) {
-      frm.fields_dict.required_attachments.grid.fields_map.attachment.reqd = 0;
-      frm.fields_dict.required_attachments.grid.fields_map.attachment.hidden = 0;
-    }
-  },
-
   validate: function (frm) {
     if (frm.doc.opportunity_type === "Internal") {
       if (!frm.doc.required_skills || frm.doc.required_skills.length === 0) {

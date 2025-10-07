@@ -107,87 +107,13 @@
           </div>
         </div>
 
-        <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-          <h3 class="text-xl font-semibold text-gray-800 mb-6">Documents</h3>
-          <div class="grid grid-cols-1 gap-6">
-            <div>
-              <label class="block mb-2 font-semibold text-gray-800"
-                >Resume</label
-              >
-              <Uploader
-                v-if="!resume"
-                label="Upload Resume"
-                :fileTypes="['.pdf', '.docx', '.doc']"
-                :maxSize="5"
-                :onSuccess="(file) => (resume = file)"
-                :onError="handleError"
-              />
-              <div
-                v-else
-                class="flex justify-between p-3 rounded-lg bg-white border"
-              >
-                <div class="grid grid-cols-1 gap-4 justify-between w-full">
-                  <iframe
-                    v-if="isPDF(resume.file_url)"
-                    :src="resume.file_url"
-                    class="w-full h-64 border rounded-lg mb-2"
-                  ></iframe>
-                  <a
-                    :href="resume.file_url"
-                    target="_blank"
-                    class="font-medium text-gray-800"
-                    >{{ resume.file_name }}</a
-                  >
-                </div>
-                <Button
-                  variant="subtle"
-                  @click="resume = null"
-                  class="text-red-500 hover:text-red-700"
-                  >✕</Button
-                >
-              </div>
-            </div>
-          </div>
-
-          <div class="mt-6">
-            <label class="block mb-2 font-semibold text-gray-800"
-              >Supporting Documents</label
-            >
-            <Uploader
-              label="Upload Supporting Documents"
-              :multi="true"
-              :fileTypes="['.pdf', '.docx', '.doc', '.jpg', '.png']"
-              :maxSize="10"
-              :onSuccess="(file) => documents.push(file)"
-              :onError="handleError"
-            />
-          </div>
-        </div>
-
-        <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-          <span class="mb-2 !pt-4 text-lg font-semibold text-gray-800">
-            {{ __("Cover Letter") }}
-          </span>
-          <div
-            class="mt-6 mb-2 font-semibold text-gray-800 border border-gray-300 rounded-lg"
-          >
-            <TextEditor
-              editor-class="min-h-[20rem] w-full rounded-b-lg border-t-0 p-2"
-              :content="form.cover_letter"
-              @change="(val) => (form.cover_letter = val)"
-              :bubbleMenu="true"
-              :fixed-menu="true"
-            />
-          </div>
-        </div>
-
-        <div class="flex justify-end">
+        <div class="flex justify-start">
           <Button
             type="submit"
             variant="solid"
             class="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-lg"
           >
-            Save Application
+            Start Application
           </Button>
         </div>
       </form>
@@ -205,14 +131,11 @@ import {
   createResource,
   TextEditor,
 } from "frappe-ui";
-import Uploader from "@/components/Controls/Uploader.vue";
 
 const route = useRoute();
 const router = useRouter();
 const user = inject("$user");
 const jobId = route.params?.job || "";
-
-const isPDF = (url) => url?.toLowerCase().endsWith(".pdf");
 
 const job = createResource({
   url: "non_profit.non_profit.api.get_job_details",
@@ -265,9 +188,6 @@ const submitApplication = () => {
   opportunityApplication.submit(
     {},
     {
-      validate: () => {
-        if (!form.value.cover_letter) return "Cover Letter is required";
-      },
       onSuccess: (response) => {
         const applicationId = response?.name || response?.application_id;
         toast.success("Application submitted successfully");

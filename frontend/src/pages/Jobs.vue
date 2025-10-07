@@ -65,23 +65,25 @@
               @change="updateJobs"
             />
             <Link
-              doctype="Department"
-              v-model="department"
-              :placeholder="__('Department')"
+              doctype="Profession"
+              v-model="profession"
+              :placeholder="__('Profession')"
               class="w-full"
               @change="updateJobs"
             />
             <MultiSelect
-              doctype="Company"
+              doctype="Company Item"
               v-model="selectedRegions"
               :label="__('Region')"
+              :mainField="'company'"
               :filters="{ organisation_type: 'Region' }"
               class="w-full"
               @change="onRegionChange"
             />
             <MultiSelect
-              doctype="Company"
+              doctype="Company Item"
               v-model="selectedBranches"
+              :mainField="'company'"
               :label="__('Branch')"
               :filters="branchFilters"
               class="w-full"
@@ -155,7 +157,7 @@ const { brand } = sessionStore();
 
 const jobType = ref(null);
 const designation = ref(null);
-const department = ref(null);
+const profession = ref(null);
 const searchQuery = ref("");
 const selectedRegions = ref([]);
 const selectedBranches = ref([]);
@@ -173,9 +175,15 @@ const jobTabs = computed(() => [
 
 const branchFilters = computed(() => {
   const baseFilter = { organisation_type: "Branch" };
+
   if (selectedRegions.value?.length) {
-    baseFilter.parent_company = ["in", selectedRegions.value];
+    const companyNames = selectedRegions.value.map((item) =>
+      typeof item === "string" ? item : item.company
+    );
+
+    baseFilter.parent_company = ["in", companyNames];
   }
+
   return baseFilter;
 });
 
@@ -213,17 +221,23 @@ const updateFilters = () => {
   if (designation.value) filters.value.designation = designation.value;
   else delete filters.value.designation;
 
-  if (department.value) filters.value.department = department.value;
-  else delete filters.value.department;
+  if (profession.value) filters.value.profession = profession.value;
+  else delete filters.value.profession;
 
   if (selectedRegions.value?.length) {
-    filters.value.region = selectedRegions.value;
+    const regionNames = selectedRegions.value.map((item) =>
+      typeof item === "string" ? item : item.company
+    );
+    filters.value.region = regionNames;
   } else {
     delete filters.value.region;
   }
 
   if (selectedBranches.value?.length) {
-    filters.value.company = selectedBranches.value;
+    const companyNames = selectedBranches.value.map((item) =>
+      typeof item === "string" ? item : item.company
+    );
+    filters.value.company = companyNames;
   } else {
     delete filters.value.company;
   }
@@ -247,7 +261,7 @@ const clearFilters = () => {
   selectedBranches.value = [];
   jobType.value = null;
   designation.value = null;
-  department.value = null;
+  profession.value = null;
   searchQuery.value = "";
   updateJobs();
 };
@@ -257,7 +271,7 @@ watch(currentTab, () => {
   jobCount.value = 0;
 });
 
-watch([jobType, designation, department, selectedBranches], () => {
+watch([jobType, designation, profession, selectedBranches], () => {
   if (currentTab.value === "Open") {
     updateJobs();
   }

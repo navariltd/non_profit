@@ -52,7 +52,6 @@
   "disqualify_if_below_minimum",
   "certifications__skills",
   "required_skills",
-  "required_certification",
   "required_licences",
   "required_attachments_section",
   "required_attachments",
@@ -289,19 +288,13 @@
    "fieldname": "required_attachments",
    "fieldtype": "Table",
    "label": "Required Attachments",
-   "options": "Supporting Document"
+   "options": "Required Attachments"
   },
   {
    "collapsible": 1,
    "fieldname": "required_attachments_section",
    "fieldtype": "Section Break",
    "label": "Required Attachments"
-  },
-  {
-   "fieldname": "required_certification",
-   "fieldtype": "Table",
-   "label": "Required Certification",
-   "options": "Certification"
   },
   {
    "fieldname": "required_gpa__grade",
@@ -359,7 +352,7 @@
    "link_fieldname": "job_opening_template"
   }
  ],
- "modified": "2025-10-07 07:02:06.629984",
+ "modified": "2025-10-07 09:25:45.545320",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Job Opening Template",

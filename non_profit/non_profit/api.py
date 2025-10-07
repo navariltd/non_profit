@@ -340,7 +340,11 @@ def get_job_openings(filters=None, orFilters=None):
 
     user = frappe.session.user
 
-    if user == "Guest":
+    employee_exists = frappe.db.exists(
+        "Employee", {"user_id": user, "status": "Active"}
+    )
+
+    if not employee_exists:
         filters["opportunity_type"] = "Guest"
 
     regions = None
