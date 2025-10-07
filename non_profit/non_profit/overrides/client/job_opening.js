@@ -1,4 +1,16 @@
 frappe.ui.form.on("Job Opening", {
+  refresh: function (frm) {
+    if (
+      frm.fields_dict.required_attachments &&
+      frm.fields_dict.required_attachments.grid &&
+      frm.fields_dict.required_attachments.grid.fields_map &&
+      frm.fields_dict.required_attachments.grid.fields_map.attachment
+    ) {
+      frm.fields_dict.required_attachments.grid.fields_map.attachment.reqd = 0;
+      frm.fields_dict.required_attachments.grid.fields_map.attachment.hidden = 0;
+    }
+  },
+
   validate: function (frm) {
     if (frm.doc.opportunity_type === "Internal") {
       if (!frm.doc.required_skills || frm.doc.required_skills.length === 0) {
@@ -38,5 +50,27 @@ frappe.ui.form.on("Job Opening", {
         },
       });
     }
+  },
+});
+
+frappe.ui.form.on("Job Application Screening Questions", {
+  screening_questions_add: function (frm, cdt, cdn) {
+    let row = frappe.get_doc(cdt, cdn);
+
+    let table = frm.doc.screening_questions || [];
+
+    let last_seq = 0;
+    if (table.length > 1) {
+      table.slice(0, -1).forEach((r) => {
+        if (r.question_id && r.question_id.startsWith("Q")) {
+          let num = parseInt(r.question_id.replace("Q", ""));
+          if (!isNaN(num) && num > last_seq) last_seq = num;
+        }
+      });
+    }
+
+    row.question_id = "Q" + (last_seq + 1);
+
+    frm.refresh_field("screening_questions");
   },
 });
