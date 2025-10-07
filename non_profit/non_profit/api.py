@@ -327,11 +327,13 @@ def get_membership_types():
 
 @frappe.whitelist(allow_guest=True)
 def get_job_openings(filters=None, orFilters=None):
+    from frappe.utils import now_datetime
+
     if not filters:
         filters = {}
     filters["publish"] = 1
     filters["status"] = "Open"
-    now = datetime.now()
+    now = now_datetime()
     filters["posted_on"] = ["<=", now]
 
     or_filters = orFilters or []
