@@ -819,6 +819,7 @@ def get_user_info():
             "full_name",
             "user_type",
             "username",
+            "phone",
         ],
         as_dict=1,
     )
@@ -937,23 +938,52 @@ def get_events():
     return events
 
 
-@frappe.whitelist()
-def confirm_event_status():
-    user_info = get_user_info()
-    events = get_events()
+@frappe.whitelist(allow_guest=True)
+def register_event(event_name, user):
+    try:
+        user_info = get_user_info()
 
-    confirmed_events = []
+        if not frappe.db.exists("FE Event", event_name):
+            frappe.throw("Event does not exist")
 
-    for event in events:
+        attendee_registration = frappe.db.get_value(
+            "Attendee Registration", {"event": event_name}, "name"
+        )
+        if not attendee_registration:
+            frappe.throw("Attendee Registration not set up for this event")
+
         if frappe.db.exists(
-            "Event Participants",
-            {"email": user_info.get("email"), "parent": event.name},
+            "Event Attendee Registration",
+            {"parent": event_name, "email": user.get("email")},
         ):
-            confirmed_events.append({"event": event, "confirmed": True})
-        else:
-            confirmed_events.append({"event": event, "confirmed": False})
+            frappe.throw("This email has already been registered for the event")
 
-    return confirmed_events
+        EAR = frappe.new_doc("Event Attendee Registration")
+        EAR.parent = event_name
+        EAR.parenttype = "Attendee Registration"
+        EAR.parentfield = "event_attendees"
+        EAR.email = user.get("email")
+        EAR.full_name = user.get("full_name")
+        EAR.phone_number = user.get("phone")
+        EAR.personnel_type = (
+            "Guest"
+            if user_info == "Guest"
+            else (
+                "Volunteer"
+                if user_info.get("is_volunteer")
+                else (
+                    "Member"
+                    if user_info.get("is_member")
+                    else "Employee" if user_info.get("employee") else "Other"
+                )
+            )
+        )
+
+        EAR.insert(ignore_permissions=True)
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Event Registration Error")
+        frappe.throw("Event Registration Error")
 
 
 @frappe.whitelist()
@@ -1265,11 +1295,7 @@ def upload_file():
 
 @frappe.whitelist()
 def fetch_assigned_projects():
-    user = frappe.session.user
-
-    volunteer = frappe.db.get_value("Employee", {"user_id": user}, "name")
-    if not volunteer:
-        return []
+    volunteer = get_current_volunteer()
 
     assignees = frappe.get_all(
         "Personnel Deployment Assignment",
@@ -1286,10 +1312,8 @@ def fetch_assigned_projects():
 
     projects = []
     for assignee in assignees:
-        deployment_name = (
-            assignee.deployment
-        )  # deployment is the Personnel Deployment name
-        assignee_name = assignee.name  # childtable row name
+        deployment_name = assignee.deployment
+        assignee_name = assignee.name
 
         deployment = frappe.get_doc("Personnel Deployment Request", deployment_name)
         if not deployment or not deployment.project:
@@ -1814,7 +1838,7 @@ def get_event_details(event_name):
         return {"error": "Failed to retrieve event details"}
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def get_speaker_profiles(event_speakers):
     try:
         speakers_list = json.loads(event_speakers)
