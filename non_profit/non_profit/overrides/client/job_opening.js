@@ -51,6 +51,87 @@ frappe.ui.form.on("Job Opening", {
       });
     }
   },
+
+  job_opening_template: function (frm) {
+    if (!frm.doc.job_opening_template) return;
+
+    frappe.call({
+      method: "frappe.client.get",
+      args: {
+        doctype: "Job Opening Template",
+        name: frm.doc.job_opening_template,
+      },
+      callback: function (r) {
+        if (!r.message) return;
+
+        let template = r.message;
+
+        const skip_fields = [
+          "name",
+          "job_opening_template",
+          "creation",
+          "modified",
+          "modified_by",
+          "owner",
+          "idx",
+        ];
+
+        const skip_fieldtypes = [
+          "Section Break",
+          "Column Break",
+          "Tab Break",
+          "HTML",
+          "Button",
+          "Read Only",
+          "Image",
+          "Fold",
+        ];
+
+        frappe.meta.get_docfields("Job Opening").forEach((df) => {
+          let fieldname = df.fieldname;
+
+          if (
+            !fieldname ||
+            skip_fields.includes(fieldname) ||
+            skip_fieldtypes.includes(df.fieldtype)
+          ) {
+            return;
+          }
+
+          if (df.fieldtype === "Table") {
+            // Clear table first
+            frm.clear_table(fieldname);
+
+            if (template[fieldname] && template[fieldname].length > 0) {
+              template[fieldname].forEach((row) => {
+                let new_row = frm.add_child(fieldname);
+                Object.keys(row).forEach((key) => {
+                  if (
+                    !skip_fields.includes(key) &&
+                    ![
+                      "doctype",
+                      "parent",
+                      "parentfield",
+                      "parenttype",
+                      "name",
+                      "idx",
+                    ].includes(key)
+                  ) {
+                    new_row[key] = row[key];
+                  }
+                });
+              });
+              frm.refresh_field(fieldname);
+            }
+          } else {
+            frm.set_value(fieldname, template[fieldname]);
+          }
+        });
+
+        frappe.show_alert(__("Fields copied from Job Opening Template"));
+      },
+    });
+  },
 });
 
 frappe.ui.form.on("Job Application Screening Questions", {
