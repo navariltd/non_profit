@@ -416,6 +416,7 @@ watch(
 
     if (linkField) {
       linkDoctype.value = linkField.options;
+
       await nextTick();
       filterOptions.reload();
     }

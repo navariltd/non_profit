@@ -1,693 +1,512 @@
 <template>
   <div class="max-w-5xl mx-auto py-10 space-y-8">
-    <div v-if="!isLoggedIn" class="text-center py-20">
-      <LogIn class="w-16 h-16 text-gray-400 mx-auto mb-4" />
-      <h2 class="text-3xl font-bold text-gray-900 mb-4">
-        Authentication Required
-      </h2>
-      <p class="text-gray-600 mb-8">
-        Please log in to access your job application details. Your application
-        information is protected and only available to authenticated users.
-      </p>
-      <Button
-        variant="solid"
-        class="bg-red-600 hover:bg-red-700 text-white"
-        @click="redirectToLogin"
-      >
-        <template #prefix>
-          <LogIn class="w-4 h-4" />
-        </template>
-        {{ __("Login to View Application") }}
-      </Button>
-    </div>
-
-    <div v-else>
-      <div
-        v-if="job.data"
-        class="p-6 rounded-xl shadow-sm border border-gray-200 bg-gradient-to-r from-red-50 to-white"
-      >
-        <div class="flex items-start gap-4">
-          <div>
-            <img
-              v-if="job.data.company_logo"
-              :src="job.data.company_logo"
-              class="w-16 h-16 rounded-lg object-contain cursor-pointer bg-gray-50 border"
-              :alt="job.data.company"
-              @click="redirectToWebsite(job.data.company_website)"
-            />
-            <div
-              v-else
-              class="w-16 h-16 flex items-center justify-center rounded-lg bg-red-100 text-red-700 font-semibold text-xl cursor-default"
-            >
-              {{ getCompanyAbbr(job.data.company) }}
-            </div>
-          </div>
-          <div>
-            <router-link
-              :to="{ name: 'JobDetail', params: { job: job.data.name } }"
-            >
-              <h1 class="text-3xl font-bold text-gray-900 mb-1">
-                {{ job.data.job_title }}
-              </h1>
-            </router-link>
-            <div class="text-lg font-medium text-red-600">
-              {{ job.data.company }}
-            </div>
-            <div
-              v-if="job.data.location || job.data.country"
-              class="text-sm text-gray-500 mt-1"
-            >
-              {{ job.data.location
-              }}<span v-if="job.data.country">, {{ job.data.country }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        v-if="application.data && !canViewApplication"
-        class="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl p-6 mt-6"
-      >
-        <h3 class="text-xl font-semibold mb-2">Application Restricted</h3>
-        <p>You don't have enough permissions to view this application.</p>
-      </div>
-
-      <div
-        v-if="application.data && canViewApplication"
-        class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 mt-6"
-      >
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold text-red-700">Your Application</h2>
-          <Button
-            variant="solid"
-            @click="isEditing = !isEditing"
-            class="px-4 py-2 rounded-lg"
-            :disabled="!canEditResource?.data || submitted"
+    <div
+      v-if="job.data"
+      class="p-6 rounded-xl shadow-sm border border-gray-200 bg-gradient-to-r from-red-50 to-white"
+    >
+      <div class="flex items-start gap-4">
+        <div>
+          <img
+            v-if="job.data.company_logo"
+            :src="job.data.company_logo"
+            class="w-16 h-16 rounded-lg object-contain cursor-pointer bg-gray-50 border"
+            :alt="job.data.company"
+            @click="redirectToWebsite(job.data.company_website)"
+          />
+          <div
+            v-else
+            class="w-16 h-16 flex items-center justify-center rounded-lg bg-red-100 text-red-700 font-semibold text-xl cursor-default"
           >
-            <template #prefix>
-              <Edit3 class="w-4 h-4" />
-            </template>
-            {{ isEditing ? "Cancel" : "Edit" }}
-          </Button>
-        </div>
-
-        <div v-if="!isEditing" class="space-y-6">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <p class="text-sm text-gray-500">Full Name</p>
-              <p class="text-lg font-semibold text-gray-800 pt-2">
-                {{ form.applicant_name }}
-              </p>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500">Email</p>
-              <p class="text-lg font-semibold text-gray-800 pt-2">
-                {{ form.email_id }}
-              </p>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500">Phone</p>
-              <p class="text-lg font-semibold text-gray-800 pt-2">
-                {{ form.phone }}
-              </p>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500">Applied On</p>
-              <p class="text-lg font-semibold text-gray-800 pt-2">
-                {{ formatDate(form.creation) }}
-                <span class="text-gray-500 text-sm">
-                  ({{ timeAgo(application.data.creation) }})
-                </span>
-              </p>
-            </div>
-            <div>
-              <p class="text-sm text-gray-500">Last Modified</p>
-              <p class="text-lg font-semibold text-gray-800 pt-2">
-                {{ formatDate(form.modified) }}
-                <span class="text-gray-500 text-sm">
-                  ({{ timeAgo(application.data.modified) }})
-                </span>
-              </p>
-            </div>
-          </div>
-
-          <div>
-            <p class="text-sm text-gray-500 mb-1">Cover Letter</p>
-            <p
-              class="text-gray-800 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg border"
-            >
-              <TextEditor
-                editor-class="min-h-[20rem] w-full rounded-b-lg border-t-0 p-2"
-                :content="form.cover_letter"
-                @change="(val) => (form.cover_letter = val)"
-                :bubbleMenu="true"
-                :fixed-menu="true"
-              />
-            </p>
-          </div>
-
-          <div class="grid grid-cols-1 gap-6">
-            <div class="grid grid-cols-1 gap-6">
-              <div>
-                <p class="text-sm text-gray-500 mb-1">Resume</p>
-                <div
-                  v-if="application?.data?.resume_attachment"
-                  class="space-y-3"
-                >
-                  <a
-                    :href="application.data.resume_attachment"
-                    target="_blank"
-                    class="text-blue-600 hover:text-blue-800 font-medium truncate block"
-                  >
-                    View / Download Resume
-                  </a>
-
-                  <iframe
-                    :src="application.data.resume_attachment"
-                    class="w-full h-64 border rounded-lg"
-                  ></iframe>
-                </div>
-                <p v-else class="text-gray-500">No resume uploaded</p>
-              </div>
-            </div>
-
-            <div>
-              <p class="text-sm text-gray-500 mb-3">
-                Documents ({{ form.documents.length }})
-              </p>
-              <div
-                v-if="form.documents.length > 0"
-                class="space-y-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-              >
-                <div
-                  v-for="(doc, index) in form.documents"
-                  :key="index"
-                  class="border rounded-lg p-4 bg-gray-50"
-                >
-                  <div class="flex items-start gap-3">
-                    <div class="flex-shrink-0">
-                      <div
-                        v-if="isPDF(doc.file_url)"
-                        class="w-16 h-20 bg-red-100 rounded border flex items-center justify-center"
-                      >
-                        <svg
-                          class="w-8 h-8 text-red-600"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            d="M4 18h12a1 1 0 001-1V7.414a1 1 0 00-.293-.707L13.414 3.414A1 1 0 0012.586 3H4a1 1 0 00-1 1v14a1 1 0 001 1z"
-                          />
-                        </svg>
-                      </div>
-                      <div
-                        v-else-if="isWord(doc.file_url)"
-                        class="w-16 h-20 bg-blue-100 rounded border flex items-center justify-center"
-                      >
-                        <svg
-                          class="w-8 h-8 text-blue-600"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            d="M4 3a1 1 0 000 2h12a1 1 0 100-2H4zM3 7a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM4 11a1 1 0 100 2h8a1 1 0 100-2H4z"
-                          />
-                        </svg>
-                      </div>
-                      <div
-                        v-else
-                        class="w-16 h-20 bg-gray-100 rounded border flex items-center justify-center"
-                      >
-                        <svg
-                          class="w-8 h-8 text-gray-600"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                          <path
-                            fill-rule="evenodd"
-                            d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5z"
-                          />
-                        </svg>
-                      </div>
-                    </div>
-
-                    <div class="flex-1 min-w-0">
-                      <a
-                        :href="doc.file_url"
-                        target="_blank"
-                        class="text-blue-600 hover:text-blue-800 font-medium truncate block"
-                      >
-                        {{ doc.file_name }}
-                      </a>
-                      <p class="text-sm text-gray-500 mt-1">
-                        {{ getFileType(doc.file_name) }}
-                        <span v-if="doc.file_size">
-                          • {{ formatBytes(doc.file_size) }}</span
-                        >
-                      </p>
-                      <p
-                        v-if="doc.uploaded_on"
-                        class="text-xs text-gray-400 mt-1"
-                      >
-                        Uploaded {{ timeAgo(doc.uploaded_on) }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div v-if="isPDF(doc.file_url)" class="mt-4">
-                    <iframe
-                      :src="doc.file_url"
-                      class="w-full h-40 border rounded-lg"
-                    ></iframe>
-                  </div>
-                </div>
-              </div>
-              <p
-                v-else
-                class="text-gray-500 py-8 text-center border rounded-lg bg-gray-50"
-              >
-                No documents uploaded
-              </p>
-            </div>
+            {{ getCompanyAbbr(job.data.company) }}
           </div>
         </div>
-
-        <form v-else class="space-y-10" @submit.prevent="updateApplication">
-          <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-            <span class="mb-2 !pt-4 text-lg font-semibold text-gray-800">
-              {{ __("Cover Letter") }}
-            </span>
-            <div
-              class="mt-6 mb-2 font-semibold text-gray-800 border border-gray-300 rounded-lg"
-            >
-              <TextEditor
-                editor-class="min-h-[20rem] w-full rounded-b-lg border-t-0 p-2"
-                :content="form.cover_letter"
-                @change="(val) => (form.cover_letter = val)"
-                :bubbleMenu="true"
-                :fixed-menu="true"
-              />
-            </div>
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-1">
+            {{ job.data.job_title }}
+          </h1>
+          <div class="text-lg font-medium text-red-600">
+            {{ job.data.company }}
           </div>
-
-          <div class="bg-gray-50 rounded-xl p-6 border border-gray-200">
-            <h3 class="text-xl font-semibold text-gray-800 mb-6">Documents</h3>
-            <div class="grid grid-cols-1 gap-8">
-              <div class="grid grid-cols-1 gap-8">
-                <div>
-                  <label class="block mb-2 font-semibold text-gray-800">
-                    Resume
-                  </label>
-                  <Uploader
-                    label="Upload Resume"
-                    :fileTypes="['.pdf', '.docx', '.doc']"
-                    :maxSize="10"
-                    :onSuccess="handleResumeUpload"
-                    :onError="handleError"
-                  />
-                  <div
-                    v-if="resume"
-                    class="mt-3 p-3 border rounded-lg bg-white"
-                  >
-                    <a
-                      :href="resume.file_url"
-                      target="_blank"
-                      class="text-blue-600 hover:text-blue-800 font-medium truncate block"
-                    >
-                      {{ resume.file_name }}
-                    </a>
-                    <p class="text-sm text-gray-500">
-                      {{ getFileType(resume.file_name) }}
-                      <span v-if="resume.file_size">
-                        • {{ formatBytes(resume.file_size) }}</span
-                      >
-                    </p>
-                    <Button
-                      variant="subtle"
-                      size="sm"
-                      class="mt-2 text-red-600"
-                      @click="removeResume"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                  <p v-else class="text-gray-500">No resume uploaded</p>
-                </div>
-              </div>
-
-              <div>
-                <label class="block mb-2 font-semibold text-gray-800">
-                  Other Documents (Certificates, etc.)
-                </label>
-                <Uploader
-                  label="Upload Documents"
-                  :fileTypes="[
-                    '.pdf',
-                    '.docx',
-                    '.doc',
-                    '.jpg',
-                    '.jpeg',
-                    '.png',
-                  ]"
-                  :maxSize="10"
-                  :multi="true"
-                  :maxFiles="10"
-                  :onSuccess="handleDocumentUpload"
-                  :onError="handleError"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-4">
-            <Button
-              type="submit"
-              variant="solid"
-              class="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-lg"
-              :loading="updateApplicationResource.loading"
-            >
-              Save Changes
-            </Button>
-          </div>
-        </form>
-
-        <div class="flex justify-end gap-4">
-          <Button
-            variant="solid"
-            class="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-lg"
-            :loading="submitApplicationResource.loading"
-            v-if="canEditResource?.data && !isEditing && !submitted"
-            @click="showSubmitDialog = true"
+          <div
+            v-if="job.data.location || job.data.country"
+            class="text-sm text-gray-500 mt-1"
           >
-            Submit Application
-          </Button>
+            {{ job.data.location
+            }}<span v-if="job.data.country">, {{ job.data.country }}</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <Dialog v-model="showSubmitDialog">
-    <!-- Title -->
-    <template #body-title>
-      <h2 class="text-lg font-bold text-gray-900">
-        {{ __("Confirm Submission") }}
+
+    <div
+      v-if="!loading"
+      class="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
+    >
+      <h2 class="text-2xl font-bold text-red-700 mb-6">
+        Apply for this Opportunity
       </h2>
-    </template>
 
-    <!-- Content -->
-    <template #body-content>
-      <p class="text-gray-700 leading-relaxed">
-        {{ __("Are you sure you want to submit this application?") }}
-      </p>
-      <p class="mt-2 text-sm text-red-600 font-medium">
-        {{ __("You won’t be able to make further edits after submission.") }}
-      </p>
-    </template>
-
-    <!-- Actions -->
-    <template #actions>
-      <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
-        <Button
-          variant="outline"
-          class="w-full sm:w-auto py-3"
-          @click="showSubmitDialog = false"
+      <div
+        class="flex overflow-x-auto border-b border-gray-200 whitespace-nowrap mb-8 -mx-6 px-6 sm:mx-0 sm:px-0"
+      >
+        <button
+          v-for="(step, index) in filteredSteps"
+          :key="index"
+          @click="goToStep(step.originalIndex)"
+          :disabled="step.originalIndex > maxCompletedStep + 1 && !isSubmitted"
+          :class="[
+            'py-3 px-3 sm:px-5 text-sm sm:text-base font-semibold transition-all duration-200 ease-in-out flex-shrink-0 flex items-center gap-2',
+            currentStep === step.originalIndex
+              ? 'border-b-4 border-red-600 text-red-700 bg-red-50/50'
+              : step.originalIndex <= maxCompletedStep && !isSubmitted
+                ? 'text-green-600 hover:text-red-500 hover:border-b-4 hover:border-red-100'
+                : isSubmitted
+                  ? 'text-red-700'
+                  : 'text-gray-400 cursor-not-allowed',
+          ]"
         >
-          {{ __("Cancel") }}
+          <svg
+            v-if="step.originalIndex <= maxCompletedStep && !isSubmitted"
+            class="w-4 h-4 text-green-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            ></path>
+          </svg>
+          {{ step.title }}
+        </button>
+      </div>
+
+      <div
+        class="space-y-10 min-h-[300px] bg-gray-50 rounded-xl p-6 border border-gray-200"
+      >
+        <component
+          :is="steps[currentStep].component"
+          v-bind="{
+            form,
+            job: job.data,
+            user: userDetails,
+
+            isReadonly: isSubmitted,
+          }"
+        />
+      </div>
+
+      <div
+        v-if="!isSubmitted"
+        class="flex justify-between mt-6 pt-4 border-t border-gray-100"
+      >
+        <Button
+          v-if="currentStep > 0"
+          variant="subtle"
+          @click="prevStep"
+          class="text-gray-700 hover:bg-gray-100"
+        >
+          &larr; Back
         </Button>
+
+        <div class="flex-grow"></div>
+
         <Button
           variant="solid"
-          class="w-full sm:w-auto bg-red-700 hover:bg-red-800 text-white py-3"
-          :loading="submitApplicationResource.loading"
-          @click="confirmSubmit"
+          :loading="isSaving"
+          @click="handleStepAction"
+          class="!bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-lg ml-auto"
         >
-          <template #prefix>
-            <FeatherIcon name="check-circle" class="w-4" />
-          </template>
-          {{ __("Submit") }}
+          {{
+            currentStep < steps.length - 1
+              ? "Save & Continue"
+              : "Submit Application"
+          }}
         </Button>
       </div>
-    </template>
-  </Dialog>
+
+      <div
+        v-else
+        class="mt-6 pt-4 border-t border-gray-100 text-lg font-medium text-gray-700"
+      >
+        <div class="text-center py-4">
+          <div
+            class="mb-2 text-emerald-600 font-semibold flex items-center justify-center"
+          >
+            <svg
+              class="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              ></path>
+            </svg>
+            Application Successfully Submitted
+          </div>
+          <p class="text-gray-600">
+            Thank you for your application. You can review your submitted
+            details here.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="text-center py-20 text-gray-500">
+      Loading application details...
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, inject } from "vue";
+import { ref, inject, markRaw, watch, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Button, TextEditor, toast, createResource, Dialog } from "frappe-ui";
-import Uploader from "@/components/Controls/Uploader.vue";
-import { Edit3, LogIn } from "lucide-vue-next";
+import { Button, toast, createResource } from "frappe-ui";
 
-import { formatDistanceToNow, parseISO } from "date-fns";
-
-import { usersStore } from "../stores/user";
-import { sessionStore } from "../stores/session";
-
-const showSubmitDialog = ref(false);
-const { userResource } = usersStore();
-const { isLoggedIn } = sessionStore();
-const user = userResource;
-
-const router = useRouter();
+import PersonalInfo from "@/components/Application/PersonalInfo.vue";
+import EducationBackground from "@/components/Application/EducationBackground.vue";
+import WorkExperience from "@/components/Application/WorkExperience.vue";
+import AdditionalInformation from "@/components/Application/AdditionalInformation.vue";
+import ApplicationReview from "@/components/Application/ApplicationReview.vue";
 
 const route = useRoute();
-const applicationId = route.params?.id || "";
-const isEditing = ref(false);
-const submitted = ref(false);
+const router = useRouter();
+const user = inject("$user");
 
-const form = ref({
-  applicant_name: "",
-  surname: "",
-  other_names: "",
-  email_id: "",
-  phone: "",
-  cover_letter: "",
-  job_title: "",
-  creation: "",
-  modified: "",
-});
+const jobId = route.params?.id || "";
+const loading = ref(true);
+const currentStep = ref(0);
+const maxCompletedStep = ref(-1);
+const isSaving = ref(false);
 
+const steps = [
+  {
+    hash: "#info",
+    title: "Personal Info",
+    component: markRaw(PersonalInfo),
+    validate: (f) => true,
+  },
+  {
+    hash: "#education",
+    title: "Education & Qualifications",
+    component: markRaw(EducationBackground),
+    validate: () => true,
+  },
+  {
+    hash: "#experience",
+    title: "Work Experience",
+    component: markRaw(WorkExperience),
+    validate: () => true,
+  },
+  {
+    hash: "#additional",
+    title: "Additional Information",
+    component: markRaw(AdditionalInformation),
+    validate: () => true,
+  },
+  {
+    hash: "#review",
+    title: "Review & Submit",
+    component: markRaw(ApplicationReview),
+    validate: () => true,
+  },
+];
+
+const form = ref({});
+const resume = ref(null);
 const documents = ref([]);
-const profilePhoto = ref(null);
+const userDetails = ref({});
 
-const isPDF = (url) => url?.toLowerCase().endsWith(".pdf");
-const isWord = (url) => /\.(doc|docx)$/i.test(url);
-
-const getFileType = (filename) => {
-  const ext = filename?.split(".").pop()?.toUpperCase();
-  return ext || "Unknown";
-};
-
-const formatBytes = (bytes, decimals = 2) => {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-};
-
-const job = createResource({
-  url: "frappe.client.get",
-  makeParams() {
-    return {
-      doctype: "Job Opening",
-      name: form.value.job_title,
-    };
-  },
-  auto: false,
+const isSubmitted = computed(() => {
+  return (
+    opportunityApplication.data?.status &&
+    opportunityApplication.data.status !== "Draft"
+  );
 });
 
-const application = createResource({
-  url: "non_profit.non_profit.api.get_job_application",
-  makeParams() {
-    return {
-      name: applicationId,
-    };
-  },
-  onSuccess(data) {
-    if (!data) return toast.error("Application not found.");
+const filteredSteps = computed(() => {
+  if (isSubmitted.value) {
+    const reviewStepIndex = steps.findIndex((s) => s.hash === "#review");
+    const reviewStep = steps[reviewStepIndex];
+    return [{ ...reviewStep, originalIndex: reviewStepIndex }];
+  }
 
-    form.value = {
-      applicant_name: data.applicant_name || "",
-      surname: data.surname || "",
-      other_names: data.other_names || "",
-      email_id: data.email_id || "",
-      phone: data.phone || "",
-      cover_letter: data.cover_letter || "",
-      job_title: data.job_title || "",
-      creation: data.creation || "",
-      profile_photo: data.profile_photo || null,
-      modified: data.modified || "",
-      documents: [],
-      resume: null,
-    };
+  return steps.map((s, index) => ({ ...s, originalIndex: index }));
+});
 
-    if (data.job_title) job.submit({ name: data.job_title });
-
-    files.fetch();
-  },
+const userDetailsResource = createResource({
+  url: "non_profit.non_profit.api.get_user_details",
   auto: true,
-});
-
-const files = createResource({
-  url: "frappe.client.get_list",
-  makeParams() {
-    return {
-      doctype: "File",
-      filters: {
-        attached_to_doctype: "Job Applicant",
-        attached_to_name: applicationId,
-      },
-      fields: ["name", "file_name", "file_url", "file_size", "creation"],
-      order_by: "creation asc",
-    };
-  },
   onSuccess(data) {
-    if (!data) return;
-
-    const filesList = data.map((f) => ({
-      name: f.name,
-      file_name: f.file_name,
-      file_url: f.file_url,
-      file_size: f.file_size,
-      uploaded_on: f.creation,
-    }));
-
-    form.value.documents = filesList.filter(
-      (f) => !f.file_name.toLowerCase().includes("resume")
-    );
-
-    profilePhoto.value = form.value.profile_photo || null;
+    if (data) {
+      userDetails.value = data;
+      populateForm(data);
+    }
+    loading.value = false;
   },
-  auto: false,
+  onError(err) {
+    toast.error(err.message || "Failed to fetch user details");
+    loading.value = false;
+  },
 });
 
-const canViewApplication = computed(() => {
-  return user.data?.email === form.value.email_id;
-});
-
-const canEditResource = createResource({
-  url: "non_profit.non_profit.api.can_edit_job_application",
-  makeParams() {
-    return { applicant_id: applicationId };
-  },
+const opportunityApplication = createResource({
+  url: "non_profit.non_profit.api.get_job_application",
+  params: { name: jobId },
+  auto: true,
   onSuccess(data) {
-    if (!data) {
-      toast.warning(data?.reason || "This application cannot be edited.");
+    if (data) {
+      populateForm(data, true);
+      form.value.job_application_id = data.name;
+      resume.value = data.resume || null;
+      documents.value = data.documents || [];
+
+      if (data.job_title) {
+        job.update({ params: { job: data.job_title } });
+      }
+
+      if (data.status && data.status !== "Draft") {
+        const reviewIndex = steps.findIndex((s) => s.hash === "#review");
+        if (reviewIndex !== -1) {
+          currentStep.value = reviewIndex;
+          router.replace({ hash: steps[reviewIndex].hash });
+        }
+      }
     }
   },
-  auto: true,
+  onError(err) {
+    toast.error(err.message || "Failed to fetch application details");
+    loading.value = false;
+  },
 });
 
-const updateApplicationResource = createResource({
-  url: "non_profit.non_profit.api.update_job_application",
-  makeParams() {
-    return {
-      id: applicationId,
-      cover_letter: form.value.cover_letter,
-      documents: documents.value,
-      profile_photo: profilePhoto.value,
-      resume: resume.value,
-    };
+const job = createResource({
+  url: "non_profit.non_profit.api.get_job_details",
+  params: { job: jobId },
+  cache: ["job", jobId],
+  onSuccess(data) {
+    if (!data) {
+      toast.error("Job not found");
+      router.replace({ name: "JobListings" });
+    }
   },
+  onError(err) {
+    toast.error(err.message || "Failed to fetch job details");
+    router.replace({ name: "JobListings" });
+  },
+  auto: false,
+});
+
+const applicationSave = createResource({
+  url: "non_profit.non_profit.api.update_job_application",
 });
 
 const submitApplicationResource = createResource({
   url: "non_profit.non_profit.api.submit_job_application",
   makeParams() {
     return {
-      id: applicationId,
+      id: jobId,
     };
   },
 });
 
-const confirmSubmit = () => {
-  submitApplicationResource.submit(
-    {},
-    {
-      onSuccess: () => {
-        toast.success("Application submitted successfully");
-        showSubmitDialog.value = false;
-        isEditing.value = false;
-        application.reload();
-        submitted.value = true;
-      },
-      onError: (err) => toast.error(err.messages?.[0] || err),
+function populateForm(data = {}, isApplication = false) {
+  const src = isApplication ? "application" : "user";
+  const user = userDetails.value || {};
+
+  const fieldMap = {
+    surname: ["surname", "last_name"],
+    other_names: ["other_names", "first_name"],
+    email_id: ["email_id", "email"],
+    phone: ["phone", "mobile", "contact"],
+    cover_letter: ["cover_letter"],
+  };
+
+  for (const key in fieldMap) {
+    let value =
+      data[key] ||
+      fieldMap[key]
+        .map((alt) => data[alt])
+        .find((v) => v !== undefined && v !== null) ||
+      form.value[key];
+
+    if (
+      (value === undefined || value === null || value === "") &&
+      src === "user"
+    ) {
+      value =
+        user[key] ||
+        fieldMap[key]
+          .map((alt) => user[alt])
+          .find((v) => v !== undefined && v !== null) ||
+        "";
     }
-  );
-};
 
-const handleDocumentUpload = (file) => {
-  const newDocument = {
-    file_name: file.file_name,
-    file_url: file.file_url,
-    file_size: file.file_size,
-    uploaded_on: new Date().toISOString(),
-  };
-  documents.value.push(newDocument);
-  toast.success(`Document "${file.file_name}" uploaded successfully`);
-};
+    form.value[key] = Array.isArray(value) ? [...value] : value;
+  }
 
-const resume = ref(null);
+  const source = src === "user" ? user : data;
+  for (const key in source) {
+    const value = source[key];
 
-const handleResumeUpload = (file) => {
-  resume.value = {
-    file_name: file.file_name,
-    file_url: file.file_url,
-    file_size: file.file_size,
-    uploaded_on: new Date().toISOString(),
-  };
-  toast.success(`Resume "${file.file_name}" uploaded successfully`);
-};
+    if (
+      form.value[key] === undefined ||
+      form.value[key] === null ||
+      form.value[key] === "" ||
+      (Array.isArray(form.value[key]) && form.value[key].length === 0)
+    ) {
+      form.value[key] = Array.isArray(value) ? [...value] : value;
+    }
+  }
 
-const removeResume = () => {
-  if (confirm("Are you sure you want to remove the resume?")) {
-    resume.value = null;
-    toast.success("Resume removed successfully");
+  if (src === "user") {
+    for (const key in data) {
+      if (fieldMap[key]) continue;
+      if (
+        form.value[key] === undefined ||
+        form.value[key] === null ||
+        form.value[key] === "" ||
+        (Array.isArray(form.value[key]) && form.value[key].length === 0)
+      ) {
+        form.value[key] = Array.isArray(data[key]) ? [...data[key]] : data[key];
+      }
+    }
+  }
+}
+
+const goToStep = (index) => {
+  if (isSubmitted.value) {
+    const reviewIndex = steps.findIndex((s) => s.hash === "#review");
+    if (index === reviewIndex) {
+      currentStep.value = index;
+      router.replace({ hash: steps[index].hash });
+    } else {
+      toast.error(
+        "This submitted application is read-only and can only view the Review tab."
+      );
+    }
+    return;
+  }
+
+  if (index <= maxCompletedStep.value + 1) {
+    currentStep.value = index;
+    router.replace({ hash: steps[index].hash });
+    isSaving.value = false;
+  } else {
+    toast.error("Please complete the previous step first.");
   }
 };
 
-const redirectToLogin = () => {
-  const currentPath = router.currentRoute.value.fullPath;
-  router.push({
-    name: "Login",
-    query: { "redirect-to": currentPath },
-  });
+const prevStep = () => {
+  if (currentStep.value > 0) goToStep(currentStep.value - 1);
 };
 
-const updateApplication = () => {
-  updateApplicationResource.submit(
-    {},
+onMounted(() => {
+  const initialHash = route.hash || "#info";
+
+  const index = steps.findIndex((s) => s.hash === initialHash);
+  currentStep.value = index >= 0 ? index : 0;
+
+  if (!route.hash || route.hash !== steps[currentStep.value].hash) {
+    router.replace({ hash: steps[currentStep.value].hash });
+  }
+});
+
+watch(
+  () => route.hash,
+  (newHash) => {
+    const index = steps.findIndex((s) => s.hash === newHash);
+    if (index >= 0) currentStep.value = index;
+  }
+);
+
+watch(
+  () => opportunityApplication.data,
+  (newData) => {
+    if (newData && newData.job_title) {
+      job.update({ params: { job: newData.job_title } });
+      job.reload();
+    }
+  },
+  { deep: true }
+);
+
+const handleStepAction = () => {
+  const step = steps[currentStep.value];
+  const valid = step.validate(form.value, resume.value, userDetails.value);
+
+  if (!valid) {
+    toast.error("Please complete required fields before continuing.");
+    return;
+  }
+
+  if (currentStep.value < steps.length - 1) {
+    saveApplicationDraft();
+  } else {
+    submitApplication();
+  }
+};
+
+const saveApplicationDraft = () => {
+  isSaving.value = true;
+  applicationSave.submit(
     {
-      onSuccess: () => {
-        toast.success("Application updated successfully");
-        isEditing.value = false;
-        application.reload();
+      id: jobId,
+      ...form.value,
+      resume: resume.value,
+      documents: documents.value,
+    },
+    {
+      onSuccess: (response) => {
+        form.value.job_application_id =
+          response?.name || response?.application_id;
+        maxCompletedStep.value = Math.max(
+          maxCompletedStep.value,
+          currentStep.value
+        );
+        toast.success("Application stage saved successfully.");
+        goToStep(currentStep.value + 1);
       },
-      onError: (err) => toast.error(err.messages?.[0] || err),
+      onError: (err) =>
+        toast.error(err.messages?.[0] || "Failed to save application stage."),
+      onSettled: () => (isSaving.value = false),
     }
   );
 };
 
-const handleError = (error) => toast.error(error.message || "Upload error.");
+const submitApplication = () => {
+  isSaving.value = true;
+  submitApplicationResource.submit(
+    {
+      id: jobId,
+    },
+    {
+      onSuccess: (response) => {
+        const id = response?.name || response?.application_id;
+        toast.success("Application submitted successfully.");
+        router.push({ name: "JobApplicationDetail", params: { id } });
+      },
+      onError: (err) =>
+        toast.error(err.messages?.[0] || "Failed to submit application."),
+      onSettled: () => (isSaving.value = false),
+    }
+  );
+};
+
 const redirectToWebsite = (url) => window.open(url, "_blank");
 const getCompanyAbbr = (name) =>
   name
     ? name
         .split(" ")
-        .map((word) => word[0])
+        .map((w) => w[0])
         .join("")
         .slice(0, 2)
         .toUpperCase()
     : "NA";
-
-const formatDate = (date) => {
-  if (!date) return "N/A";
-  return new Date(date).toLocaleDateString();
-};
-
-const timeAgo = (date) => {
-  if (!date) return "";
-  return formatDistanceToNow(parseISO(date), { addSuffix: true });
-};
 </script>
