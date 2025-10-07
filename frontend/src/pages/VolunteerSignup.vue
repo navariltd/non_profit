@@ -64,7 +64,7 @@
               ></div>
 
               <div
-                class="relative z-10 flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ease-in-out"
+                class="relative flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300 ease-in-out"
                 :class="[
                   i < currentStep
                     ? 'bg-red-600 border-red-600 text-white shadow-md hover:shadow-lg'

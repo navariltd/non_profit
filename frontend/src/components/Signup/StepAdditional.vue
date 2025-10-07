@@ -48,7 +48,7 @@
       <div>
         <MultiSelect
           v-model="localModel.languages"
-          doctype="Language"
+          doctype="Volunteer Language"
           :label="__('Languages')"
         />
         <p v-if="errors[1]?.['Languages']" class="text-sm text-red-600 mt-1">
@@ -59,7 +59,7 @@
         <MultiSelect
           v-model="localModel.driving_licence"
           :label="__('Driving Licence')"
-          doctype="Driving Licence Class"
+          doctype="Driving Licences"
         />
         <p
           v-if="errors[1]?.['Driving Licence']"

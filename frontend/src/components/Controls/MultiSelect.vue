@@ -1,10 +1,5 @@
 <template>
   <div>
-    <!-- <label class="block mb-1" :class="labelClasses" v-if="label">
-      {{ label }}
-      <span class="text-ink-red-3" v-if="required">*</span>
-    </label> -->
-
     <div class="w-full">
       <Combobox v-model="selectedValue" nullable>
         <Popover class="w-full" v-model:show="showOptions">
@@ -107,24 +102,24 @@
       </Combobox>
     </div>
 
-    <div v-if="values.length" class="grid grid-cols-2 gap-2 mt-1">
+    <div v-if="displayValues.length" class="grid grid-cols-2 gap-2 mt-1">
       <div
-        v-for="item in values"
-        :key="item.value"
+        v-for="item in displayValues"
+        :key="item.childtable_id || item.link_value"
         class="flex items-center justify-between break-all bg-surface-gray-2 text-ink-gray-7 word-wrap p-2 rounded-md mr-2"
       >
-        <span class="break-all">{{ item.label || item.value }}</span>
+        <span class="break-all">{{ item.label }}</span>
         <X
           v-if="!props.readOnly"
           class="size-4 stroke-1.5 cursor-pointer"
-          @click="removeValue(item.value)"
+          @click="removeValue(item)"
         />
       </div>
     </div>
 
     <CreateNewEntryDialog
       v-model="showCreateDialog"
-      :doctype="props.doctype"
+      :doctype="linkDoctype"
       @created="(newName) => addValue({ value: newName, label: newName })"
     />
   </div>
@@ -138,7 +133,7 @@ import {
   ComboboxOption,
 } from "@headlessui/vue";
 import { createResource, Popover, Button } from "frappe-ui";
-import { ref, computed, nextTick, useAttrs } from "vue";
+import { ref, computed, nextTick, watch, onMounted } from "vue";
 import { watchDebounced } from "@vueuse/core";
 import { X, Plus } from "lucide-vue-next";
 import CreateNewEntryDialog from "../Modals/CreateNewEntryDialog.vue";
@@ -147,6 +142,7 @@ const props = defineProps({
   label: String,
   size: { type: String, default: "sm" },
   doctype: { type: String, required: true },
+  mainField: { type: String, default: null },
   filters: { type: Object, default: () => ({}) },
   validate: { type: Function, default: null },
   errorMessage: {
@@ -159,15 +155,186 @@ const props = defineProps({
 });
 
 const values = defineModel();
-const attrs = useAttrs();
-const emails = ref([]);
+const emit = defineEmits(["change"]);
+
 const search = ref(null);
 const error = ref(null);
 const query = ref("");
 const text = ref("");
 const showOptions = ref(false);
 const showCreateDialog = ref(false);
-const emit = defineEmits(["change"]);
+const linkFieldName = ref(props.mainField);
+const linkDoctype = ref(null);
+const displayValues = ref([]);
+
+const isLinkValue = (value) => {
+  return value && typeof value === "string";
+};
+
+const childtableMeta = createResource({
+  url: "frappe.desk.form.load.getdoctype",
+  params: {
+    doctype: props.doctype,
+    with_parent: 1,
+  },
+  auto: true,
+  onSuccess(data) {
+    if (!linkFieldName.value) {
+      const linkField = data.docs[0].fields.find((f) => f.fieldtype === "Link");
+
+      if (linkField) {
+        linkFieldName.value = linkField.fieldname;
+        linkDoctype.value = linkField.options;
+      } else {
+        console.error(
+          "[MultiSelect] No link field found in childtable:",
+          props.doctype
+        );
+      }
+    } else {
+      const field = data.docs[0].fields.find(
+        (f) => f.fieldname === linkFieldName.value
+      );
+
+      if (field && field.fieldtype === "Link") {
+        linkDoctype.value = field.options;
+      } else {
+        console.error("[MultiSelect] Field not found or not a Link field:", {
+          fieldname: linkFieldName.value,
+          field: field,
+        });
+      }
+    }
+  },
+  onError(error) {
+    console.error("[MultiSelect] Error fetching childtable meta:", error);
+  },
+});
+
+const childtableEntries = createResource({
+  url: "frappe.client.get_list",
+  makeParams() {
+    if (!values.value?.length) {
+      return null;
+    }
+
+    const childIds = values.value.filter(
+      (v) => typeof v === "string" && !isLinkValue(v)
+    );
+
+    if (!childIds.length) {
+      return null;
+    }
+
+    const params = {
+      doctype: props.doctype,
+      fields: ["name", linkFieldName.value],
+      filters: [["name", "in", childIds]],
+    };
+
+    return params;
+  },
+  auto: false,
+  onSuccess(data) {},
+  onError(error) {
+    console.error("[MultiSelect] Error fetching childtable entries:", error);
+  },
+});
+
+const linkLabelsResource = createResource({
+  url: "non_profit.non_profit.api.custom_search_link",
+  method: "GET",
+  auto: false,
+  onSuccess(data) {},
+  onError(error) {
+    console.error("[MultiSelect] Error fetching link labels:", error);
+  },
+});
+
+const resolveValues = async () => {
+  if (!values.value?.length || !linkFieldName.value) {
+    displayValues.value = [];
+    return;
+  }
+
+  const resolved = [];
+  const linkValuesToFetch = [];
+
+  for (const val of values.value) {
+    if (typeof val === "string") {
+      if (isLinkValue(val)) {
+        resolved.push({
+          link_value: val,
+          label: null,
+          childtable_id: null,
+        });
+        linkValuesToFetch.push(val);
+      } else {
+        if (!childtableEntries.data) {
+          await childtableEntries.reload();
+        }
+        const entry = childtableEntries.data?.find((e) => e.name === val);
+        if (entry) {
+          const linkVal = entry[linkFieldName.value];
+          resolved.push({
+            link_value: linkVal,
+            label: null,
+            childtable_id: val,
+          });
+          linkValuesToFetch.push(linkVal);
+        }
+      }
+    } else if (typeof val === "object" && val !== null) {
+      const linkVal = val[linkFieldName.value] || val.name;
+      resolved.push({
+        link_value: linkVal,
+        label: null,
+        childtable_id: val.name || null,
+      });
+      linkValuesToFetch.push(linkVal);
+    }
+  }
+
+  displayValues.value = resolved;
+
+  if (linkValuesToFetch.length && linkDoctype.value) {
+    await linkLabelsResource.update({
+      params: {
+        doctype: linkDoctype.value,
+        txt: "",
+        filters: JSON.stringify({ name: ["in", linkValuesToFetch] }),
+        ignore_user_permissions: 1,
+      },
+    });
+    await linkLabelsResource.reload();
+
+    if (linkLabelsResource.data) {
+      displayValues.value = resolved.map((item) => {
+        const match = linkLabelsResource.data.find(
+          (opt) => opt.value === item.link_value
+        );
+        return {
+          ...item,
+          label: match ? match.label || match.value : item.link_value,
+        };
+      });
+    }
+  }
+};
+
+watch(
+  [() => values.value, linkFieldName],
+  () => {
+    resolveValues();
+  },
+  { deep: true }
+);
+
+onMounted(() => {
+  if (values.value?.length) {
+    resolveValues();
+  }
+});
 
 const selectedValue = computed({
   get: () => query.value || "",
@@ -199,27 +366,60 @@ watchDebounced(
 const filterOptions = createResource({
   url: "non_profit.non_profit.api.custom_search_link",
   method: "POST",
-  cache: [text.value, props.doctype, serializeFilters(props.filters)],
-  auto: true,
-  params: {
-    txt: text.value,
-    doctype: props.doctype,
-    filters: serializeFilters(props.filters),
+  cache: [text.value, linkDoctype.value, serializeFilters(props.filters)],
+  auto: false,
+  makeParams() {
+    if (!linkDoctype.value) {
+      return null;
+    }
+
+    const params = {
+      txt: text.value,
+      doctype: linkDoctype.value,
+      filters: serializeFilters(props.filters),
+    };
+
+    return params;
+  },
+  onError(error) {
+    console.error("[MultiSelect] Error fetching filter options:", error);
   },
 });
 
+watch(
+  linkDoctype,
+  (newVal) => {
+    if (newVal) {
+      filterOptions.reload();
+    }
+  },
+  { immediate: true }
+);
+
 const options = computed(() => {
-  if (!filterOptions.data) return [];
-  return filterOptions?.data?.filter(
-    (option) => !values?.value?.some((item) => item.value === option.value)
+  if (!filterOptions.data) {
+    return [];
+  }
+
+  const currentLinkValues = displayValues.value.map((v) => v.link_value);
+
+  const filtered = filterOptions.data.filter(
+    (option) => !currentLinkValues.includes(option.value)
   );
+
+  return filtered;
 });
 
 function reload(val) {
+  if (!linkDoctype.value) {
+    console.warn("[MultiSelect] Cannot reload, link doctype not set");
+    return;
+  }
+
   filterOptions.update({
     params: {
       txt: val,
-      doctype: props.doctype,
+      doctype: linkDoctype.value,
       filters: serializeFilters(props.filters),
     },
   });
@@ -228,38 +428,58 @@ function reload(val) {
 
 const addValue = (option) => {
   error.value = null;
-  if (option) {
-    let valueToAdd, labelToAdd;
+  if (!option) return;
 
-    if (typeof option === "string") {
-      valueToAdd = option.trim();
-      labelToAdd = option.trim();
-    } else {
-      valueToAdd = option.value;
-      labelToAdd = option.label || option.value;
-    }
+  let linkValue, labelValue;
 
-    if (
-      valueToAdd &&
-      !values.value?.some((item) => item.value === valueToAdd)
-    ) {
-      if (props.validate && !props.validate(valueToAdd)) {
-        error.value = props.errorMessage(valueToAdd);
-        return;
-      }
-
-      const newItem = { value: valueToAdd, label: labelToAdd };
-
-      if (!values.value) {
-        values.value = [newItem];
-      } else {
-        values.value.push(newItem);
-      }
-      emit("change", values.value);
-      showOptions.value = false;
-    }
-    !error.value && (query.value = "");
+  if (typeof option === "string") {
+    linkValue = option.trim();
+    labelValue = option.trim();
+  } else {
+    linkValue = option.value;
+    labelValue = option.label || option.value;
   }
+
+  if (displayValues.value.some((item) => item.link_value === linkValue)) {
+    query.value = "";
+    return;
+  }
+
+  if (props.validate && !props.validate(linkValue)) {
+    error.value = props.errorMessage(linkValue);
+    console.error("[MultiSelect] Validation failed:", error.value);
+    return;
+  }
+
+  displayValues.value.push({
+    link_value: linkValue,
+    label: labelValue,
+    childtable_id: null,
+  });
+
+  if (!values.value) {
+    values.value = [];
+  }
+  values.value = [...values.value, linkValue];
+
+  emit("change", values.value);
+
+  query.value = "";
+  showOptions.value = false;
+};
+
+const removeValue = (item) => {
+  displayValues.value = displayValues.value.filter(
+    (v) => v.link_value !== item.link_value
+  );
+
+  if (item.childtable_id) {
+    values.value = values.value.filter((v) => v !== item.childtable_id);
+  } else {
+    values.value = values.value.filter((v) => v !== item.link_value);
+  }
+
+  emit("change", values.value);
 };
 
 const closeDropdown = (closeFunction) => {
@@ -267,31 +487,21 @@ const closeDropdown = (closeFunction) => {
   showOptions.value = false;
 };
 
-const removeValue = (value) => {
-  values.value = values.value.filter((item) => item.value !== value);
-  emit("change", values.value);
-};
-
 const removeLastValue = () => {
   if (query.value) return;
-  let emailRef = emails.value[emails.value.length - 1]?.$el;
-  if (document.activeElement === emailRef) {
-    values.value.pop();
+  if (displayValues.value.length) {
+    const lastItem = displayValues.value[displayValues.value.length - 1];
+    removeValue(lastItem);
     nextTick(() => {
-      if (values.value.length) {
-        emailRef = emails.value[emails.value.length - 1].$el;
-        emailRef?.focus();
-      } else {
+      if (displayValues.value.length) {
         setFocus();
       }
     });
-  } else {
-    emailRef?.focus();
   }
 };
 
 function setFocus() {
-  search.value.$el.focus();
+  search.value?.$el?.focus();
 }
 
 defineExpose({ setFocus });
