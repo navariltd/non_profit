@@ -14,7 +14,7 @@
         :variant="attrs.variant"
         :placeholder="attrs.placeholder"
         :filterable="false"
-        :readonly="attrs.readonly"
+        :readonly="attrs.readonly || props.readOnly"
         class="relative !z-100"
       >
         <template #target="{ open, togglePopover }">
@@ -89,6 +89,10 @@ const props = defineProps({
   description: {
     type: String,
     default: "",
+  },
+  readOnly: {
+    type: Boolean,
+    default: false,
   },
 });
 

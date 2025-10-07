@@ -561,21 +561,49 @@ def set_field_value(doc, fieldname, value, fieldtype=None):
         child_table = frappe.get_meta(doc.doctype).get_field(fieldname).options
         child_meta = frappe.get_meta(child_table)
         link_field = next(
-            (df.fieldname for df in child_meta.fields if df.fieldtype == "Link"), None
+            (df.fieldname for df in child_meta.fields if df.fieldtype == "Link"),
+            None,
         )
         if not link_field:
             frappe.throw(f"No Link field found in child table {child_table}")
-        doc.set(fieldname, [])
-        if isinstance(value, list):
-            for item in value:
-                if isinstance(item, dict) and item.get("value"):
-                    doc.append(fieldname, {link_field: item["value"]})
-                elif isinstance(item, str) and item.strip():
-                    doc.append(fieldname, {link_field: item})
-        else:
+
+        if not isinstance(value, list):
             frappe.throw(
                 f"Expected list of values for Table MultiSelect field {fieldname}"
             )
+
+        existing = {row.name: row for row in doc.get(fieldname)}
+
+        doc.set(fieldname, [])
+
+        for item in value:
+            if isinstance(item, str):
+                if item.strip():
+                    doc.append(fieldname, {link_field: item})
+
+            elif isinstance(item, dict):
+                row_data = item.copy()
+
+                if row_data.get("name") and row_data["name"] in existing:
+                    row = existing[row_data["name"]]
+                    for k, v in row_data.items():
+                        if k != "name":
+                            row.set(k, v)
+                    doc.append(fieldname, row.as_dict())
+
+                else:
+                    if link_field not in row_data and row_data.get("value"):
+                        row_data[link_field] = row_data.pop("value")
+                    if link_field not in row_data:
+                        frappe.throw(
+                            f"Missing link field {link_field} for new child row in {fieldname}"
+                        )
+                    doc.append(fieldname, row_data)
+
+            else:
+                frappe.throw(
+                    f"Unsupported item type {type(item)} for Table MultiSelect field {fieldname}"
+                )
 
     elif fieldtype == "Table":
         if isinstance(value, list):
@@ -1011,10 +1039,6 @@ def create_availability_schedule(slot_data):
 
         personal_schedule_name = create_personal_schedule(employee, fiscal_year)
         create_schedule(personal_schedule_name, weekly_availability)
-
-        # generate_weekly_patterns(
-        #     personal_schedule_name, weekly_availability, fiscal_year
-        # )
 
         return {"employee": employee}
     except Exception as e:
@@ -1826,33 +1850,38 @@ def get_user_details():
 
 
 @frappe.whitelist()
-def update_user_details(data):
+def update_user_details(**data):
     """
     Updates the logged-in user's details.
     `data` should be a dict of fields to update.
     """
-    if not frappe.session.user or frappe.session.user == "Guest":
-        frappe.throw(
-            _("You must be logged in to update your profile"), frappe.PermissionError
-        )
+    try:
+        if not frappe.session.user or frappe.session.user == "Guest":
+            frappe.throw(
+                _("You must be logged in to update your profile"),
+                frappe.PermissionError,
+            )
 
-    if isinstance(data, str):
-        import json
+        if isinstance(data, str):
+            import json
 
-        try:
-            data = json.loads(data)
-        except Exception:
-            frappe.throw(_("Invalid data format"))
+            try:
+                data = json.loads(data)
+            except Exception:
+                frappe.throw(_("Invalid data format"))
 
-    user_doc = frappe.get_doc("User", frappe.session.user)
+        user_doc = frappe.get_doc("User", frappe.session.user)
 
-    for field, value in data.items():
-        if hasattr(user_doc, field):
-            setattr(user_doc, field, value)
-        else:
-            frappe.throw(_("Field {0} does not exist on User").format(field))
+        for fieldname, value in data.items():
+            if user_doc.meta.has_field(fieldname):
+                fieldtype = user_doc.meta.get_field(fieldname).fieldtype
+                set_field_value(user_doc, fieldname, value, fieldtype)
 
-    user_doc.save(ignore_permissions=True)
-    frappe.db.commit()
+        user_doc.save(ignore_permissions=True)
+        frappe.db.commit()
 
-    return {"message": _("Profile updated successfully")}
+        return {"message": _("Profile updated successfully")}
+
+    except Exception as e:
+        frappe.db.rollback()
+        frappe.log_error("User Profile Update Error", str(e))

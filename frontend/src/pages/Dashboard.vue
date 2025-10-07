@@ -26,7 +26,7 @@
     </div>
   </div>
   <div v-if="user?.data && user?.data !== 'Guest'" class="max-w-7xl mx-auto">
-    <div class="flex flex-col gap-2 mb-6">
+    <div class="flex flex-col gap-2 my-6">
       <h1 class="text-3xl md:text-4xl font-bold text-gray-900">
         👋 Welcome back, {{ user?.data?.full_name }}!
       </h1>
