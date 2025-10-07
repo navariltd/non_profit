@@ -99,7 +99,6 @@ frappe.ui.form.on("Job Opening", {
           }
 
           if (df.fieldtype === "Table") {
-            // Clear table first
             frm.clear_table(fieldname);
 
             if (template[fieldname] && template[fieldname].length > 0) {

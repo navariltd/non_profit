@@ -104,15 +104,15 @@
 
     <div v-if="displayValues.length" class="grid grid-cols-2 gap-2 mt-1">
       <div
-        v-for="item in displayValues"
-        :key="item.childtable_id || item.link_value"
+        v-for="(item, index) in displayValues"
+        :key="`${props.label}-${item[linkFieldName] || index}`"
         class="flex items-center justify-between break-all bg-surface-gray-2 text-ink-gray-7 word-wrap p-2 rounded-md mr-2"
       >
-        <span class="break-all">{{ item.label }}</span>
+        <span class="break-all">{{ item.__label || item.label }}</span>
         <X
           v-if="!props.readOnly"
           class="size-4 stroke-1.5 cursor-pointer"
-          @click="removeValue(item)"
+          @click="removeValue(index)"
         />
       </div>
     </div>
@@ -165,11 +165,9 @@ const showOptions = ref(false);
 const showCreateDialog = ref(false);
 const linkFieldName = ref(props.mainField);
 const linkDoctype = ref(null);
+const titleField = ref(null);
 const displayValues = ref([]);
-
-const isLinkValue = (value) => {
-  return value && typeof value === "string";
-};
+let resolving = false;
 
 const childtableMeta = createResource({
   url: "frappe.desk.form.load.getdoctype",
@@ -177,11 +175,11 @@ const childtableMeta = createResource({
     doctype: props.doctype,
     with_parent: 1,
   },
+  cache: [props.doctype],
   auto: true,
   onSuccess(data) {
     if (!linkFieldName.value) {
       const linkField = data.docs[0].fields.find((f) => f.fieldtype === "Link");
-
       if (linkField) {
         linkFieldName.value = linkField.fieldname;
         linkDoctype.value = linkField.options;
@@ -202,14 +200,39 @@ const childtableMeta = createResource({
         console.error("[MultiSelect] Field not found or not a Link field:", {
           fieldname: linkFieldName.value,
           field: field,
+          doctype: props.doctype,
         });
       }
     }
   },
-  onError(error) {
-    console.error("[MultiSelect] Error fetching childtable meta:", error);
+});
+
+const linkDoctypeMeta = createResource({
+  url: "frappe.desk.form.load.getdoctype",
+  makeParams() {
+    return linkDoctype.value
+      ? {
+          doctype: linkDoctype.value,
+          with_parent: 0,
+        }
+      : null;
+  },
+  cache: () => [linkDoctype.value],
+  auto: false,
+  onSuccess(data) {
+    titleField.value = data.docs[0].title_field || "name";
   },
 });
+
+watch(
+  linkDoctype,
+  (newVal) => {
+    if (newVal) {
+      linkDoctypeMeta.reload();
+    }
+  },
+  { immediate: true }
+);
 
 const childtableEntries = createResource({
   url: "frappe.client.get_list",
@@ -218,114 +241,110 @@ const childtableEntries = createResource({
       return null;
     }
 
-    const childIds = values.value.filter(
-      (v) => typeof v === "string" && !isLinkValue(v)
-    );
+    const childIds = values.value.filter((v) => typeof v === "string");
 
     if (!childIds.length) {
       return null;
     }
 
-    const params = {
+    return {
       doctype: props.doctype,
       fields: ["name", linkFieldName.value],
       filters: [["name", "in", childIds]],
     };
-
-    return params;
   },
   auto: false,
-  onSuccess(data) {},
-  onError(error) {
-    console.error("[MultiSelect] Error fetching childtable entries:", error);
-  },
 });
 
 const linkLabelsResource = createResource({
-  url: "non_profit.non_profit.api.custom_search_link",
-  method: "GET",
-  auto: false,
-  onSuccess(data) {},
-  onError(error) {
-    console.error("[MultiSelect] Error fetching link labels:", error);
+  url: "frappe.client.get_list",
+  makeParams() {
+    const linkValues = displayValues.value
+      .map((v) => v[linkFieldName.value])
+      .filter(Boolean);
+
+    if (!linkValues.length || !linkDoctype.value || !titleField.value) {
+      return null;
+    }
+
+    return {
+      doctype: linkDoctype.value,
+      fields: ["name", titleField.value],
+      filters: [["name", "in", linkValues]],
+    };
   },
+  auto: false,
 });
 
 const resolveValues = async () => {
-  if (!values.value?.length || !linkFieldName.value) {
+  if (resolving || !values.value?.length || !linkFieldName.value) {
     displayValues.value = [];
     return;
   }
 
-  const resolved = [];
-  const linkValuesToFetch = [];
+  resolving = true;
+  try {
+    const resolved = [];
 
-  for (const val of values.value) {
-    if (typeof val === "string") {
-      if (isLinkValue(val)) {
-        resolved.push({
-          link_value: val,
-          label: null,
-          childtable_id: null,
-        });
-        linkValuesToFetch.push(val);
-      } else {
-        if (!childtableEntries.data) {
-          await childtableEntries.reload();
-        }
-        const entry = childtableEntries.data?.find((e) => e.name === val);
-        if (entry) {
-          const linkVal = entry[linkFieldName.value];
+    const hasStringValues = values.value.some((v) => typeof v === "string");
+
+    if (hasStringValues) {
+      await childtableEntries.reload();
+
+      if (childtableEntries.data) {
+        for (const entry of childtableEntries.data) {
           resolved.push({
-            link_value: linkVal,
-            label: null,
-            childtable_id: val,
+            name: entry.name,
+            [linkFieldName.value]: entry[linkFieldName.value],
+            __label: entry[linkFieldName.value],
           });
-          linkValuesToFetch.push(linkVal);
         }
       }
-    } else if (typeof val === "object" && val !== null) {
-      const linkVal = val[linkFieldName.value] || val.name;
-      resolved.push({
-        link_value: linkVal,
-        label: null,
-        childtable_id: val.name || null,
-      });
-      linkValuesToFetch.push(linkVal);
+    } else {
+      for (const val of values.value) {
+        resolved.push({
+          ...val,
+          __label: val[linkFieldName.value] || val.name,
+        });
+      }
     }
-  }
 
-  displayValues.value = resolved;
+    displayValues.value = resolved;
 
-  if (linkValuesToFetch.length && linkDoctype.value) {
-    await linkLabelsResource.update({
-      params: {
-        doctype: linkDoctype.value,
-        txt: "",
-        filters: JSON.stringify({ name: ["in", linkValuesToFetch] }),
-        ignore_user_permissions: 1,
-      },
-    });
-    await linkLabelsResource.reload();
+    // ✅ Only reload linkLabelsResource if ALL required parameters exist
+    if (
+      resolved.length &&
+      linkDoctype.value &&
+      titleField.value &&
+      resolved.every((item) => item[linkFieldName.value])
+    ) {
+      await linkLabelsResource.reload();
 
-    if (linkLabelsResource.data) {
-      displayValues.value = resolved.map((item) => {
-        const match = linkLabelsResource.data.find(
-          (opt) => opt.value === item.link_value
-        );
-        return {
-          ...item,
-          label: match ? match.label || match.value : item.link_value,
-        };
-      });
+      if (linkLabelsResource.data?.length) {
+        displayValues.value = resolved.map((item) => {
+          const match = linkLabelsResource.data.find(
+            (opt) => opt.name === item[linkFieldName.value]
+          );
+          return {
+            ...item,
+            __label: match
+              ? match[titleField.value] || match.name
+              : item[linkFieldName.value],
+          };
+        });
+      }
     }
+  } finally {
+    resolving = false;
   }
 };
 
 watch(
-  [() => values.value, linkFieldName],
+  [() => values.value, linkFieldName, titleField],
   () => {
-    resolveValues();
+    if (linkFieldName.value && titleField.value) {
+      resolveValues();
+    }
   },
   { deep: true }
 );
@@ -366,30 +385,38 @@ watchDebounced(
 const filterOptions = createResource({
   url: "non_profit.non_profit.api.custom_search_link",
   method: "POST",
-  cache: [text.value, linkDoctype.value, serializeFilters(props.filters)],
+  cache: [
+    text.value,
+    linkDoctype.value,
+    serializeFilters(props.filters),
+    props.doctype,
+  ],
   auto: false,
   makeParams() {
     if (!linkDoctype.value) {
       return null;
     }
 
-    const params = {
+    return {
       txt: text.value,
       doctype: linkDoctype.value,
       filters: serializeFilters(props.filters),
     };
-
-    return params;
-  },
-  onError(error) {
-    console.error("[MultiSelect] Error fetching filter options:", error);
   },
 });
 
 watch(
-  linkDoctype,
-  (newVal) => {
-    if (newVal) {
+  () => childtableMeta.data,
+  async (meta) => {
+    if (!meta) return;
+    const linkField =
+      meta.docs[0].fields.find(
+        (f) => f.fieldname === linkFieldName.value && f.fieldtype === "Link"
+      ) || meta.docs[0].fields.find((f) => f.fieldtype === "Link");
+
+    if (linkField) {
+      linkDoctype.value = linkField.options;
+      await nextTick();
       filterOptions.reload();
     }
   },
@@ -401,13 +428,13 @@ const options = computed(() => {
     return [];
   }
 
-  const currentLinkValues = displayValues.value.map((v) => v.link_value);
-
-  const filtered = filterOptions.data.filter(
-    (option) => !currentLinkValues.includes(option.value)
+  const currentLinkValues = displayValues.value.map(
+    (v) => v[linkFieldName.value]
   );
 
-  return filtered;
+  return filterOptions.data.filter(
+    (option) => !currentLinkValues.includes(option.value)
+  );
 });
 
 function reload(val) {
@@ -440,7 +467,9 @@ const addValue = (option) => {
     labelValue = option.label || option.value;
   }
 
-  if (displayValues.value.some((item) => item.link_value === linkValue)) {
+  if (
+    displayValues.value.some((item) => item[linkFieldName.value] === linkValue)
+  ) {
     query.value = "";
     return;
   }
@@ -451,16 +480,18 @@ const addValue = (option) => {
     return;
   }
 
-  displayValues.value.push({
-    link_value: linkValue,
-    label: labelValue,
-    childtable_id: null,
-  });
+  const newRow = {
+    [linkFieldName.value]: linkValue,
+    __label: labelValue,
+  };
+
+  displayValues.value.push(newRow);
 
   if (!values.value) {
     values.value = [];
   }
-  values.value = [...values.value, linkValue];
+
+  values.value = [...values.value, newRow];
 
   emit("change", values.value);
 
@@ -468,16 +499,9 @@ const addValue = (option) => {
   showOptions.value = false;
 };
 
-const removeValue = (item) => {
-  displayValues.value = displayValues.value.filter(
-    (v) => v.link_value !== item.link_value
-  );
-
-  if (item.childtable_id) {
-    values.value = values.value.filter((v) => v !== item.childtable_id);
-  } else {
-    values.value = values.value.filter((v) => v !== item.link_value);
-  }
+const removeValue = (index) => {
+  displayValues.value.splice(index, 1);
+  values.value.splice(index, 1);
 
   emit("change", values.value);
 };
@@ -490,8 +514,7 @@ const closeDropdown = (closeFunction) => {
 const removeLastValue = () => {
   if (query.value) return;
   if (displayValues.value.length) {
-    const lastItem = displayValues.value[displayValues.value.length - 1];
-    removeValue(lastItem);
+    removeValue(displayValues.value.length - 1);
     nextTick(() => {
       if (displayValues.value.length) {
         setFocus();

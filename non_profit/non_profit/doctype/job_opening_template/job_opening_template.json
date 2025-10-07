@@ -301,7 +301,7 @@
    "fieldname": "required_certification",
    "fieldtype": "Table",
    "label": "Required Certification",
-   "options": "Designation Skill"
+   "options": "Certification"
   },
   {
    "fieldname": "required_gpa__grade",
@@ -359,7 +359,7 @@
    "link_fieldname": "job_opening_template"
   }
  ],
- "modified": "2025-10-07 06:50:06.270337",
+ "modified": "2025-10-07 07:02:06.629984",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Job Opening Template",
