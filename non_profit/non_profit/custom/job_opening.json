@@ -1389,7 +1389,7 @@
       "name": "Job Opening-required_certification",
       "no_copy": 0,
       "non_negative": 0,
-      "options": "Designation Skill",
+      "options": "Certification",
       "owner": "Administrator",
       "permlevel": 0,
       "placeholder": null,

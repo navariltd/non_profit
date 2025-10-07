@@ -149,15 +149,6 @@ const requiredFields = [
   "reason_to_join_krcs",
 ];
 
-const childTables = [
-  "disabilities",
-  "education",
-  "courses",
-  "additional_skills",
-  "licences",
-  "certification",
-];
-
 const disabilityQueries = {
   disability: (row, allRows, formData) => {
     return {

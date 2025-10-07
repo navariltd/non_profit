@@ -443,30 +443,12 @@ def get_job_openings(filters=None, orFilters=None):
 
 @frappe.whitelist(allow_guest=True)
 def get_job_details(job):
-    job_details = frappe.db.get_value(
-        "Job Opening",
-        job,
-        [
-            "job_title",
-            "posted_on",
-            "closes_on",
-            "closed_on",
-            "designation",
-            "vacancies",
-            "location",
-            "employment_type",
-            "opportunity_type",
-            "company",
-            "department",
-            "name",
-            "creation",
-            "description",
-            "route",
-            "status",
-            "is_internal",
-        ],
-        as_dict=1,
-    )
+    job_doc = frappe.get_doc("Job Opening", job)
+
+    if not job_doc:
+        return {}
+
+    job_details = job_doc.as_dict()
 
     if not job_details:
         return {}
