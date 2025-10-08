@@ -46,9 +46,15 @@
                 theme="red"
                 variant="solid"
                 size="lg"
-                @click="handleRegister"
+                @click="
+                  handleRegister(eventDetail.data?.is_ticketed ? true : false)
+                "
               >
-                REGISTER NOW
+                {{
+                  eventDetail.data?.is_ticketed
+                    ? "Get Ticket"
+                    : "Register Event"
+                }}
               </Button>
             </div>
 
@@ -218,16 +224,21 @@
     </div>
   </div>
   <AttendEventModal
-    :eventId="eventDetail.data.name"
+    :eventId="eventDetail.data?.name"
     :dialogStatus="isOpen"
     @close="isOpen = false"
     v-model="isOpen"
+  />
+  <Ticket
+    v-model="openTicketModal"
+    :tickets="eventDetail.data?.tickets"
+    :event="eventDetail.data?.name"
   />
 </template>
 <script setup>
 import { Button, createResource, toast } from "frappe-ui";
 import { CalendarDays, Clock, MapPin, Users } from "lucide-vue-next";
-import { ref, onMounted, onUnmounted, inject, watch } from "vue";
+import { ref, onMounted, onUnmounted, inject, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
 import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
@@ -242,11 +253,13 @@ import {
 } from "lucide-vue-next";
 import router from "../router";
 import AttendEventModal from "../components/Modals/AttendEventModal.vue";
+import Ticket from "../components/Modals/Ticket.vue";
 
 const route = useRoute();
 const eventName = ref(route.params.id);
 const user = inject("$user");
 const isOpen = ref(false);
+const openTicketModal = ref(false);
 
 const eventDetail = createResource({
   url: "non_profit.non_profit.api.get_event_details",
@@ -258,6 +271,8 @@ const eventDetail = createResource({
   auto: true,
   cache: ["event", eventName.value],
   onSuccess(data) {
+    console.log("Event Data:", data);
+
     if (
       user?.data == "Guest" &&
       (eventDetail.data?.event_access === "Private" ||
@@ -309,8 +324,12 @@ const formatDate = (dateStr) => {
   });
 };
 
-const handleRegister = () => {
-  isOpen.value = true;
+const handleRegister = (status) => {
+  if (status) {
+    openTicketModal.value = true;
+  } else {
+    isOpen.value = true;
+  }
 };
 
 onMounted(() => {
