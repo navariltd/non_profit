@@ -46,14 +46,14 @@
 
         <MultiSelect
           v-model="form.languages"
-          doctype="Language"
+          doctype="Volunteer Language"
           :label="__('Languages')"
           :disabled="true"
           :readOnly="true"
         />
         <MultiSelect
           v-model="form.driving_licence"
-          doctype="Driving Licence Class"
+          doctype="Driving Licences"
           :label="__('Driving Licence')"
           :disabled="true"
           :readOnly="true"

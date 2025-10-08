@@ -43,10 +43,6 @@
       </button>
     </template>
   </Dropdown>
-  <SettingsModal
-    v-if="userResource.data?.is_moderator"
-    v-model="showSettingsModal"
-  />
 </template>
 
 <script setup>
@@ -92,6 +88,16 @@ const userDropdownOptions = computed(() => {
     {
       group: "",
       items: [
+        {
+          icon: User,
+          label: "My Profile",
+          onClick: () => {
+            router.push(`/user/profile`);
+          },
+          condition: () => {
+            return isLoggedIn;
+          },
+        },
         {
           component: markRaw(Apps),
           condition: () => {

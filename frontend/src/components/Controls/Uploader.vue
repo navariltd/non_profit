@@ -1,7 +1,26 @@
 <template>
   <div class="border-0">
+    <label v-if="label" class="block text-sm font-medium text-gray-700 mb-1"
+      >{{ label }} <span v-if="required" class="text-red-500">*</span></label
+    >
+    <p v-if="description" class="text-xs text-gray-500 mb-2">
+      {{ description }}
+    </p>
+
+    <component
+      v-if="
+        !readOnly && (multi || !uploadedFiles.length) && customUploadComponent
+      "
+      :is="customUploadComponent"
+      :accept="acceptAttribute"
+      :multiple="multi"
+      :supported-formats="supportedFormatsText"
+      @files-selected="handleFiles"
+      @click="triggerFileInput"
+    />
+
     <button
-      v-if="multi || !uploadedFiles.length"
+      v-else-if="!readOnly && (multi || !uploadedFiles.length)"
       type="button"
       class="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-md bg-gray-50 hover:border-blue-400 transition-colors duration-300 w-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 mb-4"
       @dragover.prevent
@@ -31,9 +50,17 @@
       </div>
     </button>
 
+    <div
+      v-if="readOnly && !uploadedFiles.length"
+      class="p-6 border-2 border-solid border-gray-200 rounded-md bg-gray-50 text-center text-gray-500"
+    >
+      No files uploaded.
+    </div>
+
     <div v-if="uploadedFiles.length" class="space-y-3">
-      <div class="text-sm font-medium text-gray-700 mb-2">
-        {{ uploadedFiles.length }} file(s) uploaded
+      <div class="text-sm font-medium text-gray-700 mb-2" v-if="showLength">
+        {{ uploadedFiles.length }} file(s)
+        {{ readOnly ? "attached" : "uploaded" }}
       </div>
       <div class="grid grid-cols-1 gap-4">
         <div
@@ -41,7 +68,16 @@
           :key="(file.file_name || file.name || file.file_url) + index"
           class="bg-white p-4 rounded-md border space-y-2"
         >
-          <div class="relative w-full">
+          <component
+            v-if="customPreviewComponent"
+            :is="customPreviewComponent"
+            :file="file"
+            :index="index"
+            :read-only="readOnly"
+            @remove="removeFile"
+          />
+
+          <div v-else class="relative w-full max-w-32">
             <img
               v-if="isImage(file.file_url || file.url || file.file_url)"
               :src="file.file_url || file.url || file"
@@ -63,7 +99,7 @@
             </div>
 
             <button
-              v-if="!uploading"
+              v-if="!uploading && !readOnly"
               @click="removeFile(index)"
               class="absolute -top-2 -right-2 bg-gray-200 border rounded-full shadow h-6 w-6 text-red-500 hover:bg-red-100 flex items-center justify-center text-xs"
               title="Remove File"
@@ -77,6 +113,7 @@
               :href="file.file_url || file.url || file"
               target="_blank"
               class="block font-medium text-blue-600 hover:underline truncate"
+              v-if="showFileName"
             >
               {{ file.file_name || file.name || file }}
             </a>
@@ -88,7 +125,7 @@
       </div>
 
       <button
-        v-if="multi && uploadedFiles.length > 1 && !uploading"
+        v-if="multi && uploadedFiles.length > 1 && !uploading && !readOnly"
         @click="clearAllFiles"
         type="button"
         class="mt-4 px-4 py-2 text-sm text-red-600 border border-red-300 rounded-md hover:bg-red-50 transition-colors"
@@ -97,8 +134,15 @@
       </button>
     </div>
 
+    <component
+      v-if="uploading && customProgressComponent"
+      :is="customProgressComponent"
+      :upload-queue="uploadQueue"
+      @cancel="cancelUpload"
+    />
+
     <div
-      v-if="uploading"
+      v-else-if="uploading"
       class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center"
     >
       <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg">
@@ -158,6 +202,16 @@ const props = withDefaults(
     multi?: boolean;
     maxFiles?: number;
     maxFileSize?: number;
+    readOnly?: boolean;
+
+    showFileName?: boolean;
+    showLength?: boolean;
+
+    customUploadComponent?: any;
+    customPreviewComponent?: any;
+    customProgressComponent?: any;
+
+    customUploadHandler?: (file: File) => Promise<any>;
   }>(),
   {
     modelValue: "",
@@ -169,6 +223,12 @@ const props = withDefaults(
     multi: false,
     maxFiles: 10,
     maxFileSize: 10,
+    readOnly: false,
+    showFileName: true,
+    showLength: false,
+    customUploadComponent: null,
+    customPreviewComponent: null,
+    customProgressComponent: null,
   }
 );
 
@@ -177,9 +237,16 @@ const uploading = ref(false);
 const uploadedFiles = ref<any[]>([]);
 const uploadQueue = ref<{ file: File; progress: number }[]>([]);
 
-const triggerFileInput = () => fileInput.value?.click();
+const triggerFileInput = () => {
+  if (props.readOnly) return;
+  fileInput.value?.click();
+};
 
 async function uploadFile(file: File) {
+  if (props.customUploadHandler) {
+    return await props.customUploadHandler(file);
+  }
+
   const formData = new FormData();
   formData.append("file", file);
 
@@ -327,12 +394,15 @@ const onFileSelect = (e: Event) => {
 };
 
 const onDrop = (e: DragEvent) => {
+  if (props.readOnly) return;
   if (!e.dataTransfer?.files?.length) return;
   const files = Array.from(e.dataTransfer.files);
   handleFiles(files);
 };
 
 const handleFiles = async (files: File[]) => {
+  if (props.readOnly) return;
+
   const validFiles = validateFiles(files);
   if (!validFiles.length) return;
 
@@ -364,10 +434,6 @@ const handleFiles = async (files: File[]) => {
       item.progress = 100;
 
       if (props.multi) {
-        const current = Array.isArray(props.modelValue)
-          ? [...props.modelValue]
-          : [...uploadedFiles.value];
-
         emit("update:modelValue", uploadedFiles.value.slice());
         emit("filesChanged", uploadedFiles.value.slice());
       } else {
@@ -386,6 +452,7 @@ const handleFiles = async (files: File[]) => {
 };
 
 const removeFile = (index: number) => {
+  if (props.readOnly) return;
   const removedFile = uploadedFiles.value[index];
   uploadedFiles.value.splice(index, 1);
 
@@ -401,6 +468,7 @@ const removeFile = (index: number) => {
 };
 
 const clearAllFiles = () => {
+  if (props.readOnly) return;
   if (
     confirm(
       `Are you sure you want to remove all ${uploadedFiles.value.length} files?`
@@ -418,6 +486,11 @@ const clearAllFiles = () => {
 
     toast.success("All files removed successfully.");
   }
+};
+
+const cancelUpload = () => {
+  uploading.value = false;
+  uploadQueue.value = [];
 };
 
 const formatBytes = (bytes: number, decimals = 2) => {
@@ -477,6 +550,13 @@ watch(
   },
   { deep: true }
 );
+
+defineExpose({
+  triggerFileInput,
+  handleFiles,
+  removeFile,
+  clearAllFiles,
+});
 </script>
 
 <style scoped>

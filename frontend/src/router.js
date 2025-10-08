@@ -31,6 +31,14 @@ const routes = [
     path: "/login",
     component: () => import("@/pages/Login.vue"),
   },
+
+  {
+    path: "/user/profile",
+    name: "Profile",
+    component: () => import("@/pages/Profile.vue"),
+    props: true,
+    meta: { requiresAuth: true },
+  },
   {
     name: "Welcome",
     path: "/welcome",

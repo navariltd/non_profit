@@ -1,62 +1,67 @@
 <template>
-  <div class="space-y-1.5">
+  <div class="space-y-1.5 relative">
     <label class="block" :class="labelClasses" v-if="attrs.label">
       {{ attrs.label }}
       <span class="text-ink-red-3" v-if="attrs.required">*</span>
     </label>
-    <Autocomplete
-      ref="autocomplete"
-      :options="options.data"
-      v-model="value"
-      :size="attrs.size || 'sm'"
-      :variant="attrs.variant"
-      :placeholder="attrs.placeholder"
-      :filterable="false"
-      :readonly="attrs.readonly"
-    >
-      <template #target="{ open, togglePopover }">
-        <slot name="target" v-bind="{ open, togglePopover }" />
-      </template>
 
-      <template #prefix>
-        <slot name="prefix" />
-      </template>
+    <div class="relative">
+      <Autocomplete
+        ref="autocomplete"
+        :options="options.data"
+        v-model="value"
+        :size="attrs.size || 'sm'"
+        :variant="attrs.variant"
+        :placeholder="attrs.placeholder"
+        :filterable="false"
+        :readonly="attrs.readonly || props.readOnly"
+        class="relative !z-100"
+      >
+        <template #target="{ open, togglePopover }">
+          <slot name="target" v-bind="{ open, togglePopover }" />
+        </template>
 
-      <template #item-prefix="{ active, selected, option }">
-        <slot name="item-prefix" v-bind="{ active, selected, option }" />
-      </template>
+        <template #prefix>
+          <slot name="prefix" />
+        </template>
 
-      <template #item-label="{ active, selected, option }">
-        <slot name="item-label" v-bind="{ active, selected, option }" />
-      </template>
+        <template #item-prefix="{ active, selected, option }">
+          <slot name="item-prefix" v-bind="{ active, selected, option }" />
+        </template>
 
-      <template #footer="{ value, close }">
-        <div v-if="attrs.onCreate">
-          <Button
-            variant="ghost"
-            class="w-full !justify-start"
-            :label="__('Create New')"
-            @click="attrs.onCreate(value, close)"
-          >
-            <template #prefix>
-              <Plus class="h-4 w-4 stroke-1.5" />
-            </template>
-          </Button>
-        </div>
-        <div>
-          <Button
-            variant="ghost"
-            class="w-full !justify-start"
-            :label="__('Clear')"
-            @click="() => clearValue(close)"
-          >
-            <template #prefix>
-              <X class="h-4 w-4 stroke-1.5" />
-            </template>
-          </Button>
-        </div>
-      </template>
-    </Autocomplete>
+        <template #item-label="{ active, selected, option }">
+          <slot name="item-label" v-bind="{ active, selected, option }" />
+        </template>
+
+        <template #footer="{ value, close }">
+          <div v-if="attrs.onCreate">
+            <Button
+              variant="ghost"
+              class="w-full !justify-start"
+              :label="__('Create New')"
+              @click="attrs.onCreate(value, close)"
+            >
+              <template #prefix>
+                <Plus class="h-4 w-4 stroke-1.5" />
+              </template>
+            </Button>
+          </div>
+          <div>
+            <Button
+              variant="ghost"
+              class="w-full !justify-start"
+              :label="__('Clear')"
+              @click="() => clearValue(close)"
+            >
+              <template #prefix>
+                <X class="h-4 w-4 stroke-1.5" />
+              </template>
+            </Button>
+          </div>
+        </template>
+      </Autocomplete>
+    </div>
+
     <p v-if="description" class="text-sm text-ink-gray-5">{{ description }}</p>
   </div>
 </template>
@@ -84,6 +89,10 @@ const props = defineProps({
   description: {
     type: String,
     default: "",
+  },
+  readOnly: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -137,13 +146,11 @@ const options = createResource({
     filters: serializeFilters(props.filters),
   },
   transform: (data) => {
-    return data.map((option) => {
-      return {
-        label: option.label || option.value,
-        value: option.value,
-        description: option.description,
-      };
-    });
+    return data.map((option) => ({
+      label: option.label || option.value,
+      value: option.value,
+      description: option.description,
+    }));
   },
 });
 
@@ -163,15 +170,10 @@ const clearValue = (close) => {
   close();
 };
 
-const labelClasses = computed(() => {
-  return [
-    {
-      sm: "text-xs",
-      md: "text-base",
-    }[attrs.size || "sm"],
-    "text-ink-gray-5",
-  ];
-});
+const labelClasses = computed(() => [
+  { sm: "text-xs", md: "text-base" }[attrs.size || "sm"],
+  "text-ink-gray-5",
+]);
 
 watch(
   () => props.filters,
@@ -179,3 +181,9 @@ watch(
   { immediate: true, deep: true }
 );
 </script>
+
+<style scoped>
+.frappeui-popper-root {
+  z-index: 9999 !important;
+}
+</style>

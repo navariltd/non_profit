@@ -140,6 +140,9 @@ doc_events = {
         "after_insert": "non_profit.non_profit.overrides.server.gl_entry.on_update",
         "on_update": "non_profit.non_profit.overrides.server.gl_entry.on_update",
     },
+    "Job Applicant": {
+        "on_update": "non_profit.non_profit.overrides.server.job_applicant.on_update"
+    },
 }
 
 # Scheduled Tasks
@@ -286,4 +289,14 @@ add_to_apps_screen = [
         "route": "/vmms-portal",
         "has_permission": "non_profit.non_profit.api.check_app_permission",
     }
+]
+
+fixtures = [
+    {
+        "doctype": "Property Setter",
+        "filters": [
+            ["is_system_generated", "=", 0],
+            ["module", "=", "Non Profit"],
+        ],
+    },
 ]

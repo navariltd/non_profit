@@ -1,5 +1,5 @@
 <template>
-  <div ref="tableRef" class="w-full relative">
+  <div ref="tableRef" class="w-full">
     <div v-if="label" class="text-xs text-ink-gray-5 mb-2">{{ label }}</div>
 
     <div class="block lg:hidden">
@@ -59,7 +59,7 @@
         <div
           v-for="(row, rowIndex) in rowsRef"
           :key="`mobile-row-${rowIndex}`"
-          class="border rounded-lg p-3 transition-all relative"
+          class="border rounded-lg p-3 transition-all"
           :class="[
             selectedRows.has(rowIndex)
               ? 'bg-blue-50 border-blue-200'
@@ -98,7 +98,7 @@
               validationErrors.has(rowIndex) &&
               Object.keys(validationErrors.get(rowIndex) || {}).length > 0
             "
-            class="absolute top-2 right-2 p-1 bg-red-500 rounded-full"
+            class="top-2 right-2 p-1 bg-red-500 rounded-full"
           >
             <X class="size-3 text-white" />
           </div>
@@ -239,9 +239,9 @@
     </div>
 
     <div class="hidden lg:block">
-      <div class="overflow-x-auto border rounded-md relative">
+      <div class="overflow-x-auto border rounded-md">
         <div
-          class="grid items-center gap-4 p-3 bg-surface-gray-1 border-b text-xs sticky top-0 z-10"
+          class="grid items-center gap-4 p-3 bg-surface-gray-1 border-b text-xs sticky top-0"
           :style="{ gridTemplateColumns: gridColumnsStyle }"
         >
           <div class="w-8 flex items-center justify-center">
@@ -268,7 +268,7 @@
         <div
           v-for="(row, rowIndex) in rowsRef"
           :key="`desktop-row-${rowIndex}`"
-          class="grid items-center gap-4 p-3 transition-all relative group"
+          class="grid items-center gap-4 p-3 transition-all group"
           :class="[
             rowIndex % 2 === 0 ? 'bg-white' : 'bg-surface-white',
             selectedRows.has(rowIndex) ? 'bg-blue-50' : '',
@@ -370,7 +370,6 @@
               variant="ghost"
               size="sm"
               @click.stop="openEditModal(rowIndex)"
-              class="relative"
             >
               <Edit class="size-4 text-ink-gray-7 stroke-1.5" />
             </Button>
@@ -449,7 +448,7 @@
 
     <div
       v-if="editModalOpen"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4"
+      class="fixed inset-0 z-10 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4"
       @click.self="closeEditModal"
     >
       <div
