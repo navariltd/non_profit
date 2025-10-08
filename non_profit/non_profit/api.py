@@ -2024,6 +2024,7 @@ def get_job_application(name=None):
 def get_event_details(event_name):
 
     try:
+
         event = frappe.get_doc("FE Event", event_name).as_dict()
 
         event["description"] = (
@@ -2036,11 +2037,25 @@ def get_event_details(event_name):
             frappe.utils.strip_html_tags(event["about"]) if event.get("about") else ""
         )
 
+        event_tickets = frappe.get_all(
+            "Event Ticket Type",
+            filters={
+                "event": event_name,
+            },
+            fields=["name", "title", "price", "currency"],
+            order_by="price asc",
+        )
+
+        if not event_tickets:
+            event_tickets = []
+
+        event["tickets"] = event_tickets
+
         return event
 
     except Exception as e:
         frappe.log_error(str(e), "Error fetching event details")
-        return {"error": "Failed to retrieve event details"}
+        frappe.throw("Error fetching event details")
 
 
 @frappe.whitelist(allow_guest=True)
@@ -2060,3 +2075,33 @@ def get_speaker_profiles(event_speakers):
     except Exception as e:
         frappe.log_error(title="Speaker Profile Fetch Error", message=str(e))
         frappe.throw("Error fetching speaker profiles")
+
+
+@frappe.whitelist()
+def handle_ticket_payment(phone, event_name, ticket_name):
+    frappe.set_user("Administrator")
+
+    user = frappe.get_doc("User", frappe.session.user)
+    event_ticket_price = frappe.db.get_value("Event Ticket Type", ticket_name, "price")
+    company = frappe.db.get_value("FE Event", event_name, "company")
+    currency = frappe.db.get_value("Company", company, "default_currency")
+
+    event_booking = frappe.get_doc(
+        {
+            "doctype": "Event Booking",
+            "event": event_name,
+            "user": frappe.session.user,
+            "attendees": [
+                {
+                    "full_name": user.full_name,
+                    "email": frappe.session.user,
+                    "ticket_type": ticket_name,
+                    "amount": event_ticket_price,
+                    "currency": currency,
+                }
+            ],
+        }
+    )
+
+    event_booking.insert(ignore_permissions=True)
+    event_booking.initialize_payment(phone_number=phone)
