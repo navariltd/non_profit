@@ -42,20 +42,27 @@
             </div>
 
             <div class="mb-6 sm:mb-8">
-              <Button
-                theme="red"
-                variant="solid"
-                size="lg"
-                @click="
-                  handleRegister(eventDetail.data?.is_ticketed ? true : false)
-                "
-              >
-                {{
-                  eventDetail.data?.is_ticketed
-                    ? "Get Ticket"
-                    : "Register Event"
-                }}
-              </Button>
+              <div v-if="eventDetail.data?.is_ticketed">
+                <Button
+                  v-if="!hasBookedTickets"
+                  theme="red"
+                  variant="solid"
+                  size="lg"
+                  @click="handleRegister(true)"
+                >
+                  Get Ticket
+                </Button>
+              </div>
+              <div v-else>
+                <Button
+                  theme="red"
+                  variant="solid"
+                  size="lg"
+                  @click="handleRegister(false)"
+                >
+                  Register Event
+                </Button>
+              </div>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -83,6 +90,11 @@
           </div>
         </div>
       </div>
+
+      <BookedTickets
+        v-if="eventDetail.data?.booked_tickets?.length"
+        :tickets="eventDetail.data.booked_tickets"
+      />
 
       <div class="max-w-7xl mx-auto md:px-4 px-1 lg:px-8 py-6 lg:py-8">
         <div
@@ -254,6 +266,19 @@ import {
 import router from "../router";
 import AttendEventModal from "../components/Modals/AttendEventModal.vue";
 import Ticket from "../components/Modals/Ticket.vue";
+import BookedTickets from "../components/BookedTickets.vue";
+
+const showTickets = ref(false);
+const toggleTickets = () => {
+  showTickets.value = !showTickets.value;
+};
+
+const hasBookedTickets = computed(() => {
+  return (
+    eventDetail.data?.booked_tickets &&
+    eventDetail.data.booked_tickets.length > 0
+  );
+});
 
 const route = useRoute();
 const eventName = ref(route.params.id);
