@@ -2079,29 +2079,38 @@ def get_speaker_profiles(event_speakers):
 
 @frappe.whitelist()
 def handle_ticket_payment(phone, event_name, ticket_name):
-    frappe.set_user("Administrator")
+    try:
+        frappe.set_user("Administrator")
 
-    user = frappe.get_doc("User", frappe.session.user)
-    event_ticket_price = frappe.db.get_value("Event Ticket Type", ticket_name, "price")
-    company = frappe.db.get_value("FE Event", event_name, "company")
-    currency = frappe.db.get_value("Company", company, "default_currency")
+        user = frappe.get_doc("User", frappe.session.user)
+        event_ticket_price = frappe.db.get_value(
+            "Event Ticket Type", ticket_name, "price"
+        )
+        company = frappe.db.get_value("FE Event", event_name, "company")
+        currency = frappe.db.get_value("Company", company, "default_currency")
 
-    event_booking = frappe.get_doc(
-        {
-            "doctype": "Event Booking",
-            "event": event_name,
-            "user": frappe.session.user,
-            "attendees": [
-                {
-                    "full_name": user.full_name,
-                    "email": frappe.session.user,
-                    "ticket_type": ticket_name,
-                    "amount": event_ticket_price,
-                    "currency": currency,
-                }
-            ],
-        }
-    )
+        event_booking = frappe.get_doc(
+            {
+                "doctype": "Event Booking",
+                "event": event_name,
+                "user": frappe.session.user,
+                "attendees": [
+                    {
+                        "full_name": user.full_name,
+                        "email": frappe.session.user,
+                        "ticket_type": ticket_name,
+                        "amount": event_ticket_price,
+                        "currency": currency,
+                    }
+                ],
+            }
+        )
 
-    event_booking.insert(ignore_permissions=True)
-    event_booking.initialize_payment(phone_number=phone)
+        event_booking.insert(ignore_permissions=True)
+        event_booking.initialize_payment(phone_number=phone)
+
+        frappe.set_user("Guest")
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Ticket Payment Error")
+        frappe.throw("Ticket Payment Error")
