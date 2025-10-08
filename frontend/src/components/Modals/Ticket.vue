@@ -47,7 +47,6 @@
                   />
                 </svg>
               </div>
-             
             </div>
 
             <div class="flex flex-col items-end justify-between h-full">
@@ -181,7 +180,9 @@ function proceedToPay() {
 
   handlePay.submit({
     onSuccess(res) {
-      console.log("res ", res);
+      if (res.message) {
+        window.location.reload();
+      }
     },
   });
 }

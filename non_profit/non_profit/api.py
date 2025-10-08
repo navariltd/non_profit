@@ -1805,9 +1805,7 @@ def get_job_application(name=None):
 
 @frappe.whitelist(allow_guest=True)
 def get_event_details(event_name):
-
     try:
-
         event = frappe.get_doc("FE Event", event_name).as_dict()
 
         event["description"] = (
@@ -1822,22 +1820,54 @@ def get_event_details(event_name):
 
         event_tickets = frappe.get_all(
             "Event Ticket Type",
-            filters={
-                "event": event_name,
-            },
+            filters={"event": event_name},
             fields=["name", "title", "price", "currency"],
             order_by="price asc",
         )
+        event["tickets"] = event_tickets or []
 
-        if not event_tickets:
-            event_tickets = []
+        event["booked_tickets"] = []
 
-        event["tickets"] = event_tickets
+        if frappe.session.user and frappe.session.user != "Guest":
+            booking = frappe.get_all(
+                "Event Booking",
+                filters={
+                    "user": frappe.session.user,
+                    "event": event_name,
+                },
+                fields=["name"],
+                limit=1,
+            )
+
+            if booking:
+                booking_name = booking[0].name
+                booked_tickets = []
+                tickets = frappe.get_all(
+                    "Event Ticket",
+                    filters={"booking": booking_name},
+                    fields=[
+                        "name",
+                        "ticket_type",
+                        "attendee_name",
+                        "attendee_email",
+                        "qr_code",
+                    ],
+                )
+
+                for ticket in tickets:
+                    ticket_title = frappe.db.get_value(
+                        "Event Ticket Type", ticket.ticket_type, "title"
+                    )
+                    ticket_dict = ticket.copy()
+                    ticket_dict["ticket_type_title"] = ticket_title
+                    booked_tickets.append(ticket_dict)
+
+                event["booked_tickets"] = booked_tickets or []
 
         return event
 
     except Exception as e:
-        frappe.log_error(str(e), "Error fetching event details")
+        frappe.log_error(frappe.get_traceback(), "Error fetching event details")
         frappe.throw("Error fetching event details")
 
 
