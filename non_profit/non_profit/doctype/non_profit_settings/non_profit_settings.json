@@ -32,6 +32,8 @@
   "enable_payment_table_on_donation",
   "donation_debit_account",
   "donation_payment_account",
+  "hiring_settings_section",
+  "interview_roles",
   "section_break_27",
   "creation_user"
  ],
@@ -235,12 +237,23 @@
    "fieldname": "enable_payment_table_on_donation",
    "fieldtype": "Check",
    "label": "Enable Payment Table on Donation"
+  },
+  {
+   "fieldname": "hiring_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Hiring Settings"
+  },
+  {
+   "fieldname": "interview_roles",
+   "fieldtype": "Table MultiSelect",
+   "label": "Interview Roles",
+   "options": "Has Role"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-06-30 09:44:23.963735",
+ "modified": "2025-09-21 17:58:18.070144",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit Settings",

@@ -1,0 +1,80 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-09-02 16:18:30.081098",
+  "name": "Volunteer",
+  "role_profile": "Volunteer",
+  "roles": [
+   {
+    "parent": "Volunteer",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Gameplan Guest"
+   },
+   {
+    "parent": "Volunteer",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Gameplan Member"
+   },
+   {
+    "parent": "Volunteer",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "HR User"
+   },
+   {
+    "parent": "Volunteer",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Inbox User"
+   },
+   {
+    "parent": "Volunteer",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Projects User"
+   },
+   {
+    "parent": "Volunteer",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "LMS Student"
+   },
+   {
+    "parent": "Volunteer",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Volunteer"
+   },
+   {
+    "parent": "Volunteer",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Employee"
+   }
+  ]
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Role Profile",
+  "modified": "2025-08-27 12:56:50.599230",
+  "name": "Member",
+  "role_profile": "Member",
+  "roles": [
+   {
+    "parent": "Member",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Non Profit Member"
+   },
+   {
+    "parent": "Member",
+    "parentfield": "roles",
+    "parenttype": "Role Profile",
+    "role": "Non Profit Portal User"
+   }
+  ]
+ }
+]

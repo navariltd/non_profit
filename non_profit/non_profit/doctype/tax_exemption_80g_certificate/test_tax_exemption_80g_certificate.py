@@ -72,7 +72,7 @@ class TestTaxExemption80GCertificate(FrappeTestCase):
 			'email': "_test_member_erpnext@example.com",
 			'plan_id': plan.name
 		}))
-		member_doc.make_customer_and_link()
+		member_doc.make_customer_and_link() 
 		member = member_doc.name
 
 		membership = make_membership(member, { "from_date": getdate() })

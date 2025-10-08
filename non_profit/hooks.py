@@ -36,8 +36,16 @@ required_apps = ["erpnext"]
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 doctype_js = {
-	"Sales Invoice": "public/js/payment_entry.js"
+    "Project": "non_profit/overrides/client/project.js",
+    "Job Opening": "non_profit/overrides/client/job_opening.js",
+    "Employee Onboarding": "non_profit/overrides/client/employee_onboarding.js",
+    "Employee": "non_profit/overrides/client/employee.js",
+    "Job Applicant": "non_profit/overrides/client/job_applicant.js",
+    "Contract": "non_profit/overrides/client/contract.js",
+    "Interview": "non_profit/overrides/client/interview.js",
+    "Interview Round": "non_profit/overrides/client/interview_round.js",
 }
+
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -50,7 +58,7 @@ doctype_js = {
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# 	"Role": "home_page"
 # }
 
 # Generators
@@ -102,24 +110,48 @@ after_install = "non_profit.setup.setup_non_profit"
 # ---------------
 # Override standard doctype classes
 
-override_doctype_class = {
-	"Payment Entry": "non_profit.non_profit.custom_doctype.payment_entry.NonProfitPaymentEntry",
-}
+# override_doctype_class = {
+#     "Payment Entry": "non_profit.non_profit.custom_doctype.payment_entry.NonProfitPaymentEntry",
+# }
 
 # Document Events
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# }
+doc_events = {
+    "LMS Enrollment": {
+        "on_update": "non_profit.non_profit.overrides.server.lms_enrollment.on_update"
+    },
+    "Employee": {
+        "after_insert": "non_profit.non_profit.overrides.server.employee.after_insert"
+    },
+    "Employee Onboarding": {
+        "on_update": "non_profit.non_profit.overrides.server.employee_onboarding.on_update",
+        "on_update_after_submit": "non_profit.non_profit.overrides.server.employee_onboarding.on_update_after_submit",
+    },
+    "Job Opening": {
+        "validate": "non_profit.non_profit.overrides.server.job_opening.validate"
+    },
+    "Sales Invoice": {
+        "on_update": "non_profit.non_profit.overrides.server.sales_invoice.on_update",
+        "on_update_after_submit": "non_profit.non_profit.overrides.server.sales_invoice.on_update",
+    },
+    "GL Entry": {
+        "after_insert": "non_profit.non_profit.overrides.server.gl_entry.on_update",
+        "on_update": "non_profit.non_profit.overrides.server.gl_entry.on_update",
+    },
+    "Job Applicant": {
+        "on_update": "non_profit.non_profit.overrides.server.job_applicant.on_update"
+    },
+}
 
 # Scheduled Tasks
 # ---------------
 
 scheduler_events = {
-	"daily": [
-		"non_profit.non_profit.doctype.membership.membership.set_expired_status",
-	],
+    "daily": [
+        "non_profit.non_profit.doctype.membership.membership.set_expired_status",
+    ],
 }
 
 # Testing
@@ -179,24 +211,84 @@ before_tests = "non_profit.non_profit.utils.before_tests"
 
 
 global_search_doctypes = {
-	"Non Profit": [
-		{'doctype': 'Certified Consultant', 'index': 1},
-		{'doctype': 'Certification Application', 'index': 2},
-		{'doctype': 'Volunteer', 'index': 3},
-		{'doctype': 'Membership', 'index': 4},
-		{'doctype': 'Member', 'index': 5},
-		{'doctype': 'Donor', 'index': 6},
-		{'doctype': 'Chapter', 'index': 7},
-		{'doctype': 'Grant Application', 'index': 8},
-		{'doctype': 'Volunteer Type', 'index': 9},
-		{'doctype': 'Donor Type', 'index': 10},
-		{'doctype': 'Membership Type', 'index': 11}
-	]
+    "Non Profit": [
+        {"doctype": "Certified Consultant", "index": 1},
+        {"doctype": "Certification Application", "index": 2},
+        {"doctype": "Volunteer", "index": 3},
+        {"doctype": "Membership", "index": 4},
+        {"doctype": "Member", "index": 5},
+        {"doctype": "Donor", "index": 6},
+        {"doctype": "Chapter", "index": 7},
+        {"doctype": "Grant Application", "index": 8},
+        {"doctype": "Volunteer Type", "index": 9},
+        {"doctype": "Donor Type", "index": 10},
+        {"doctype": "Membership Type", "index": 11},
+    ]
 }
 
 standard_portal_menu_items = [
-	{"title": _("Certification"), "route": "/certification",
-	 "reference_doctype": "Certification Application", "role": "Non Profit Portal User"},
+    {
+        "title": _("Certification"),
+        "route": "/certification",
+        "reference_doctype": "Certification Application",
+        "role": "Non Profit Portal User",
+    },
+]
+
+website_route_rules = [
+    {"from_route": "/vmms-portal/<path:app_path>", "to_route": "vmms-portal"},
+]
+
+fixtures = [
+    {
+        "doctype": "Calendar View",
+        "filters": [
+            ["name", "=", "Volunteer Availability"],
+        ],
+    },
+    {"doctype": "Volunteer Status"},
+    {"doctype": "Volunteer Deployment Criteria"},
+    {"doctype": "Translation"},
+    {
+        "doctype": "Role",
+        "filters": [
+            ["name", "in", ["Volunteer", "Vmms Guest"]],
+        ],
+    },
+    {
+        "doctype": "Role Profile",
+        "filters": [
+            ["name", "in", ["Volunteer", "Member"]],
+        ],
+    },
+    {
+        "doctype": "Module Profile",
+        "filters": [
+            ["name", "in", ["Volunteer", "Member"]],
+        ],
+    },
+    {
+        "doctype": "Designation",
+        "filters": [
+            ["name", "=", "Volunteer"],
+        ],
+    },
+    {
+        "doctype": "Property Setter",
+        "filters": [
+            ["module", "=", "Non Profit"],
+        ],
+    },
+]
+
+add_to_apps_screen = [
+    {
+        "name": "vmms",
+        "logo": "/assets/non_profit/frontend/vmms.svg",
+        "title": "VMMS Portal",
+        "route": "/vmms-portal",
+        "has_permission": "non_profit.non_profit.api.check_app_permission",
+    }
 ]
 
 fixtures = [

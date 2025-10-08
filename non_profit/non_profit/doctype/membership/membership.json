@@ -11,6 +11,7 @@
   "membership_type",
   "column_break_3",
   "company",
+  "branch",
   "membership_status",
   "membership_validity_section",
   "from_date",
@@ -123,6 +124,7 @@
   {
    "fieldname": "invoice",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Invoice",
    "options": "Sales Invoice"
   },
@@ -141,20 +143,38 @@
    "reqd": 1
   },
   {
-    "fieldname": "column_break_19",
-    "fieldtype": "Column Break"
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
   },
   {
-    "fieldname": "column_break_16",
-    "fieldtype": "Column Break"
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2022-03-16 17:37:28.672916",
+ "links": [
+  {
+   "group": "Invoices",
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "membership"
+  },
+  {
+   "group": "Payment Request",
+   "link_doctype": "Payment Request",
+   "link_fieldname": "reference_name"
+  }
+ ],
+ "modified": "2025-09-16 12:57:41.723776",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -183,9 +203,11 @@
   }
  ],
  "restrict_to_domain": "Non Profit",
+ "row_format": "Dynamic",
  "search_fields": "member, member_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "member_name",
  "track_changes": 1
 }

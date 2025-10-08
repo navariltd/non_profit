@@ -1,0 +1,20 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Volunteer Status",
+  "modified": "2025-08-22 10:32:20.163262",
+  "name": "Available"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Volunteer Status",
+  "modified": "2025-08-22 10:32:36.349885",
+  "name": "Unavailable"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Volunteer Status",
+  "modified": "2025-08-22 10:32:46.084005",
+  "name": "Engaged"
+ }
+]

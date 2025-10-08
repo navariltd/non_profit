@@ -1,0 +1,13 @@
+[
+ {
+  "all_day": 0,
+  "docstatus": 0,
+  "doctype": "Calendar View",
+  "end_date_field": "ends_on",
+  "modified": "2025-08-25 17:30:37.364700",
+  "name": "Volunteer Availability",
+  "reference_doctype": "Volunteer Availability Slot",
+  "start_date_field": "starts_on",
+  "subject_field": "employee_name"
+ }
+]
