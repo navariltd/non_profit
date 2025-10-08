@@ -290,3 +290,13 @@ add_to_apps_screen = [
         "has_permission": "non_profit.non_profit.api.check_app_permission",
     }
 ]
+
+fixtures = [
+    {
+        "doctype": "Property Setter",
+        "filters": [
+            ["is_system_generated", "=", 0],
+            ["module", "=", "Non Profit"],
+        ],
+    },
+]
