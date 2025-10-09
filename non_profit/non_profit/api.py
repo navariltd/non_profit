@@ -27,6 +27,8 @@ from non_profit.non_profit.utils import (
 from collections import defaultdict
 from frappe.utils import getdate
 
+from non_profit.non_profit.user import create_user
+
 
 @frappe.whitelist(allow_guest=True)
 def get_list(
@@ -1947,9 +1949,23 @@ def update_user_details(**data):
         frappe.log_error("User Profile Update Error", str(e))
 
 
-@frappe.whitelist()
-def handle_ticket_payment(phone, event_name, ticket_name):
+@frappe.whitelist(allow_guest=True)
+def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, last_name):
     try:
+
+        if frappe.session.user == "Guest":
+            if frappe.db.exists("User", email):
+                user = frappe.get_doc("User", email)
+            else:
+                create_user(
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                )
+                user = frappe.get_doc("User", email)
+        else:
+            user = frappe.get_doc("User", frappe.session.user)
+
         user = frappe.get_doc("User", frappe.session.user)
         event_ticket_price = frappe.db.get_value(
             "Event Ticket Type", ticket_name, "price"
@@ -1957,6 +1973,21 @@ def handle_ticket_payment(phone, event_name, ticket_name):
         company = frappe.db.get_value("FE Event", event_name, "company")
         currency = frappe.db.get_value("Company", company, "default_currency")
 
+        event_booking = frappe.get_doc(
+            {
+                "doctype": "Event Booking",
+                "event": event_name,
+                "user": user.name,
+                "attendees": [
+                    {
+                        "full_name": user.full_name,
+                        "email": user.email,
+                        "ticket_type": ticket_name,
+                        "amount": event_ticket_price,
+                        "currency": currency,
+                    }
+                ],
+            }
         existing_booking = frappe.db.exists(
             "Event Booking", {"user": frappe.session.user, "event": event_name}
         )
@@ -1991,6 +2022,11 @@ def handle_ticket_payment(phone, event_name, ticket_name):
         while elapsed_time < max_wait_time:
             time.sleep(interval)
             elapsed_time += interval
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Ticket Payment Error")
+        frappe.throw("Ticket Payment Error")
+
 
             event_booking.reload()
 

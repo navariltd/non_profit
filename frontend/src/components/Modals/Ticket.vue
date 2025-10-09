@@ -88,6 +88,33 @@
           readonly
         />
         <Input
+          v-if="user.data === 'Guest'"
+          required
+          name="email"
+          type="email"
+          placeholder="you@example.com"
+          label="Email"
+          v-model="ticketData.email"
+        />
+        <Input
+          v-if="user.data === 'Guest'"
+          required
+          name="first_name"
+          type="text"
+          placeholder="First Name"
+          label="First Name"
+          v-model="ticketData.first_name"
+        />
+        <Input
+          v-if="user.data === 'Guest'"
+          required
+          name="last_name"
+          type="text"
+          placeholder="Last Name"
+          label="Last Name"
+          v-model="ticketData.last_name"
+        />
+        <Input
           required
           name="phone"
           type="text"
@@ -119,13 +146,14 @@
 
 <script setup>
 import { Dialog, Button, Input, createResource, ErrorMessage } from "frappe-ui";
-import { computed, reactive, ref } from "vue";
+import { computed, inject, reactive, ref } from "vue";
 const isOpen = ref(false);
 const payStatus = ref(false);
 const amount = computed(() => {
   return `${ticketData.currency} ${ticketData.price}`;
 });
 const selectedTicket = ref(null);
+const user = inject("$user");
 
 const ticketData = reactive({
   ticket_type: "",
@@ -133,6 +161,9 @@ const ticketData = reactive({
   currency: "",
   phone: "",
   ticket_name: "",
+  email: "",
+  first_name: "",
+  last_name: "",
 });
 
 const props = defineProps({
@@ -163,6 +194,9 @@ const handlePay = createResource({
       event_name: props.event,
       phone: ticketData.phone,
       ticket_name: ticketData.ticket_name,
+      email: ticketData.email,
+      first_name: ticketData.first_name,
+      last_name: ticketData.last_name,
     };
   },
   onSuccess(data) {
