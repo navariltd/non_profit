@@ -24,7 +24,6 @@ declare module 'vue' {
     CollapseSidebar: typeof import('./src/components/Icons/CollapseSidebar.vue')['default']
     CollapsibleSection: typeof import('./src/components/CollapsibleSection.vue')['default']
     ColorSwatches: typeof import('./src/components/Controls/ColorSwatches.vue')['default']
-    copy: typeof import('./src/components/Controls/MultiSelectList copy.vue')['default']
     CreateNewEntryDialog: typeof import('./src/components/Modals/CreateNewEntryDialog.vue')['default']
     DateRange: typeof import('./src/components/Common/DateRange.vue')['default']
     DesktopLayout: typeof import('./src/components/DesktopLayout.vue')['default']
@@ -66,7 +65,6 @@ declare module 'vue' {
     ReviewList: typeof import('./src/components/Signup/ReviewList.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    SelectList: typeof import('./src/components/Controls/SelectList.vue')['default']
     SidebarLink: typeof import('./src/components/SidebarLink.vue')['default']
     StepAdditional: typeof import('./src/components/Signup/StepAdditional.vue')['default']
     StepDocuments: typeof import('./src/components/Signup/StepDocuments.vue')['default']
@@ -83,6 +81,5 @@ declare module 'vue' {
     Volunteer: typeof import('./src/components/Volunteer.vue')['default']
     Welcome: typeof import('./src/components/Welcome.vue')['default']
     WorkExperience: typeof import('./src/components/Application/WorkExperience.vue')['default']
-    WorkReferences: typeof import('./src/components/Application/WorkReferences.vue')['default']
   }
 }
