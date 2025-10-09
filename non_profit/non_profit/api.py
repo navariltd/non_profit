@@ -1947,7 +1947,6 @@ def update_user_details(**data):
 @frappe.whitelist()
 def handle_ticket_payment(phone, event_name, ticket_name):
     try:
-        frappe.set_user("Administrator")
 
         user = frappe.get_doc("User", frappe.session.user)
         event_ticket_price = frappe.db.get_value(
@@ -1976,7 +1975,6 @@ def handle_ticket_payment(phone, event_name, ticket_name):
         event_booking.insert(ignore_permissions=True)
         event_booking.initialize_payment(phone_number=phone)
 
-        frappe.set_user("Guest")
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Ticket Payment Error")
