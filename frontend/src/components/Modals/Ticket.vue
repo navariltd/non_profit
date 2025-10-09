@@ -80,7 +80,13 @@
           v-model="ticketData.ticket_type"
           readonly
         />
-        <Input name="price" type="text" label="Price" v-model="amount" />
+        <Input
+          name="price"
+          type="text"
+          label="Price"
+          v-model="amount"
+          readonly
+        />
         <Input
           v-if="user.data === 'Guest'"
           required
@@ -193,6 +199,17 @@ const handlePay = createResource({
       last_name: ticketData.last_name,
     };
   },
+  onSuccess(data) {
+    if (data.success) {
+      isOpen.value = false;
+      window.location.reload();
+    } else {
+      handlePay.error = data.message;
+    }
+  },
+  onError(error) {
+    handlePay.error = error.message || "An error occurred. Please try again.";
+  },
 });
 
 function validatePhone(phone) {
@@ -212,12 +229,6 @@ function proceedToPay() {
     return;
   }
 
-  handlePay.submit({
-    onSuccess(res) {
-      if (res.message) {
-        window.location.reload();
-      }
-    },
-  });
+  handlePay.submit({});
 }
 </script>

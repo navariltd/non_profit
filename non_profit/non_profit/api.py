@@ -2,6 +2,7 @@ import json
 import re
 import random
 import string
+import time
 
 import frappe
 from frappe import _, cint, cstr
@@ -904,6 +905,7 @@ def get_events():
         "venue",
         "banner_image",
         "event_access",
+        "route",
     ]
 
     base_filters = {"start_date": [">=", datetime.now().date()]}
@@ -1808,7 +1810,8 @@ def get_job_application(name=None):
 @frappe.whitelist(allow_guest=True)
 def get_event_details(event_name):
     try:
-        event = frappe.get_doc("FE Event", event_name).as_dict()
+        event = frappe.get_doc("FE Event", {"route": event_name}).as_dict()
+        event_name = event.name
 
         event["description"] = (
             frappe.utils.strip_html_tags(event["description"])
@@ -1822,7 +1825,7 @@ def get_event_details(event_name):
 
         event_tickets = frappe.get_all(
             "Event Ticket Type",
-            filters={"event": event_name},
+            filters={"event": event.name},
             fields=["name", "title", "price", "currency"],
             order_by="price asc",
         )
@@ -1963,6 +1966,7 @@ def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, las
         else:
             user = frappe.get_doc("User", frappe.session.user)
 
+        user = frappe.get_doc("User", frappe.session.user)
         event_ticket_price = frappe.db.get_value(
             "Event Ticket Type", ticket_name, "price"
         )
@@ -1984,13 +1988,78 @@ def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, las
                     }
                 ],
             }
+        existing_booking = frappe.db.exists(
+            "Event Booking", {"user": frappe.session.user, "event": event_name}
         )
 
-        event_booking.insert(ignore_permissions=True)
-        event_booking.initialize_payment(phone_number=phone)
+        if existing_booking:
+            event_booking = frappe.get_doc("Event Booking", existing_booking)
+        else:
+            event_booking = frappe.get_doc(
+                {
+                    "doctype": "Event Booking",
+                    "event": event_name,
+                    "user": frappe.session.user,
+                    "attendees": [
+                        {
+                            "full_name": user.full_name,
+                            "email": frappe.session.user,
+                            "ticket_type": ticket_name,
+                            "amount": event_ticket_price,
+                            "currency": currency,
+                        }
+                    ],
+                }
+            )
+            event_booking.insert(ignore_permissions=True)
+
+        payment_response = event_booking.initialize_payment(phone_number=phone)
+
+        max_wait_time = 30
+        interval = 5
+        elapsed_time = 0
+
+        while elapsed_time < max_wait_time:
+            time.sleep(interval)
+            elapsed_time += interval
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Ticket Payment Error")
         frappe.throw("Ticket Payment Error")
 
 
+            event_booking.reload()
+
+            if event_booking.docstatus == 1:
+
+                tickets = frappe.get_all(
+                    "Event Ticket",
+                    filters={"booking": event_booking.name},
+                    fields=[
+                        "name",
+                        "ticket_type",
+                        "attendee_name",
+                        "attendee_email",
+                        "qr_code",
+                    ],
+                )
+
+                return {
+                    "success": True,
+                    "message": "Payment successful",
+                    "booking": event_booking.name,
+                    "tickets": tickets,
+                }
+
+        return {
+            "success": False,
+            "message": "Payment processing timed out. Please check your payment status later.",
+            "booking": event_booking.name,
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Ticket Payment Error")
+        return {
+            "success": False,
+            "message": "Error occurred while processing ticket. Please try again.",
+        }
