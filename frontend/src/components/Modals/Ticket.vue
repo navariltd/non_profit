@@ -200,11 +200,21 @@ const handlePay = createResource({
     };
   },
   onSuccess(data) {
+    console.log("Payment Response:", data);
+
     if (data.success) {
+      if (data.tickets && data.tickets.length > 0) {
+        const firstTicket = data.tickets[0];
+        if (firstTicket.qr_code) {
+          window.location.href = firstTicket.qr_code;
+          return;
+        }
+      }
+
       isOpen.value = false;
       window.location.reload();
     } else {
-      handlePay.error = data.message;
+      handlePay.error = data.message || "Payment failed. Please try again.";
     }
   },
   onError(error) {
