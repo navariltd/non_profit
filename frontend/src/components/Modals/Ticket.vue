@@ -91,6 +91,24 @@
           v-model="ticketData.email"
         />
         <Input
+          v-if="user.data === 'Guest'"
+          required
+          name="first_name"
+          type="text"
+          placeholder="First Name"
+          label="First Name"
+          v-model="ticketData.first_name"
+        />
+        <Input
+          v-if="user.data === 'Guest'"
+          required
+          name="last_name"
+          type="text"
+          placeholder="Last Name"
+          label="Last Name"
+          v-model="ticketData.last_name"
+        />
+        <Input
           required
           name="phone"
           type="text"
@@ -137,7 +155,9 @@ const ticketData = reactive({
   currency: "",
   phone: "",
   ticket_name: "",
-  email: ""
+  email: "",
+  first_name: "",
+  last_name: "",
 });
 
 const props = defineProps({
@@ -168,7 +188,9 @@ const handlePay = createResource({
       event_name: props.event,
       phone: ticketData.phone,
       ticket_name: ticketData.ticket_name,
-        email: ticketData.email,
+      email: ticketData.email,
+      first_name: ticketData.first_name,
+      last_name: ticketData.last_name,
     };
   },
 });
