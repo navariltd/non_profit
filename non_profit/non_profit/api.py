@@ -1951,8 +1951,8 @@ def update_user_details(**data):
 
 @frappe.whitelist(allow_guest=True)
 def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, last_name):
+    original_user = frappe.session.user
     try:
-
         if frappe.session.user == "Guest":
             if frappe.db.exists("User", email):
                 user = frappe.get_doc("User", email)
@@ -1963,33 +1963,19 @@ def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, las
                     last_name=last_name,
                 )
                 user = frappe.get_doc("User", email)
+
+            frappe.local.login_manager.login_as(email)
         else:
             user = frappe.get_doc("User", frappe.session.user)
 
-        user = frappe.get_doc("User", frappe.session.user)
         event_ticket_price = frappe.db.get_value(
             "Event Ticket Type", ticket_name, "price"
         )
         company = frappe.db.get_value("FE Event", event_name, "company")
         currency = frappe.db.get_value("Company", company, "default_currency")
 
-        event_booking = frappe.get_doc(
-            {
-                "doctype": "Event Booking",
-                "event": event_name,
-                "user": user.name,
-                "attendees": [
-                    {
-                        "full_name": user.full_name,
-                        "email": user.email,
-                        "ticket_type": ticket_name,
-                        "amount": event_ticket_price,
-                        "currency": currency,
-                    }
-                ],
-            }
         existing_booking = frappe.db.exists(
-            "Event Booking", {"user": frappe.session.user, "event": event_name}
+            "Event Booking", {"user": user.name, "event": event_name}
         )
 
         if existing_booking:
@@ -1999,11 +1985,11 @@ def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, las
                 {
                     "doctype": "Event Booking",
                     "event": event_name,
-                    "user": frappe.session.user,
+                    "user": user.name,
                     "attendees": [
                         {
                             "full_name": user.full_name,
-                            "email": frappe.session.user,
+                            "email": user.email,
                             "ticket_type": ticket_name,
                             "amount": event_ticket_price,
                             "currency": currency,
@@ -2023,15 +2009,9 @@ def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, las
             time.sleep(interval)
             elapsed_time += interval
 
-    except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Ticket Payment Error")
-        frappe.throw("Ticket Payment Error")
-
-
             event_booking.reload()
 
             if event_booking.docstatus == 1:
-
                 tickets = frappe.get_all(
                     "Event Ticket",
                     filters={"booking": event_booking.name},
@@ -2044,12 +2024,18 @@ def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, las
                     ],
                 )
 
+                if original_user == "Guest":
+                    frappe.local.login_manager.logout()
+
                 return {
                     "success": True,
                     "message": "Payment successful",
                     "booking": event_booking.name,
                     "tickets": tickets,
                 }
+
+        if original_user == "Guest":
+            frappe.local.login_manager.logout()
 
         return {
             "success": False,
@@ -2058,6 +2044,9 @@ def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, las
         }
 
     except Exception as e:
+        if original_user == "Guest" and frappe.session.user != "Guest":
+            frappe.local.login_manager.logout()
+
         frappe.log_error(frappe.get_traceback(), "Ticket Payment Error")
         return {
             "success": False,
