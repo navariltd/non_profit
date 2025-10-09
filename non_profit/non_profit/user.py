@@ -12,26 +12,26 @@ def create_user(**kwargs):
         if frappe.db.exists("User", {"email": kwargs.get("email")}):
             frappe.throw("User already exists with this email")
 
-        if frappe.db.get_creation_count("User", 60) > 300:
-            return frappe.respond_as_web_page(
-                _("Temporarily Disabled"),
-                _(
-                    "Too many users signed up recently, so the registration is disabled. Please try back in an hour"
-                ),
-                http_status_code=429,
-            )
+        # if frappe.db.get_creation_count("User", 60) > 300:
+        #     return frappe.respond_as_web_page(
+        #         _("Temporarily Disabled"),
+        #         _(
+        #             "Too many users signed up recently, so the registration is disabled. Please try back in an hour"
+        #         ),
+        #         http_status_code=429,
+        #     )
 
         user = frappe.get_doc(
             {
-                "doctype": "User",
-                "email": kwargs.get("email"),
-                "first_name": kwargs.get("first_name"),
-                "last_name": kwargs.get("last_name"),
-                "full_name": f'{kwargs.get("first_name")} {kwargs.get("last_name")}',
-                "phone": kwargs.get("phone"),
-                "gender": kwargs.get("gender"),
-                "enabled": 1,
-                "default_app": "non_profit",
+            "doctype": "User",
+            "email": kwargs.get("email") or "",
+            "first_name": kwargs.get("first_name") or "",
+            "last_name": kwargs.get("last_name") or "",
+            "full_name": f'{kwargs.get("first_name") or ""} {kwargs.get("last_name") or ""}',
+            "phone": kwargs.get("phone") or "",
+            "gender": kwargs.get("gender") or "",
+            "enabled": 1,
+            "default_app": "non_profit",
             }
         )
 
