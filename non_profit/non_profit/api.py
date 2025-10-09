@@ -26,6 +26,8 @@ from non_profit.non_profit.utils import (
 from collections import defaultdict
 from frappe.utils import getdate
 
+from non_profit.non_profit.user import create_user
+
 
 @frappe.whitelist(allow_guest=True)
 def get_list(
@@ -1944,11 +1946,23 @@ def update_user_details(**data):
         frappe.log_error("User Profile Update Error", str(e))
 
 
-@frappe.whitelist()
-def handle_ticket_payment(phone, event_name, ticket_name):
+@frappe.whitelist(allow_guest=True)
+def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, last_name):
     try:
 
-        user = frappe.get_doc("User", frappe.session.user)
+        if frappe.session.user == "Guest":
+            if frappe.db.exists("User", email):
+                user = frappe.get_doc("User", email)
+            else:
+                create_user(
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                )
+                user = frappe.get_doc("User", email)
+        else:
+            user = frappe.get_doc("User", frappe.session.user)
+
         event_ticket_price = frappe.db.get_value(
             "Event Ticket Type", ticket_name, "price"
         )
@@ -1959,11 +1973,11 @@ def handle_ticket_payment(phone, event_name, ticket_name):
             {
                 "doctype": "Event Booking",
                 "event": event_name,
-                "user": frappe.session.user,
+                "user": user.name,
                 "attendees": [
                     {
                         "full_name": user.full_name,
-                        "email": frappe.session.user,
+                        "email": user.email,
                         "ticket_type": ticket_name,
                         "amount": event_ticket_price,
                         "currency": currency,
@@ -1975,7 +1989,8 @@ def handle_ticket_payment(phone, event_name, ticket_name):
         event_booking.insert(ignore_permissions=True)
         event_booking.initialize_payment(phone_number=phone)
 
-
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Ticket Payment Error")
         frappe.throw("Ticket Payment Error")
+
+
