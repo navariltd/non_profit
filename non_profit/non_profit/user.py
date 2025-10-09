@@ -93,11 +93,6 @@ def create_membership(**kwargs):
         else:
             member = frappe.get_doc("Member", member)
 
-        user = frappe.get_doc("User", {"email": member.email_id})
-        user.role_profile_name = "Member"
-        user.module_profile = "Member"
-
-        user.save(ignore_permissions=True)
 
         if kwargs.get("membership_type"):
             doc_name = kwargs.get("membership_type")
