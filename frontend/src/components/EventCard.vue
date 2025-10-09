@@ -96,7 +96,7 @@ function navigateEvent(event) {
   if (event.event_access === "Private" && userResource.data == "Guest") {
     dialog.value = true;
   } else {
-    router.push({ name: "EventDetail", params: { id: event.name } });
+    router.push({ name: "EventDetail", params: { id: event.route } });
   }
 }
 </script>
