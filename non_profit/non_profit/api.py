@@ -1999,48 +1999,65 @@ def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, las
             )
             event_booking.insert(ignore_permissions=True)
 
-        payment_response = event_booking.initialize_payment(phone_number=phone)
+        event_booking.initialize_payment(phone_number=phone)
+        frappe.db.commit()
 
         max_wait_time = 30
         interval = 5
         elapsed_time = 0
+        time.sleep(max_wait_time)
 
-        while elapsed_time < max_wait_time:
-            time.sleep(interval)
-            elapsed_time += interval
+        # while elapsed_time < max_wait_time:
+        #     time.sleep(interval)
+        #     elapsed_time += interval
 
-            event_booking.reload()
+        #     tickets = frappe.get_all(
+        #         "Event Ticket",
+        #         filters={"booking": event_booking.name},
+        #         fields=[
+        #             "name",
+        #             "ticket_type",
+        #             "attendee_name",
+        #             "attendee_email",
+        #             "qr_code",
+        #         ],
+        #     )
 
-            if event_booking.docstatus == 1:
-                tickets = frappe.get_all(
-                    "Event Ticket",
-                    filters={"booking": event_booking.name},
-                    fields=[
-                        "name",
-                        "ticket_type",
-                        "attendee_name",
-                        "attendee_email",
-                        "qr_code",
-                    ],
-                )
+        #     if len(tickets) > 0:
+        #         if original_user == "Guest":
+        #             frappe.local.login_manager.logout()
 
-                if original_user == "Guest":
-                    frappe.local.login_manager.logout()
-
-                return {
-                    "success": True,
-                    "message": "Payment successful",
-                    "booking": event_booking.name,
-                    "tickets": tickets,
-                }
+        #         return {
+        #             "success": True,
+        #             "message": "Payment successful",
+        #             "booking": event_booking.name,
+        #             "tickets": tickets,
+        #         }
 
         if original_user == "Guest":
             frappe.local.login_manager.logout()
 
+        tickets = frappe.get_all(
+            "Event Ticket",
+            filters={"booking": event_booking.name},
+            fields=[
+                "name",
+                "ticket_type",
+                "attendee_name",
+                "attendee_email",
+                "qr_code",
+            ],
+        )
+
         return {
-            "success": False,
-            "message": "Payment processing timed out. Please check your payment status later.",
+            "success": False if not tickets else True,
+            "message": (
+                "Payment processing timed out. Please check your payment status later."
+                if not tickets
+                else "Payment successful"
+            ),
             "booking": event_booking.name,
+            "tickets": tickets,
         }
 
     except Exception as e:
