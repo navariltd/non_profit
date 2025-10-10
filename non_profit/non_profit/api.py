@@ -908,7 +908,7 @@ def get_events():
         "route",
     ]
 
-    base_filters = {"start_date": [">=", datetime.now().date()]}
+    base_filters = {"start_date": [">=", datetime.now().date()], "is_published": 1}
 
     if user_info == "Guest":
         base_filters["event_access"] = ["in", ["Public", "Private"]]
