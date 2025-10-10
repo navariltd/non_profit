@@ -138,7 +138,7 @@
         @click="proceedToPay"
         :loading="handlePay.loading"
       >
-        Proceed to Pay
+        {{ handlePay.loading ? "Processing Payment" : "Proceed to Pay" }}
       </Button>
     </template>
   </Dialog>
@@ -200,9 +200,7 @@ const handlePay = createResource({
     };
   },
   onSuccess(data) {
-    console.log("Payment Response:", data);
-
-    if (data.success) {
+     if (data.success) {
       if (data.tickets && data.tickets.length > 0) {
         const firstTicket = data.tickets[0];
         if (firstTicket.qr_code) {
@@ -228,8 +226,8 @@ function validatePhone(phone) {
 }
 
 function proceedToPay() {
-  if (!ticketData.phone) {
-    handlePay.error = "Phone number is required";
+  if (!ticketData.phone || !ticketData.first_name || !ticketData.last_name || !ticketData.email) {
+    handlePay.error = "All fields are required";
     return;
   }
 
