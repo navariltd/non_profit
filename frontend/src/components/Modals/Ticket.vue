@@ -200,7 +200,7 @@ const handlePay = createResource({
     };
   },
   onSuccess(data) {
-     if (data.success) {
+    if (data.success) {
       if (data.tickets && data.tickets.length > 0) {
         const firstTicket = data.tickets[0];
         if (firstTicket.qr_code) {
@@ -226,17 +226,28 @@ function validatePhone(phone) {
 }
 
 function proceedToPay() {
-  if (!ticketData.phone || !ticketData.first_name || !ticketData.last_name || !ticketData.email) {
-    handlePay.error = "All fields are required";
-    return;
-  }
+  if (user.data == "Guest") {
+    if (
+      !ticketData.email ||
+      !ticketData.first_name ||
+      !ticketData.last_name ||
+      !ticketData.phone
+    ) {
+      handlePay.error = "All fields are required";
+      return;
+    }
+  } else {
+    if (!ticketData.phone) {
+      handlePay.error = "Phone number is required";
+      return;
+    }
 
-  if (!validatePhone(ticketData.phone)) {
-    handlePay.error =
-      "Invalid phone number format. Please use 0712345678 format";
-    return;
+    if (!validatePhone(ticketData.phone)) {
+      handlePay.error =
+        "Invalid phone number format. Please use 0712345678 format";
+      return;
+    }
   }
-
   handlePay.submit({});
 }
 </script>
