@@ -116,6 +116,7 @@
       <div class="max-w-7xl mx-auto md:px-4 px-2 lg:px-8 py-4 lg:py-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div
+            v-if="speakerProfiles.data?.length"
             class="md:col-span-2 bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
           >
             <div class="mb-6 flex items-center gap-3">
@@ -296,8 +297,6 @@ const eventDetail = createResource({
   auto: true,
   cache: ["event", eventName.value],
   onSuccess(data) {
-    console.log("Event Data:", data);
-
     if (
       user?.data == "Guest" &&
       (eventDetail.data?.event_access === "Private" ||
@@ -323,9 +322,16 @@ const timeRemaining = ref({
 
 let timerInterval = null;
 
+const start_date = computed(() => {
+  return eventDetail.data?.start_date || "";
+});
+const start_time = computed(() => {
+  return eventDetail.data?.start_time || "";
+});
+
 const calculateTimeRemaining = () => {
   const startDateTime = new Date(
-    `${eventDetail.start_date}T${eventDetail.start_time}`
+    `${start_date.value}T${start_time.value}`
   );
   const now = new Date();
   const difference = startDateTime - now;
