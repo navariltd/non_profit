@@ -329,10 +329,42 @@ const start_time = computed(() => {
   return eventDetail.data?.start_time || "";
 });
 
+watch([start_date, start_time], () => {
+  if (start_date.value && start_time.value) {
+    calculateTimeRemaining();
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+    timerInterval = setInterval(calculateTimeRemaining, 1000);
+  }
+});
+
 const calculateTimeRemaining = () => {
-  const startDateTime = new Date(
-    `${start_date.value}T${start_time.value}`
-  );
+  if (!start_date.value || !start_time.value) {
+    return;
+  }
+
+  let timeStr = start_time.value.trim();
+  if (!timeStr.includes(":")) {
+    return;
+  }
+
+  let timeParts = timeStr.split(":");
+  timeParts = timeParts.map((part) => part.padStart(2, "0"));
+
+  if (timeParts.length === 2) {
+    timeParts.push("00");
+  }
+
+  timeStr = timeParts.join(":");
+
+  const dateTimeStr = `${start_date.value}T${timeStr}`;
+  const startDateTime = new Date(dateTimeStr);
+
+  if (isNaN(startDateTime.getTime())) {
+    return;
+  }
+
   const now = new Date();
   const difference = startDateTime - now;
 
@@ -342,6 +374,13 @@ const calculateTimeRemaining = () => {
       hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
       minutes: Math.floor((difference / 1000 / 60) % 60),
       seconds: Math.floor((difference / 1000) % 60),
+    };
+  } else {
+    timeRemaining.value = {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
     };
   }
 };
