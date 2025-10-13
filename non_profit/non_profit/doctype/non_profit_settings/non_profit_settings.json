@@ -29,6 +29,7 @@
   "donation_webhook_secret",
   "column_break_22",
   "automate_donation_payment_entries",
+  "enable_payment_table_on_donation",
   "donation_debit_account",
   "donation_payment_account",
   "section_break_27",
@@ -227,12 +228,19 @@
    "label": "Creation User",
    "options": "User",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Show and allow editing of the Donation Payment Items table on the Donation form.",
+   "fieldname": "enable_payment_table_on_donation",
+   "fieldtype": "Check",
+   "label": "Enable Payment Table on Donation"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-11 10:43:38.124240",
+ "modified": "2025-06-30 09:44:23.963735",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit Settings",
@@ -267,7 +275,9 @@
   }
  ],
  "quick_entry": 1,
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

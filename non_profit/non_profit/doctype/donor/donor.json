@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:email",
  "creation": "2017-09-19 16:20:27.510196",
@@ -52,6 +53,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Email",
+   "reqd": 1,
    "unique": 1
   },
   {
@@ -116,12 +118,6 @@
    "label": "Birthday Date"
   },
   {
-   "fieldname": "charter",
-   "fieldtype": "Link",
-   "label": "Charter",
-   "options": "Funding Pool"
-  },
-  {
    "fieldname": "id_number",
    "fieldtype": "Data",
    "label": "ID Number"
@@ -136,6 +132,13 @@
    "fieldname": "date_registered",
    "fieldtype": "Date",
    "label": "Date Registered"
+  },
+  {
+   "fieldname": "charter",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Charter",
+   "options": "Funding Pool"
   }
  ],
  "image_field": "image",
@@ -143,13 +146,9 @@
   {
    "link_doctype": "Donation",
    "link_fieldname": "donor"
-  },
-  {
-   "link_doctype": "Beneficiary",
-   "link_fieldname": "donor"
   }
  ],
- "modified": "2024-12-23 10:38:43.274257",
+ "modified": "2025-05-17 14:50:15.607245",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donor",
@@ -171,9 +170,13 @@
  ],
  "quick_entry": 1,
  "restrict_to_domain": "Non Profit",
+ "row_format": "Dynamic",
+ "search_fields": "donor_name,email,phone_number",
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
  "title_field": "donor_name",
- "track_changes": 1
+ "track_changes": 1,
+ "translated_doctype": 1
 }

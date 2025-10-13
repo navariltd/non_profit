@@ -111,11 +111,6 @@ override_doctype_class = {
 # Hook on document methods and events
 
 # doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-#	}
 # }
 
 # Scheduled Tasks
@@ -202,4 +197,14 @@ global_search_doctypes = {
 standard_portal_menu_items = [
 	{"title": _("Certification"), "route": "/certification",
 	 "reference_doctype": "Certification Application", "role": "Non Profit Portal User"},
+]
+
+fixtures = [
+    {
+        "doctype": "Property Setter",
+        "filters": [
+            ["is_system_generated", "=", 0],
+            ["module", "=", "Non Profit"],
+        ],
+    },
 ]
