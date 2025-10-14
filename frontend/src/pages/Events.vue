@@ -17,6 +17,18 @@
       message="Failed to load Events"
     />
     <div>
+      <div class="flex justify-center mb-2">
+        <TextInput
+          type="search"
+          size="sm"
+          variant="outline"
+          placeholder="Search by event name, location, or date"
+          :disabled="false"
+          :modelValue="searchTerm"
+          @update:modelValue="(val) => (searchTerm = val)"
+        />
+      </div>
+
       <EventCard
         v-if="events.data && events.data.length > 0"
         v-for="event in events.data"
@@ -34,18 +46,34 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, provide, ref } from "vue";
+import { onMounted, provide, ref, watch } from "vue";
 import EventCard from "../components/EventCard.vue";
 import { membershipStore } from "../stores/membership";
-import { createResource } from "frappe-ui";
+import { createResource, TextInput } from "frappe-ui";
 import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
 import EmptyState from "../components/EmptyState.vue";
 import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
 
-const { events } = membershipStore();
+const searchTerm = ref("");
+
+const events = createResource({
+  url: "non_profit.non_profit.api.get_events",
+  auto: true,
+  cache: ["events"],
+  makeParams() {
+    return {
+      search: searchTerm.value,
+    };
+  },
+});
+
 const toggleEventView = ref(false);
 
 function toggleEventViews() {
   toggleEventView.value = !toggleEventView.value;
 }
+
+watch(searchTerm, () => {
+  events.reload();
+});
 </script>

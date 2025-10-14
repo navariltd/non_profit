@@ -893,7 +893,8 @@ def check_app_permission():
 
 
 @frappe.whitelist(allow_guest=True)
-def get_events():
+def get_events(search=None):
+
     user_info = get_user_info()
 
     fields = [
@@ -908,6 +909,9 @@ def get_events():
         "route",
     ]
 
+    if search:
+        search_filters = {"venue": ["like", f"%{search}%"], "title": ["like", f"%{search}%"]}
+
     base_filters = {"start_date": [">=", datetime.now().date()], "is_published": 1}
 
     if user_info == "Guest":
@@ -918,7 +922,7 @@ def get_events():
     elif user_info.get("is_volunteer"):
         base_filters["event_access"] = ["in", ["Public", "Private"]]
 
-    events = frappe.get_all("FE Event", fields=fields, filters=base_filters)
+    events = frappe.get_all("FE Event", fields=fields, filters=base_filters, or_filters=search_filters if search else None, order_by="start_date asc, start_time asc")
 
     for event in events:
         event.short_description = (
