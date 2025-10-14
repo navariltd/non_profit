@@ -302,12 +302,12 @@ const eventDetail = createResource({
       (eventDetail.data?.event_access === "Private" ||
         eventDetail.data?.event_access === "Members Only")
     ) {
+      toast.error(
+        "This is a private event. Please log in  to view event details."
+      );
       setTimeout(() => {
-        toast.error(
-          "This is a private event. Please log in  to view event details."
-        );
+        router.push({ name: "Login" });
       }, 3000);
-      router.push({ name: "Login" });
     }
     speakerProfiles.reload();
   },
