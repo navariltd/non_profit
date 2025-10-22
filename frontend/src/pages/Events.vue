@@ -20,7 +20,7 @@
       <div class="flex justify-center mb-2">
         <TextInput
           type="search"
-          size="sm"
+          size="lg"
           variant="outline"
           placeholder="Search by event name, location, or date"
           :disabled="false"
@@ -46,9 +46,8 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, provide, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import EventCard from "../components/EventCard.vue";
-import { membershipStore } from "../stores/membership";
 import { createResource, TextInput } from "frappe-ui";
 import ProgressSpinner from "../components/Common/ProgressSpinner.vue";
 import EmptyState from "../components/EmptyState.vue";
@@ -59,7 +58,7 @@ const searchTerm = ref("");
 const events = createResource({
   url: "non_profit.non_profit.api.get_events",
   auto: true,
-  cache: ["events"],
+  cache: searchTerm.value,
   makeParams() {
     return {
       search: searchTerm.value,
