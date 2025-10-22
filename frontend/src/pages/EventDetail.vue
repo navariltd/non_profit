@@ -81,11 +81,11 @@
             </div>
           </div>
 
-          <div class="">
+          <div class="w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96 flex-shrink-0">
             <img
               :src="eventDetail.data?.banner_image"
               alt="Event Image"
-              class="w-full rounded-lg"
+              class="w-full h-full object-cover rounded-lg shadow-xl"
             />
           </div>
         </div>
