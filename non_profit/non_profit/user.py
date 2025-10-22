@@ -23,33 +23,21 @@ def create_user(**kwargs):
 
         user = frappe.get_doc(
             {
-            "doctype": "User",
-            "email": kwargs.get("email") or "",
-            "first_name": kwargs.get("first_name") or "",
-            "last_name": kwargs.get("last_name") or "",
-            "full_name": f'{kwargs.get("first_name") or ""} {kwargs.get("last_name") or ""}',
-            "phone": kwargs.get("phone") or "",
-            "gender": kwargs.get("gender") or "",
-            "enabled": 1,
-            "default_app": "non_profit",
+                "doctype": "User",
+                "email": kwargs.get("email") or "",
+                "first_name": kwargs.get("first_name") or "",
+                "last_name": kwargs.get("last_name") or "",
+                "full_name": f'{kwargs.get("first_name") or ""} {kwargs.get("last_name") or ""}',
+                "phone": kwargs.get("phone") or "",
+                "gender": kwargs.get("gender") or "",
+                "enabled": 1,
+                "default_app": "non_profit",
             }
         )
 
         user.insert(ignore_permissions=True)
 
         user.add_roles("Vmms Guest")
-
-        user_permission = frappe.get_doc(
-            {
-                "doctype": "User Permission",
-                "user": user.name,
-                "allow": "User",
-                "for_value": user.name,
-                "is_default": 1,
-            }
-        )
-
-        user_permission.insert(ignore_permissions=True)
 
         frappe.db.commit()
 
@@ -92,7 +80,6 @@ def create_membership(**kwargs):
             member.insert(ignore_permissions=True)
         else:
             member = frappe.get_doc("Member", member)
-
 
         if kwargs.get("membership_type"):
             doc_name = kwargs.get("membership_type")
