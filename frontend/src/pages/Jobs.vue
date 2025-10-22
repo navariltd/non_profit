@@ -34,10 +34,6 @@
           v-if="currentTab === 'Open'"
           class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 space-y-6"
         >
-          <!-- <div
-            class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-          ></div> -->
-
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <FormControl
               type="text"
@@ -89,17 +85,7 @@
               class="w-full"
               @change="updateJobs"
             />
-            <!-- <div class="col-span-1 lg:col-span-2" v-if="selectedRegions.length">
-              <MultiSelectList
-                doctype="Company"
-                v-model="selectedBranches"
-                :label="__('Branch')"
-                :filters="branchFilters"
-                class="w-full"
-                @change="updateJobs"
-                cols="6"
-              />
-            </div> -->
+
             <Button
               variant="ghost"
               class="justify-center text-red-600 hover:bg-red-50 border border-red-200"
@@ -134,23 +120,22 @@
 </template>
 
 <script setup>
-import {
-  Button,
-  Breadcrumbs,
-  createResource,
-  FormControl,
-  usePageMeta,
-  TabButtons,
-} from "frappe-ui";
-import { Search, Filter, X } from "lucide-vue-next";
-import { sessionStore } from "../stores/session";
-import { inject, ref, onMounted, watch, computed } from "vue";
-import JobCard from "@/components/JobCard.vue";
-import JobApplication from "./JobApplication.vue";
 import Link from "@/components/Controls/Link.vue";
-import MultiSelectList from "@/components/Controls/MultiSelectList.vue";
 import MultiSelect from "@/components/Controls/MultiSelect.vue";
 import EmptyState from "@/components/EmptyState.vue";
+import JobCard from "@/components/JobCard.vue";
+import {
+  Breadcrumbs,
+  Button,
+  createResource,
+  FormControl,
+  TabButtons,
+  usePageMeta,
+} from "frappe-ui";
+import { Search } from "lucide-vue-next";
+import { computed, inject, onMounted, ref, watch } from "vue";
+import { sessionStore } from "../stores/session";
+import JobApplication from "./JobApplication.vue";
 
 const user = inject("$user");
 const { brand } = sessionStore();

@@ -17,7 +17,16 @@
                 }
               "
               autocomplete="off"
-              @focus="() => togglePopover()"
+              @focus="
+                () => {
+                  showOptions = true;
+                }
+              "
+              @pointerdown.capture="
+                () => {
+                  showOptions = true;
+                }
+              "
               @keydown.delete.capture.stop="removeLastValue"
               :placeholder="props.label || 'Select...'"
             />
@@ -102,7 +111,7 @@
       </Combobox>
     </div>
 
-    <div v-if="displayValues.length" class="grid grid-cols-2 gap-2 mt-1">
+    <div v-if="displayValues.length" class="grid grid-cols-1 gap-2 mt-1">
       <div
         v-for="(item, index) in displayValues"
         :key="`${props.label}-${item[linkFieldName] || index}`"
@@ -499,6 +508,16 @@ const addValue = (option) => {
   query.value = "";
   showOptions.value = false;
 };
+
+watch(
+  () => props.filters,
+  () => {
+    if (linkDoctype.value) {
+      filterOptions.reload();
+    }
+  },
+  { deep: true }
+);
 
 const removeValue = (index) => {
   displayValues.value.splice(index, 1);
