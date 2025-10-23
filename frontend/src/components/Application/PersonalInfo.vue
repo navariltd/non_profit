@@ -1,6 +1,14 @@
 <template>
   <div class="space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+      <FormControl
+        v-model="form.phone_number"
+        label="Phone Number"
+        type="tel"
+        required
+      />
+
+      <FormControl v-model="form.email_id" label="Email Address" required />
       <FormControl
         v-model="form.citizenship"
         :label="__('Citizenship')"
@@ -26,7 +34,7 @@
         label="Passport Number"
       />
 
-      <FormControl
+      <!-- <FormControl
         v-model="form.date_of_birth"
         label="Date of Birth"
         type="date"
@@ -46,7 +54,7 @@
         v-model="form.languages"
         doctype="Volunteer Language"
         label="Languages"
-      />
+      /> -->
     </div>
 
     <h2 class="text-xl font-semibold border-t pt-6 mt-6">Contact & Location</h2>
@@ -80,8 +88,9 @@
 
 <script setup>
 import Link from "@/components/Controls/Link.vue";
-import MultiSelect from "@/components/Controls/MultiSelect.vue";
 import { FormControl } from "frappe-ui";
+
+import { watch } from "vue";
 
 const props = defineProps({
   form: {
@@ -112,4 +121,19 @@ const internetOptions = [
   { label: "No", value: "No" },
   { label: "Sometimes", value: "Sometimes" },
 ];
+
+watch(
+  () => form.county,
+  (newValue) => {
+    form.sub_county = null;
+    form.administrative_location = null;
+  }
+);
+
+watch(
+  () => form.sub_county,
+  (newValue) => {
+    form.administrative_location = null;
+  }
+);
 </script>

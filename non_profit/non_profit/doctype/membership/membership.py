@@ -127,12 +127,12 @@ class Membership(Document):
             self.make_payment_entry(settings, invoice)
 
         if save:
-            self.save()
+            self.save(ignore_permissions=True)
 
         return invoice
 
     @frappe.whitelist()
-    def initiate_payment(self):
+    def initiate_payment(self, phone_number=None):
         member = frappe.get_doc("Member", self.member)
         if not member.customer:
             member = frappe.get_doc("Member", self.member)
@@ -141,7 +141,7 @@ class Membership(Document):
 
         plan = frappe.get_doc("Membership Type", self.membership_type)
 
-        payment_request = make_payment_request(self, member, plan)
+        payment_request = make_payment_request(self, member, plan, phone_number)
         self.reload()
 
         return payment_request
@@ -304,17 +304,40 @@ def make_invoice(membership, member, plan):
         }
     )
 
-    invoice.set_missing_values()
-    invoice.insert()
-    invoice.submit()
+    # invoice.set_missing_values()
+    invoice.insert(ignore_permissions=True)
+    # invoice.submit()
 
     frappe.msgprint(_("Sales Invoice created successfully"))
 
     return invoice
 
 
-def make_payment_request(membership, member, plan):
+def make_payment_request(membership, member, plan, phone_number=None):
     try:
+        invoice = None
+        mop = frappe.db.get_value(
+            "Non Profit Settings", "Non Profit Settings", "membership_mode_of_payment"
+        )
+        if not frappe.db.exists(
+            "Sales Invoice",
+            {"membership": membership.name, "docstatus": ["!=", 2]},
+        ):
+            invoice = make_invoice(membership, member, plan)
+        else:
+            invoice_id = frappe.db.get_value(
+                "Sales Invoice",
+                {"membership": membership.name, "docstatus": ["!=", 2]},
+                "name",
+            )
+            invoice = frappe.get_doc("Sales Invoice", invoice_id)
+
+        payment_gateway = get_payment_gateway_from_mop(mop, membership.company)
+        payment_gateway_account = frappe.db.get_value(
+            "Payment Gateway Account",
+            {"payment_gateway": payment_gateway, "company": membership.company},
+            "name",
+        )
         payment_gateway_account = frappe.db.get_value(
             "Payment Gateway Account",
             {"is_default": 1, "currency": membership.currency},
@@ -336,8 +359,12 @@ def make_payment_request(membership, member, plan):
                 "party_type": "Customer",
                 "status": "Initiated",
                 "party": member.customer,
-                "reference_doctype": "Membership",
-                "reference_name": membership.name,
+                "reference_doctype": "Sales Invoice",
+                "reference_name": invoice.name,
+                "mode_of_payment": mop,
+                "payment_gateway": payment_gateway,
+                "payment_gateway_account": payment_gateway_account,
+                "outstanding_amount": invoice.outstanding_amount,
                 "currency": membership.currency,
                 "grand_total": membership.amount,
                 "email_to": member.email_id,
@@ -348,6 +375,9 @@ def make_payment_request(membership, member, plan):
                 ),
             }
         )
+
+        if phone_number:
+            payment_request.phone_number = phone_number
 
         payment_request.flags.ignore_validate = True
         payment_request.insert(ignore_permissions=True)
@@ -632,3 +662,38 @@ def get_last_membership(member):
 
     if last_membership:
         return last_membership[0]
+
+
+@frappe.whitelist()
+def get_payment_gateway_from_mop(mode_of_payment: str, company: str) -> str:
+    payment_gateway = None
+    try:
+        if not frappe.db.exists("Mode of Payment", mode_of_payment):
+            return None
+        mop_doc = frappe.get_doc("Mode of Payment", mode_of_payment)
+        account_entry = next(
+            (acc for acc in mop_doc.accounts if acc.company == company), None
+        )
+        if account_entry:
+            payment_account = account_entry.default_account
+            if frappe.db.exists(
+                "Payment Gateway Account", {"payment_account": payment_account}
+            ):
+                try:
+                    pg_account = frappe.get_doc(
+                        "Payment Gateway Account", {"payment_account": payment_account}
+                    )
+                    if pg_account and pg_account.payment_gateway:
+                        payment_gateway = pg_account.payment_gateway
+                except Exception:
+                    pass
+            else:
+                default_pg_account = frappe.get_value(
+                    "Payment Gateway Account", {"is_default": 1}, "payment_gateway"
+                )
+                if default_pg_account:
+                    payment_gateway = default_pg_account
+    except Exception:
+        pass
+
+    return payment_gateway

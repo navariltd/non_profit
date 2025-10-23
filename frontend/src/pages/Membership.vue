@@ -46,24 +46,27 @@
       <EmptyState v-else type="Membership Type" class="mt-10" />
     </div>
 
-    <Dialog
-      v-model="registerDialog"
-      :options="{
-        size: 'xl',
-      }"
+    <div
+      v-if="registerDialog"
+      class="fixed inset-0 z-50 overflow-y-auto"
+      aria-labelledby="modal-title"
+      role="dialog"
+      aria-modal="true"
     >
-      <template #body-title>
-        <h3 class="text-2xl font-bold text-gray-900">
-          Register as a <span class="text-red-600">Member</span>
-        </h3>
-      </template>
+      <div
+        class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+      >
+        <div
+          class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          aria-hidden="true"
+          @click="cleanUpMembershipForm"
+        ></div>
 
-      <template #body-content>
-        <form @submit.prevent="submit" class="space-y-6">
-          <p class="text-gray-600">
-            Please fill in the details below to complete your membership
-            registration.
-          </p>
+        <span
+          class="hidden sm:inline-block sm:align-middle sm:h-screen"
+          aria-hidden="true"
+          >&#8203;</span
+        >
 
           <!-- Branch -->
           <div class="bg-white border rounded-lg p-4 shadow-sm">
@@ -81,101 +84,126 @@
             </div>
           </div>
 
-          <!-- Membership Info -->
-          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p class="font-medium text-gray-800">
-              Membership Type:
-              <span class="text-red-600">
-                {{ membershipForm.membership_type }}
-              </span>
-            </p>
-            <p class="text-gray-700 mt-1">
-              Amount:
-              <span class="font-semibold">KES {{ membershipForm.amount }}</span>
-            </p>
-          </div>
+          <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <form @submit.prevent="submit" class="space-y-6">
+              <p class="text-gray-600">
+                Please fill in the details below to complete your membership
+                registration.
+              </p>
 
-          <ErrorMessage
-            v-if="!payNow && createMembership.error"
-            class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm"
-            :message="createMembership.error"
-          />
+              <div class="bg-white border rounded-lg p-4 shadow-sm">
+                <Link
+                  id="branch"
+                  :label="'Branch / County'"
+                  doctype="Company"
+                  :required="true"
+                  :filters="{ is_group: 0 }"
+                  v-model="membershipForm.branch"
+                  class="w-full"
+                  :readonly="payNow"
+                />
+              </div>
 
-          <div
-            v-if="!payNow"
-            class="flex flex-col sm:flex-row justify-end gap-3 pt-2"
-          >
-            <Button
-              type="button"
-              variant="outline"
-              theme="red"
-              class="rounded-lg px-5"
-              @click="cleanUpMembershipForm"
-            >
-              Cancel
-            </Button>
+              <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p class="font-medium text-gray-800">
+                  Membership Type:
+                  <span class="text-red-600">
+                    {{ membershipForm.membership_type }}
+                  </span>
+                </p>
+                <p class="text-gray-700 mt-1">
+                  Amount:
+                  <span class="font-semibold"
+                    >KES {{ membershipForm.amount }}</span
+                  >
+                </p>
+              </div>
 
-            <Button
-              type="submit"
-              variant="solid"
-              theme="green"
-              :loading="createMembership.loading"
-              class="rounded-lg px-6"
-            >
-              Register
-            </Button>
-          </div>
-          <div v-if="payNow" class="flex flex-col space-y-4">
-            <span
-              class="text-center text-blue-800 border rounded-md p-2 border-blue-500 bg-blue-50 text-sm"
-            >
-              Registration Initiated! Please proceed to pay for your membership
-              below.
-            </span>
+              <ErrorMessage
+                v-if="!payNow && createMembership.error"
+                class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm"
+                :message="createMembership.error"
+              />
 
-            <Input
-              :type="'text'"
-              :ref_for="true"
-              size="sm"
-              variant="subtle"
-              placeholder="+254123456789"
-              :disabled="false"
-              label="Enter Mpesa Phone Number to Pay"
-              v-model="membershipForm.phone_number"
-              required
-            />
-
-            <ErrorMessage
-              v-if="createMembership.error"
-              class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm"
-              :message="createMembership.error"
-            />
-
-            <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                theme="red"
-                class="rounded-lg px-5"
-                @click="cleanUpMembershipForm"
+              <div
+                v-if="!payNow"
+                class="flex flex-col sm:flex-row justify-end gap-3 pt-2"
               >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="solid"
-                theme="red"
-                icon-right="credit-card"
-                class="rounded-lg px-6"
-                @click="payMembership"
-              >
-                Pay Now
-              </Button>
-            </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  theme="red"
+                  class="rounded-lg px-5"
+                  @click="cleanUpMembershipForm"
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  type="submit"
+                  variant="solid"
+                  theme="green"
+                  :loading="createMembership.loading"
+                  class="rounded-lg px-6"
+                >
+                  Register
+                </Button>
+              </div>
+
+              <div v-if="payNow" class="flex flex-col space-y-4">
+                <span
+                  class="text-center text-blue-800 border rounded-md p-2 border-blue-500 bg-blue-50 text-sm"
+                >
+                  Registration Initiated! Please proceed to pay for your
+                  membership below.
+                </span>
+
+                <Input
+                  :type="'text'"
+                  :ref_for="true"
+                  size="sm"
+                  variant="subtle"
+                  placeholder="+254123456789"
+                  :disabled="false"
+                  label="Enter Mpesa Phone Number to Pay"
+                  v-model="membershipForm.phone_number"
+                  required
+                />
+
+                <ErrorMessage
+                  v-if="createMembership.error"
+                  class="text-center border rounded-md p-2 border-red-500 bg-red-50 text-sm"
+                  :message="createMembership.error"
+                />
+
+                <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    theme="red"
+                    class="rounded-lg px-5"
+                    @click="cleanUpMembershipForm"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="solid"
+                    theme="red"
+                    icon-right="credit-card"
+                    class="rounded-lg px-6"
+                    @click="payMembership"
+                    :loading="renewMembership.loading"
+                  >
+                    Pay Now
+                  </Button>
+                </div>
+              </div>
+            </form>
           </div>
-        </form>
-      </template>
-    </Dialog>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -243,6 +271,18 @@ const createMembership = createResource({
     currentMembership.reload();
     membershipTypes.reload();
     payNow.value = true;
+  },
+});
+
+const renewMembership = createResource({
+  url: "non_profit.non_profit.user.renew_membership",
+  onSuccess() {
+    toast.success(
+      "Membership payment initiated successfully! Check your phone for a prompt."
+    );
+  },
+  onError(error) {
+    toast.error(error.message || "Failed to initiate membership payment.");
   },
 });
 

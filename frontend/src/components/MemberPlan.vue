@@ -15,7 +15,6 @@
         :key="membership.name"
         class="flex flex-col rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group"
       >
-        <!-- Header -->
         <div class="p-6 border-b bg-gray-50 flex justify-between items-center">
           <h2 class="text-lg font-semibold text-gray-900">
             {{ membership.membership_type }}
@@ -32,9 +31,7 @@
           </Badge>
         </div>
 
-        <!-- Body -->
         <div class="p-6 flex flex-col gap-4 flex-1">
-          <!-- Dates -->
           <div class="flex justify-between text-sm text-gray-600">
             <div>
               <span class="block text-gray-500">Start</span>
@@ -50,7 +47,6 @@
             </div>
           </div>
 
-          <!-- Branch + Amount -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <span class="block text-gray-500">Branch / County</span>
@@ -67,13 +63,12 @@
           </div>
         </div>
 
-        <!-- CTA Footer -->
         <div class="bg-gray-50 p-4 border-t">
           <Button
             :variant="'solid'"
             theme="red"
             class="w-full"
-            @click="payNow = true"
+            @click="openRenewDialog(membership.name)"
           >
             Renew Membership
           </Button>
@@ -89,14 +84,11 @@
       "
       class="flex flex-col md:flex-row items-center justify-between gap-6 rounded-2xl border border-red-200 bg-gradient-to-r from-red-50 to-white p-6 md:p-8 shadow-md"
     >
-      <!-- Left Section -->
       <div class="text-center md:text-left flex-1">
-        <!-- Heading -->
         <h2 class="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2">
           Become a <span class="text-red-600">Volunteer</span>
         </h2>
 
-        <!-- Subtext -->
         <p class="text-gray-700 max-w-2xl leading-relaxed">
           Join the <span class="font-semibold">Kenya Red Cross Society</span> as
           a volunteer and support your community. Contribute to
@@ -106,7 +98,6 @@
         </p>
       </div>
 
-      <!-- Right Section (CTA) -->
       <div class="flex-shrink-0">
         <RouterLink :to="{ name: 'VolunteerSignup' }">
           <Button
@@ -137,7 +128,7 @@
           size="sm"
           variant="subtle"
           placeholder="+254123456789"
-          :disabled="false"
+          :disabled="renewMembership.loading"
           label="Phone Number"
           v-model="phoneNumber"
         />
@@ -149,6 +140,7 @@
           icon-right="credit-card"
           class="rounded-lg px-6"
           @click="payMembership"
+          :loading="renewMembership.loading"
         >
           Pay Now
         </Button>
@@ -160,16 +152,17 @@
 <script lang="ts" setup>
 import {
   Badge,
+  Button,
   Card,
   createResource,
   Dialog,
-  Button,
-  Input,
   ErrorMessage,
+  Input,
+  toast,
 } from "frappe-ui";
+import { ref } from "vue";
 import { RouterLink } from "vue-router";
 import { usersStore } from "../stores/user";
-import { ref } from "vue";
 import { isValidPhone } from "../utils/volunteer";
 
 const { roleResource } = usersStore();
@@ -177,6 +170,7 @@ const { roleResource } = usersStore();
 const payNow = ref(false);
 const phoneNumber = ref("");
 const errorMessage = ref("");
+const selectedMembershipId = ref<string | undefined>(undefined);
 
 interface Membership {
   name?: string;
@@ -193,6 +187,28 @@ const membershipList = createResource<Membership[]>({
   url: "non_profit.non_profit.api.get_current_membership",
   auto: true,
   cache: ["currentMembership"],
+});
+const renewMembership = createResource({
+  url: "non_profit.non_profit.user.renew_membership",
+  makeParams() {
+    return {
+      id: selectedMembershipId.value,
+      phone_number: phoneNumber.value,
+    };
+  },
+  onSuccess() {
+    toast.success(
+      "Payment initiated successfully! Check your phone for a prompt."
+    );
+    payNow.value = false;
+    phoneNumber.value = "";
+    selectedMembershipId.value = undefined;
+    membershipList.reload();
+  },
+  onError(error) {
+    errorMessage.value =
+      error.message || "Failed to initiate membership renewal.";
+  },
 });
 
 function getMembershipStatusTheme(status: string) {
@@ -220,6 +236,14 @@ function formatDate(dateStr?: string): string {
   });
 }
 
+function openRenewDialog(membershipId?: string) {
+  if (membershipId) {
+    selectedMembershipId.value = membershipId;
+    errorMessage.value = "";
+    payNow.value = true;
+  }
+}
+
 function payMembership() {
   if (!phoneNumber.value) {
     errorMessage.value = "Please enter your phone number";
@@ -232,7 +256,16 @@ function payMembership() {
     return;
   }
 
+  if (!selectedMembershipId.value) {
+    errorMessage.value = "Error: Membership ID is missing.";
+    return;
+  }
+
   errorMessage.value = "";
-  alert(`Paying for membership with phone number: ${phoneNumber.value}`);
+
+  renewMembership.submit({
+    membership: selectedMembershipId.value,
+    phone_number: phoneNumber.value,
+  });
 }
 </script>

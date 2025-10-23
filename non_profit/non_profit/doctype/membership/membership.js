@@ -19,16 +19,31 @@ frappe.ui.form.on("Membership", {
 
     if (!frm.is_new()) {
       frm.add_custom_button("Request Payment", () => {
-        frm.call({
-          doc: frm.doc,
-          method: "initiate_payment",
-          args: { save: true },
-          freeze: true,
-          freeze_message: __("Requesting Payment"),
-          callback: function (r) {
-            if (r.invoice) frm.reload_doc();
+        frappe.prompt(
+          [
+            {
+              fieldname: "phone_number",
+              label: __("Phone Number"),
+              fieldtype: "Data",
+              reqd: 1,
+              description: __("Enter the phone number for payment request"),
+            },
+          ],
+          (values) => {
+            frm.call({
+              doc: frm.doc,
+              method: "initiate_payment",
+              args: { phone_number: values.phone_number },
+              freeze: true,
+              freeze_message: __("Requesting Payment"),
+              callback: function (r) {
+                if (r.invoice) frm.reload_doc();
+              },
+            });
           },
-        });
+          __("Enter Phone Number"),
+          __("Request Payment")
+        );
       });
     }
 
