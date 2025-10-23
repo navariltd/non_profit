@@ -206,7 +206,7 @@ const steps = [
     component: markRaw(PersonalInfo),
     validate: (form) => {
       const errors = [];
-      const dob = form.birth_date ? new Date(form.birth_date) : null;
+      const dob = form.date_of_birth ? new Date(form.date_of_birth) : null;
 
       if (form.citizenship === "Citizen" && !form.id_number) {
         errors.push("National ID Number is required for citizens.");

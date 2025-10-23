@@ -589,18 +589,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, nextTick } from "vue";
 import {
   Button,
-  FormControl,
   createResource,
+  FormControl,
   Textarea,
   TextEditor,
   TextInput,
 } from "frappe-ui";
-import Uploader from "./Uploader.vue";
+import { Copy, Edit, Plus, Trash2, X } from "lucide-vue-next";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import LinkControl from "./Link.vue";
-import { Plus, Trash2, Copy, Edit, X } from "lucide-vue-next";
+import Uploader from "./Uploader.vue";
 
 interface DocField {
   fieldname: string;
@@ -1201,10 +1201,11 @@ function addRow() {
   const newIndex = rowsRef.value.length - 1;
 
   validateRow(newIndex);
+  openEditModal(newIndex);
 
-  if (!editableGrid.value || props.autoEditGrid) {
-    openEditModal(newIndex);
-  }
+  // if (!editableGrid.value || props.autoEditGrid) {
+  //   openEditModal(newIndex);
+  // }
 }
 
 function duplicateSelected() {

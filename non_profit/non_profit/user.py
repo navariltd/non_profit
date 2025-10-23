@@ -1,5 +1,6 @@
-import frappe
 from datetime import datetime
+
+import frappe
 from frappe.utils import add_to_date
 from frappe.utils.password import update_password
 
@@ -23,15 +24,15 @@ def create_user(**kwargs):
 
         user = frappe.get_doc(
             {
-            "doctype": "User",
-            "email": kwargs.get("email") or "",
-            "first_name": kwargs.get("first_name") or "",
-            "last_name": kwargs.get("last_name") or "",
-            "full_name": f'{kwargs.get("first_name") or ""} {kwargs.get("last_name") or ""}',
-            "phone": kwargs.get("phone") or "",
-            "gender": kwargs.get("gender") or "",
-            "enabled": 1,
-            "default_app": "non_profit",
+                "doctype": "User",
+                "email": kwargs.get("email") or "",
+                "first_name": kwargs.get("first_name") or "",
+                "last_name": kwargs.get("last_name") or "",
+                "full_name": f'{kwargs.get("first_name") or ""} {kwargs.get("last_name") or ""}',
+                "phone": kwargs.get("phone") or "",
+                "gender": kwargs.get("gender") or "",
+                "enabled": 1,
+                "default_app": "non_profit",
             }
         )
 
@@ -93,9 +94,9 @@ def create_membership(**kwargs):
         else:
             member = frappe.get_doc("Member", member)
 
-
         if kwargs.get("membership_type"):
             doc_name = kwargs.get("membership_type")
+            amount = frappe.db.get_value("Membership Type", doc_name, "amount")
             from_date = frappe.utils.today()
             to_date = add_to_date(from_date, years=1)
 
@@ -106,6 +107,7 @@ def create_membership(**kwargs):
                     "membership_type": doc_name,
                     "company": kwargs.get("branch"),
                     "membership_status": "Pending",
+                    "amount": amount,
                     "from_date": from_date,
                     "to_date": to_date,
                     "member_since_date": from_date,
@@ -120,3 +122,12 @@ def create_membership(**kwargs):
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), "Error creating membership")
         frappe.throw("Error creating membership")
+
+
+@frappe.whitelist(allow_guest=True)
+def renew_membership(**kwargs):
+    try:
+        membership = frappe.get_doc("Membership", kwargs.get("id"))
+        membership.initiate_payment(phone_number=kwargs.get("phone_number"))
+    except Exception:
+        frappe.log_error(frappe.get_traceback(), "Error renewing membership")

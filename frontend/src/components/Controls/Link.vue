@@ -69,9 +69,9 @@
 <script setup>
 import Autocomplete from "@/components/Controls/Autocomplete.vue";
 import { watchDebounced } from "@vueuse/core";
-import { createResource, Button } from "frappe-ui";
+import { Button, createResource } from "frappe-ui";
 import { Plus, X } from "lucide-vue-next";
-import { useAttrs, computed, ref, watch } from "vue";
+import { computed, ref, useAttrs, watch } from "vue";
 
 const props = defineProps({
   doctype: {

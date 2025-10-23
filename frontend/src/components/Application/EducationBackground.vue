@@ -15,21 +15,15 @@
         :autoEditGrid="false"
       />
       <ChildTable
-        v-model="form.certification"
-        doctype="Certification"
-        label="Certifications"
+        v-model="form.courses"
+        doctype="User External Course"
+        label="Certifications and Trainings"
         :autoEditGrid="false"
       />
       <ChildTable
         v-model="form.additional_skills"
         doctype="Additional Skill"
         label="Skills"
-        :autoEditGrid="false"
-      />
-      <ChildTable
-        v-model="form.courses"
-        doctype="User External Course"
-        label="Courses"
         :autoEditGrid="false"
       />
 
