@@ -209,8 +209,8 @@ import { membershipStore } from "../stores/membership";
 import { isValidPhone } from "../utils/volunteer";
 
 const { membershipTypes, currentMembership } = membershipStore();
-const user = inject < any > "$user";
-const membershipId = ref < string > "";
+const user = inject("$user");
+const membershipId = ref("");
 
 const registerDialog = ref(false);
 const payNow = ref(false);

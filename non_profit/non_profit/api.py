@@ -1,33 +1,32 @@
 import json
-import re
 import random
+import re
 import string
 import time
+from collections import defaultdict
+from datetime import datetime
 
 import frappe
 from frappe import _, cint, cstr
 from frappe.desk.search import (
+    LinkSearchResults,
     build_for_autosuggest,
     get_std_fields_list,
-    LinkSearchResults,
     relevance_sorter,
     sanitize_searchfield,
 )
 from frappe.model.db_query import get_order_by
+from frappe.translate import get_all_translations
+from frappe.utils import getdate
 from frappe.utils.data import make_filter_tuple
 from frappe.utils.file_manager import save_file
-from frappe.translate import get_all_translations
-from datetime import datetime
-
-from non_profit.non_profit.utils import (
-    get_current_fiscal_year,
-    get_shift_types,
-    get_dates_for_day_of_week,
-)
-from collections import defaultdict
-from frappe.utils import getdate
 
 from non_profit.non_profit.user import create_user
+from non_profit.non_profit.utils import (
+    get_current_fiscal_year,
+    get_dates_for_day_of_week,
+    get_shift_types,
+)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -343,12 +342,12 @@ def get_job_openings(filters=None, orFilters=None):
 
     user = frappe.session.user
 
-    employee_exists = frappe.db.exists(
-        "Employee", {"user_id": user, "status": "Active"}
-    )
+    # employee_exists = frappe.db.exists(
+    #     "Employee", {"user_id": user, "status": "Active"}
+    # )
 
-    if not employee_exists:
-        filters["opportunity_type"] = "Guest"
+    # if not employee_exists:
+    #     filters["opportunity_type"] = "Guest"
 
     regions = None
     if "region" in filters:
