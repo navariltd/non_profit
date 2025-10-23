@@ -17,15 +17,16 @@
       message="Failed to load Events"
     />
     <div>
-      <div class="flex justify-center mb-2">
+      <div class="flex justify-center mb-2 px-2">
         <TextInput
           type="search"
           size="lg"
           variant="outline"
-          placeholder="Search by event name, location, or date"
+          placeholder="Search by event name or location"
           :disabled="false"
           :modelValue="searchTerm"
           @update:modelValue="(val) => (searchTerm = val)"
+          class="w-full md:w-1/3"
         />
       </div>
 
