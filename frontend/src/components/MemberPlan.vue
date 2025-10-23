@@ -127,7 +127,6 @@
           :ref_for="true"
           size="sm"
           variant="subtle"
-          placeholder="+254123456789"
           :disabled="renewMembership.loading"
           label="Phone Number"
           v-model="phoneNumber"
@@ -205,7 +204,7 @@ const renewMembership = createResource({
     selectedMembershipId.value = undefined;
     membershipList.reload();
   },
-  onError(error) {
+  onError(error: any) {
     errorMessage.value =
       error.message || "Failed to initiate membership renewal.";
   },

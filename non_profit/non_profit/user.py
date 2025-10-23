@@ -105,6 +105,7 @@ def create_membership(**kwargs):
             membership.insert(ignore_permissions=True)
 
         frappe.db.commit()
+        return membership.name
 
     except Exception as e:
         frappe.db.rollback()
