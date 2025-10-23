@@ -2,57 +2,36 @@
  {
   "docstatus": 0,
   "doctype": "Role Profile",
-  "modified": "2025-09-02 16:18:30.081098",
+  "modified": "2025-10-23 13:02:09.885008",
   "name": "Volunteer",
   "role_profile": "Volunteer",
   "roles": [
    {
-    "parent": "Volunteer",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
     "role": "Gameplan Guest"
    },
    {
-    "parent": "Volunteer",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
     "role": "Gameplan Member"
    },
    {
-    "parent": "Volunteer",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
-    "role": "HR User"
-   },
-   {
-    "parent": "Volunteer",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
-    "role": "Inbox User"
-   },
-   {
-    "parent": "Volunteer",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
     "role": "Projects User"
    },
    {
-    "parent": "Volunteer",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
     "role": "LMS Student"
    },
    {
-    "parent": "Volunteer",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
     "role": "Volunteer"
    },
    {
-    "parent": "Volunteer",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
     "role": "Employee"
+   },
+   {
+    "role": "Buzz User"
+   },
+   {
+    "role": "Inbox User"
+   },
+   {
+    "role": "Raven User"
    }
   ]
  },
@@ -64,15 +43,9 @@
   "role_profile": "Member",
   "roles": [
    {
-    "parent": "Member",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
     "role": "Non Profit Member"
    },
    {
-    "parent": "Member",
-    "parentfield": "roles",
-    "parenttype": "Role Profile",
     "role": "Non Profit Portal User"
    }
   ]

@@ -279,6 +279,13 @@ fixtures = [
             ["module", "=", "Non Profit"],
         ],
     },
+     {
+        "doctype": "Property Setter",
+        "filters": [
+            ["is_system_generated", "=", 0],
+            ["module", "=", "Non Profit"],
+        ],
+    },
 ]
 
 add_to_apps_screen = [
@@ -291,12 +298,3 @@ add_to_apps_screen = [
     }
 ]
 
-fixtures = [
-    {
-        "doctype": "Property Setter",
-        "filters": [
-            ["is_system_generated", "=", 0],
-            ["module", "=", "Non Profit"],
-        ],
-    },
-]

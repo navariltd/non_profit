@@ -16,7 +16,7 @@
         >
           <div class="flex-1">
             <h1
-              class="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] font-bold text-gray-800 mb-4 leading-tight"
+              class="text-3xl lg:text-[2.0rem] font-bold text-gray-800 mb-4 leading-tight"
             >
               {{ eventDetail.data?.title }}
             </h1>
@@ -60,7 +60,7 @@
                   size="lg"
                   @click="handleRegister(false)"
                 >
-                  Register 
+                  Register
                 </Button>
               </div>
             </div>
