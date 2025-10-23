@@ -1571,16 +1571,16 @@ def get_dashboard_stats():
     project_stats = {}
 
     total_projects_deployed = frappe.db.count(
-        "Volunteer Deployment Assignee", {"volunteer": volunteer}
+        "Personnel Deployment Assignment", {"employee": volunteer}
     )
     pending_projects = frappe.db.count(
-        "Volunteer Deployment Assignee", {"volunteer": volunteer, "status": "Pending"}
+        "Personnel Deployment Assignment", {"employee": volunteer, "status": "Pending"}
     )
     accepted_projects = frappe.db.count(
-        "Volunteer Deployment Assignee", {"volunteer": volunteer, "status": "Accepted"}
+        "Personnel Deployment Assignment", {"employee": volunteer, "status": "Accepted"}
     )
     rejected_projects = frappe.db.count(
-        "Volunteer Deployment Assignee", {"volunteer": volunteer, "status": "Rejected"}
+        "Personnel Deployment Assignment", {"employee": volunteer, "status": "Rejected"}
     )
 
     project_stats["total_projects_deployed"] = total_projects_deployed
