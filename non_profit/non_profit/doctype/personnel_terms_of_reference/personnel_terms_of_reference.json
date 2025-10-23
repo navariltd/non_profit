@@ -11,9 +11,8 @@
   "title_of_mission",
   "company",
   "column_break_ehba",
-  "date_of_visit",
-  "section_break_ozuk",
-  "accompanying_staff",
+  "expected_start_date",
+  "expected_end_date",
   "section_break_calj",
   "mission_background",
   "section_break_7hzn",
@@ -60,11 +59,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "date_of_visit",
-   "fieldtype": "Date",
-   "label": "Date of Visit"
-  },
-  {
    "fieldname": "section_break_calj",
    "fieldtype": "Section Break",
    "label": "Mission Background"
@@ -82,16 +76,6 @@
    "label": "Mission Details"
   },
   {
-   "fieldname": "section_break_ozuk",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "accompanying_staff",
-   "fieldtype": "Table",
-   "label": "Accompanying Staff",
-   "options": "TOR Accompanying Staff"
-  },
-  {
    "fieldname": "objectives_approach_tab",
    "fieldtype": "Tab Break",
    "label": "Objectives, Approach & Stakeholders"
@@ -105,7 +89,8 @@
    "fieldname": "objectives",
    "fieldtype": "Table",
    "label": "Objectives",
-   "options": "TOR Objectives"
+   "options": "TOR Objectives",
+   "reqd": 1
   },
   {
    "fieldname": "proposed_approach_section",
@@ -116,7 +101,8 @@
    "fieldname": "approach_methods",
    "fieldtype": "Table",
    "label": "Approach Methods",
-   "options": "TOR Approach Methods"
+   "options": "TOR Approach Methods",
+   "reqd": 1
   },
   {
    "fieldname": "itinerary_outputs_resources_tab",
@@ -132,7 +118,8 @@
    "fieldname": "itinerary",
    "fieldtype": "Table",
    "label": "Itinerary",
-   "options": "TOR Itinerary"
+   "options": "TOR Itinerary",
+   "reqd": 1
   },
   {
    "fieldname": "expected_outputs_section",
@@ -143,7 +130,8 @@
    "fieldname": "expected_outputs",
    "fieldtype": "Table",
    "label": "Expected Outputs",
-   "options": "TOR Outputs"
+   "options": "TOR Outputs",
+   "reqd": 1
   },
   {
    "fieldname": "resources_section",
@@ -154,7 +142,8 @@
    "fieldname": "resources",
    "fieldtype": "Table",
    "label": "Resources",
-   "options": "TOR Resources"
+   "options": "TOR Resources",
+   "reqd": 1
   },
   {
    "fieldname": "stakeholders_section",
@@ -165,7 +154,8 @@
    "fieldname": "stakeholders",
    "fieldtype": "Table",
    "label": "Stakeholders",
-   "options": "TOR Stakeholders"
+   "options": "TOR Stakeholders",
+   "reqd": 1
   },
   {
    "fieldname": "company",
@@ -182,6 +172,18 @@
    "hidden": 1,
    "label": "Naming Series",
    "options": "TOR-.YYYY.-.######",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expected_start_date",
+   "fieldtype": "Date",
+   "label": "Expected Start Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "expected_end_date",
+   "fieldtype": "Date",
+   "label": "Expected End Date",
    "reqd": 1
   }
  ],
@@ -200,7 +202,7 @@
    "link_fieldname": "terms_of_reference"
   }
  ],
- "modified": "2025-09-30 08:19:15.717507",
+ "modified": "2025-10-23 12:47:14.397828",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Terms of Reference",

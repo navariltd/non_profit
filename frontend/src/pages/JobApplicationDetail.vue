@@ -206,7 +206,7 @@ const steps = [
     component: markRaw(PersonalInfo),
     validate: (form) => {
       const errors = [];
-      const dob = form.date_of_birth ? new Date(form.date_of_birth) : null;
+      // const dob = form.date_of_birth ? new Date(form.date_of_birth) : null;
 
       if (form.citizenship === "Citizen" && !form.id_number) {
         errors.push("National ID Number is required for citizens.");
@@ -214,25 +214,25 @@ const steps = [
         errors.push("Passport Number is required for non-citizens.");
       }
 
-      if (!dob || isNaN(dob)) {
-        errors.push("Valid Date of Birth is required.");
-      } else {
-        const today = new Date();
-        const age =
-          today.getFullYear() -
-          dob.getFullYear() -
-          (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate())
-            ? 1
-            : 0);
+      // if (!dob || isNaN(dob)) {
+      //   errors.push("Valid Date of Birth is required.");
+      // } else {
+      //   const today = new Date();
+      //   const age =
+      //     today.getFullYear() -
+      //     dob.getFullYear() -
+      //     (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate())
+      //       ? 1
+      //       : 0);
 
-        if (dob > today) {
-          errors.push("Date of Birth cannot be in the future.");
-        } else if (age < 7) {
-          errors.push("Applicant must be at least 7 years old.");
-        } else if (age > 100) {
-          errors.push("Applicant age cannot exceed 100 years.");
-        }
-      }
+      //   if (dob > today) {
+      //     errors.push("Date of Birth cannot be in the future.");
+      //   } else if (age < 7) {
+      //     errors.push("Applicant must be at least 7 years old.");
+      //   } else if (age > 100) {
+      //     errors.push("Applicant age cannot exceed 100 years.");
+      //   }
+      // }
 
       return errors.length ? errors : true;
     },
@@ -701,10 +701,12 @@ const submitApplication = () => {
     },
     {
       onSuccess: (response) => {
-        const id = response?.name || response?.application_id;
-        toast.success("Application submitted successfully.");
-        router.push({ name: "JobApplicationDetail", params: { id } });
-        window.location.reload();
+        if (response?.error) {
+          toast.error("Application submission failed.", response.error);
+        } else {
+          toast.success("Application submission successful.");
+          window.location.reload();
+        }
       },
       onError: (err) =>
         toast.error(err.messages?.[0] || "Failed to submit application."),
