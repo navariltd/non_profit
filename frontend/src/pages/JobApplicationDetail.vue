@@ -161,19 +161,23 @@
     <div v-else class="text-center py-20 text-gray-500">
       Loading application details...
     </div>
+
+    <ErrorModal v-model="showErrorDialog" :errors="flatErrors" />
   </div>
 </template>
 
 <script setup>
-import { ref, inject, markRaw, watch, onMounted, computed } from "vue";
+import { Button, createResource, toast } from "frappe-ui";
+import { computed, inject, markRaw, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Button, toast, createResource } from "frappe-ui";
 
-import PersonalInfo from "@/components/Application/PersonalInfo.vue";
-import EducationBackground from "@/components/Application/EducationBackground.vue";
-import WorkExperience from "@/components/Application/WorkExperience.vue";
 import AdditionalInformation from "@/components/Application/AdditionalInformation.vue";
 import ApplicationReview from "@/components/Application/ApplicationReview.vue";
+import EducationBackground from "@/components/Application/EducationBackground.vue";
+import PersonalInfo from "@/components/Application/PersonalInfo.vue";
+import WorkExperience from "@/components/Application/WorkExperience.vue";
+
+import ErrorModal from "../components/Modals/ErrorModal.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -185,36 +189,215 @@ const currentStep = ref(0);
 const maxCompletedStep = ref(-1);
 const isSaving = ref(false);
 
+const showErrorDialog = ref(false);
+const validationErrors = ref([]);
+
+const flatErrors = computed(() => {
+  if (!validationErrors.value.length) return [];
+  return validationErrors.value.flatMap((err) =>
+    typeof err === "string" ? [err] : Object.values(err).flat()
+  );
+});
+
 const steps = [
   {
     hash: "#info",
     title: "Personal Info",
     component: markRaw(PersonalInfo),
-    validate: (f) => true,
+    validate: (form) => {
+      const errors = [];
+      const dob = form.birth_date ? new Date(form.birth_date) : null;
+
+      if (form.citizenship === "Citizen" && !form.id_number) {
+        errors.push("National ID Number is required for citizens.");
+      } else if (form.citizenship !== "Citizen" && !form.passport_number) {
+        errors.push("Passport Number is required for non-citizens.");
+      }
+
+      if (!dob || isNaN(dob)) {
+        errors.push("Valid Date of Birth is required.");
+      } else {
+        const today = new Date();
+        const age =
+          today.getFullYear() -
+          dob.getFullYear() -
+          (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate())
+            ? 1
+            : 0);
+
+        if (dob > today) {
+          errors.push("Date of Birth cannot be in the future.");
+        } else if (age < 7) {
+          errors.push("Applicant must be at least 7 years old.");
+        } else if (age > 100) {
+          errors.push("Applicant age cannot exceed 100 years.");
+        }
+      }
+
+      return errors.length ? errors : true;
+    },
   },
   {
     hash: "#education",
     title: "Education & Qualifications",
     component: markRaw(EducationBackground),
-    validate: () => true,
+    validate: (form) => {
+      const errors = [];
+
+      if (!form.profession) {
+        errors.push("Profession is required.");
+      }
+
+      const childTableChecks = [
+        {
+          field: "education",
+          label: "Education History",
+          requiredFields: ["school_univ", "level", "year_of_passing"],
+        },
+        {
+          field: "certification",
+          label: "Certifications",
+          requiredFields: ["certification_name", "organization", "issue_date"],
+        },
+        {
+          field: "additional_skills",
+          label: "Skills",
+          requiredFields: ["additional_skill"],
+        },
+        {
+          field: "courses",
+          label: "Courses",
+          requiredFields: ["course_name", "institution"],
+        },
+        {
+          field: "licences",
+          label: "Professional Licences",
+          requiredFields: [],
+        },
+      ];
+
+      const isRowEffectivelyEmpty = (row) => {
+        if (!row || typeof row !== "object") return true;
+
+        const keys = Object.keys(row);
+        if (keys.length === 0) return true;
+
+        return keys.every(
+          (key) =>
+            row[key] === null || row[key] === undefined || row[key] === ""
+        );
+      };
+
+      for (const table of childTableChecks) {
+        const rows = form[table.field];
+
+        if (!rows || rows.length === 0) continue;
+
+        rows.forEach((row, index) => {
+          if (isRowEffectivelyEmpty(row)) {
+            errors.push(
+              `${table.label}: Row ${index + 1} appears to be empty. Please either complete it or remove it.`
+            );
+          }
+
+          table.requiredFields.forEach((f) => {
+            if (!row[f] || row[f] === null || row[f] === "") {
+              errors.push(
+                `${table.label}: Row ${index + 1} is missing "${f.replace(
+                  /_/g,
+                  " "
+                )}".`
+              );
+            }
+          });
+        });
+      }
+
+      return errors.length ? errors : true;
+    },
   },
   {
     hash: "#experience",
     title: "Work Experience",
     component: markRaw(WorkExperience),
-    validate: () => true,
+    validate: (form) => {
+      const errors = [];
+
+      const childTableChecks = [
+        {
+          field: "work_experience",
+          label: "Work Experience",
+          requiredFields: ["title", "company", "location", "from_date"],
+        },
+        {
+          field: "work_references",
+          label: "Work References",
+          requiredFields: ["reference_name", "position", "organization"],
+        },
+      ];
+
+      const isRowEffectivelyEmpty = (row) => {
+        if (!row || typeof row !== "object") return true;
+
+        const keys = Object.keys(row);
+        if (keys.length === 0) return true;
+
+        return keys.every(
+          (key) =>
+            row[key] === null || row[key] === undefined || row[key] === ""
+        );
+      };
+
+      for (const table of childTableChecks) {
+        const rows = form[table.field];
+
+        if (!rows || rows.length === 0) continue;
+
+        rows.forEach((row, index) => {
+          if (isRowEffectivelyEmpty(row)) {
+            errors.push(
+              `${table.label}: Row ${index + 1} appears to be empty. Please either complete it or remove it.`
+            );
+          }
+
+          table.requiredFields.forEach((f) => {
+            if (!row[f] || row[f] === null || row[f] === "") {
+              errors.push(
+                `${table.label}: Row ${index + 1} is missing "${f.replace(
+                  /_/g,
+                  " "
+                )}".`
+              );
+            }
+          });
+        });
+      }
+
+      return errors.length ? errors : true;
+    },
   },
   {
     hash: "#additional",
     title: "Additional Information",
     component: markRaw(AdditionalInformation),
-    validate: () => true,
+    validate: (form) => true,
   },
   {
     hash: "#review",
     title: "Review & Submit",
     component: markRaw(ApplicationReview),
-    validate: () => true,
+    validate: (form) => {
+      const allErrors = [];
+
+      for (const step of steps.slice(0, -1)) {
+        const result = step.validate(form);
+        if (Array.isArray(result) && result.length) {
+          allErrors.push(...result.map((err) => `[${step.title}] ${err}`));
+        }
+      }
+
+      return allErrors.length ? allErrors : true;
+    },
   },
 ];
 
@@ -328,6 +511,11 @@ function populateForm(data = {}, isApplication = false) {
     cover_letter: ["cover_letter"],
   };
 
+  const renameMap = {
+    date_of_birth: ["birth_date"],
+    phone_number: ["phone", "mobile_no", "mobile", "contact"],
+  };
+
   for (const key in fieldMap) {
     let value =
       data[key] ||
@@ -352,34 +540,58 @@ function populateForm(data = {}, isApplication = false) {
   }
 
   const source = src === "user" ? user : data;
-  for (const key in source) {
-    const value = source[key];
+
+  for (const formKey in renameMap) {
+    if (
+      form.value[formKey] !== undefined &&
+      form.value[formKey] !== null &&
+      form.value[formKey] !== "" &&
+      !(Array.isArray(form.value[formKey]) && form.value[formKey].length === 0)
+    ) {
+      continue;
+    }
+
+    const sourceKeys = renameMap[formKey];
+    let mappedValue = null;
+
+    mappedValue = sourceKeys
+      .map((sourceKey) => source[sourceKey])
+      .find((v) => v !== undefined && v !== null && v !== "");
 
     if (
+      (mappedValue === undefined ||
+        mappedValue === null ||
+        mappedValue === "") &&
+      isApplication
+    ) {
+      mappedValue = sourceKeys
+        .map((sourceKey) => user[sourceKey])
+        .find((v) => v !== undefined && v !== null && v !== "");
+    }
+
+    if (mappedValue !== undefined && mappedValue !== null) {
+      form.value[formKey] = mappedValue;
+    }
+  }
+
+  const sourceToCopy = src === "user" ? user : data;
+  for (const key in sourceToCopy) {
+    const value = sourceToCopy[key];
+
+    if (
+      fieldMap[key] ||
+      renameMap[key] ||
       form.value[key] === undefined ||
       form.value[key] === null ||
       form.value[key] === "" ||
       (Array.isArray(form.value[key]) && form.value[key].length === 0)
     ) {
-      form.value[key] = Array.isArray(value) ? [...value] : value;
-    }
-  }
-
-  if (src === "user") {
-    for (const key in data) {
-      if (fieldMap[key]) continue;
-      if (
-        form.value[key] === undefined ||
-        form.value[key] === null ||
-        form.value[key] === "" ||
-        (Array.isArray(form.value[key]) && form.value[key].length === 0)
-      ) {
-        form.value[key] = Array.isArray(data[key]) ? [...data[key]] : data[key];
+      if (!fieldMap[key] && !renameMap[key]) {
+        form.value[key] = Array.isArray(value) ? [...value] : value;
       }
     }
   }
 }
-
 const goToStep = (index) => {
   if (isSubmitted.value) {
     const reviewIndex = steps.findIndex((s) => s.hash === "#review");
@@ -439,10 +651,11 @@ watch(
 
 const handleStepAction = () => {
   const step = steps[currentStep.value];
-  const valid = step.validate(form.value, resume.value, userDetails.value);
+  const result = step.validate(form.value, resume.value, userDetails.value);
 
-  if (!valid) {
-    toast.error("Please complete required fields before continuing.");
+  if (result !== true) {
+    validationErrors.value = Array.isArray(result) ? result : [result];
+    showErrorDialog.value = true;
     return;
   }
 
@@ -491,6 +704,7 @@ const submitApplication = () => {
         const id = response?.name || response?.application_id;
         toast.success("Application submitted successfully.");
         router.push({ name: "JobApplicationDetail", params: { id } });
+        window.location.reload();
       },
       onError: (err) =>
         toast.error(err.messages?.[0] || "Failed to submit application."),

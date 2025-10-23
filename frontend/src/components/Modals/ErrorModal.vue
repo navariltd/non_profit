@@ -39,9 +39,9 @@
 </template>
 
 <script setup>
-import { computed, defineComponent, h } from "vue";
-import { Dialog, Button } from "frappe-ui";
+import { Button, Dialog } from "frappe-ui";
 import { FeatherIcon } from "lucide-vue-next";
+import { computed, defineComponent, h } from "vue";
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -58,6 +58,10 @@ const show = computed({
 });
 
 function formatFieldName(fieldName) {
+  if (typeof fieldName === "number" && Number.isInteger(fieldName)) {
+    return String(fieldName + 1);
+  }
+
   return String(fieldName)
     .replace(/_/g, " ")
     .replace(/\b\w/g, (char) => char.toUpperCase());

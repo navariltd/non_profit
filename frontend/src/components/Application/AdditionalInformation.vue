@@ -1,6 +1,33 @@
 <template>
   <div class="space-y-8">
     <div
+      v-if="!props.job?.screening_questions?.length"
+      class="text-center py-10 px-6 rounded-lg bg-emerald-50 border-2 border-emerald-200 text-emerald-800"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="h-12 w-12 mx-auto mb-3"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        stroke-width="1.5"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      <h3 class="text-xl font-semibold mb-1">
+        No Additional Information Required
+      </h3>
+      <p class="text-sm">
+        This opportunity does not require any supplementary information at this
+        time. Click 'Save & Continue' to proceed to the review step.
+      </p>
+    </div>
+
+    <div
       v-for="(q, index) in visibleQuestions"
       :key="q.question_id"
       class="rounded-xl border p-5 bg-white shadow-sm transition-all"
@@ -96,10 +123,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
-import { FormControl } from "frappe-ui";
 import CheckableListSelect from "@/components/Controls/CheckableListSelect.vue";
 import Uploader from "@/components/Controls/Uploader.vue";
+import { FormControl } from "frappe-ui";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps({
   form: { type: Object, required: true },
@@ -116,18 +143,20 @@ function parseOptions(optStr) {
     .filter((o) => o);
 }
 
-props.job?.screening_questions?.forEach((q) => {
-  const existing = props.form.screening_question_responses?.find(
-    (r) => r.question_id === q.question_id
-  );
+if (props.job?.screening_questions?.length) {
+  props.job.screening_questions.forEach((q) => {
+    const existing = props.form.screening_question_responses?.find(
+      (r) => r.question_id === q.question_id
+    );
 
-  responses.value[q.question_id] = {
-    question_id: q.question_id,
-    question: q.question,
-    answer: existing?.answer || "",
-    attachment: existing?.attachment || null,
-  };
-});
+    responses.value[q.question_id] = {
+      question_id: q.question_id,
+      question: q.question,
+      answer: existing?.answer || "",
+      attachment: existing?.attachment || null,
+    };
+  });
+}
 
 watch(
   responses,
@@ -161,18 +190,20 @@ const visibleQuestions = computed(() =>
   })
 );
 
-props.job?.screening_questions?.forEach((q) => {
-  if (q.depends_on_question) {
-    watch(
-      () => responses.value[q.depends_on_question]?.answer,
-      () => {
-        const shouldShow = visibleQuestions.value.includes(q);
-        if (!shouldShow) {
-          responses.value[q.question_id].answer = "";
-          responses.value[q.question_id].attachment = null;
+if (props.job?.screening_questions?.length) {
+  props.job.screening_questions.forEach((q) => {
+    if (q.depends_on_question) {
+      watch(
+        () => responses.value[q.depends_on_question]?.answer,
+        () => {
+          const shouldShow = visibleQuestions.value.includes(q);
+          if (!shouldShow) {
+            responses.value[q.question_id].answer = "";
+            responses.value[q.question_id].attachment = null;
+          }
         }
-      }
-    );
-  }
-});
+      );
+    }
+  });
+}
 </script>
