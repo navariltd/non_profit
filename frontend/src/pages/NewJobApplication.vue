@@ -60,6 +60,27 @@
     </div>
 
     <div
+      v-else-if="
+        job.data &&
+        job.data.opportunity_type === 'Internal' &&
+        user.data &&
+        !user.data?.employee
+      "
+      class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center"
+    >
+      <h2 class="text-xl font-semibold text-blue-800 mb-4">
+        This opportunity is available for volunteers only.
+      </h2>
+      <Button
+        variant="solid"
+        class="bg-red-700 hover:bg-red-800 text-white"
+        @click="router.push({ name: 'VolunteerSignup' })"
+      >
+        Register as Volunteer
+      </Button>
+    </div>
+
+    <div
       v-else
       class="bg-white rounded-xl shadow-sm p-6 border border-gray-200"
     >
@@ -122,15 +143,9 @@
 </template>
 
 <script setup>
-import { ref, computed, inject } from "vue";
+import { Button, createResource, FormControl, toast } from "frappe-ui";
+import { computed, inject, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import {
-  Button,
-  FormControl,
-  toast,
-  createResource,
-  TextEditor,
-} from "frappe-ui";
 
 const route = useRoute();
 const router = useRouter();
@@ -140,6 +155,14 @@ const jobId = route.params?.job || "";
 const job = createResource({
   url: "non_profit.non_profit.api.get_job_details",
   params: { job: jobId },
+  onSuccess: (data) => {
+    console.log(data);
+
+    if (!data) {
+      toast.error("Job not found");
+      router.replace({ name: "JobListings" });
+    }
+  },
   cache: ["job", jobId],
   auto: true,
 });
@@ -153,7 +176,6 @@ const form = ref({
 });
 
 const resume = ref(null);
-const profilePhoto = ref(null);
 const documents = ref([]);
 
 const jobApplication = createResource({
@@ -201,7 +223,6 @@ const submitApplication = () => {
   );
 };
 
-const handleError = (error) => toast.error(error.message || "Upload error.");
 const redirectToWebsite = (url) => window.open(url, "_blank");
 const getCompanyAbbr = (name) =>
   name

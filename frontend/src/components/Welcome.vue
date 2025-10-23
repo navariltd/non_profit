@@ -1,7 +1,7 @@
 <template>
   <div
     v-if="!roleResource.data.is_pending_approval"
-    class="h-[75vh] bg-gray-50 flex items-center justify-center"
+    class="h-[75vh] flex items-center justify-center"
   >
     <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 p-10">
       <div class="flex flex-col justify-center space-y-6 text-left">
@@ -12,13 +12,13 @@
           <span class="text-gray-800">Society</span>
         </h1>
         <p class="text-lg text-gray-700 max-w-lg">
-          🌍 Together, we can
+          Together, we can
           <span class="font-semibold text-red-500">save lives</span>, support
           communities, and make a
           <span class="font-semibold text-red-500">real difference</span>. Come
           be part of our mission as a
-          <span class="font-semibold text-red-500">volunteer</span> ✨ or a
-          <span class="font-semibold text-red-500">member</span> 🤝!
+          <span class="font-semibold text-red-500">volunteer</span> or a
+          <span class="font-semibold text-red-500">member</span> !
         </p>
         <p class="text-gray-600 max-w-md">
           Your time and passion can help change lives. Join us today and help
@@ -35,7 +35,7 @@
             class="w-full py-4 rounded-xl shadow-lg text-lg font-medium"
             @click="navigateTo('volunteer/signup')"
           >
-            🙋‍♂️ Join as Volunteer
+            Join as Volunteer
           </Button>
           <Button
             variant="outline"
@@ -44,7 +44,7 @@
             class="w-full py-4 rounded-xl shadow-md text-lg font-medium"
             @click="navigateTo('membership')"
           >
-            🏅 Join as Member
+            Join as Member
           </Button>
         </div>
       </div>
