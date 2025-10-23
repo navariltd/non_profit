@@ -60,7 +60,7 @@
                   size="lg"
                   @click="handleRegister(false)"
                 >
-                  Register Event
+                  Register 
                 </Button>
               </div>
             </div>
