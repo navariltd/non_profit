@@ -3,7 +3,6 @@
  "allow_rename": 1,
  "creation": "2025-09-30 07:33:37.907497",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "employee",
@@ -39,7 +38,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-30 07:35:59.684940",
+ "modified": "2025-10-23 12:55:27.689182",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "TOR Accompanying Staff",

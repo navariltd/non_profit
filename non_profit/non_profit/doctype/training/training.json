@@ -3,7 +3,6 @@
  "allow_rename": 1,
  "creation": "2025-09-01 13:26:19.469081",
  "doctype": "DocType",
- "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "training_program"
@@ -25,7 +24,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-02 08:51:14.951229",
+ "modified": "2025-10-23 12:55:30.010804",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Training",
