@@ -27,7 +27,7 @@
       />
 
       <FormControl
-        v-model="form.birth_date"
+        v-model="form.date_of_birth"
         label="Date of Birth"
         type="date"
       />
@@ -79,9 +79,9 @@
 </template>
 
 <script setup>
-import { FormControl } from "frappe-ui";
 import Link from "@/components/Controls/Link.vue";
 import MultiSelect from "@/components/Controls/MultiSelect.vue";
+import { FormControl } from "frappe-ui";
 
 const props = defineProps({
   form: {

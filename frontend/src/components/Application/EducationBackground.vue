@@ -6,6 +6,7 @@
         v-model="form.profession"
         label="Profession"
         class="mt-4"
+        :required="true"
       />
       <ChildTable
         v-model="form.education"
@@ -43,8 +44,8 @@
 </template>
 
 <script setup>
-import Link from "@/components/Controls/Link.vue";
 import ChildTable from "@/components/Controls/ChildTable.vue";
+import Link from "@/components/Controls/Link.vue";
 
 const props = defineProps({
   form: {

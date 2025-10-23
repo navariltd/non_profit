@@ -125,10 +125,10 @@
 </template>
 
 <script setup>
-import { computed, watch, onMounted } from "vue";
-import { FormControl } from "frappe-ui";
-import MultiSelect from "@/components/Controls/MultiSelect.vue";
 import Link from "@/components/Controls/Link.vue";
+import MultiSelect from "@/components/Controls/MultiSelect.vue";
+import { FormControl } from "frappe-ui";
+import { computed, onMounted, watch } from "vue";
 import ChildTable from "../Controls/ChildTable.vue";
 
 const props = defineProps({
