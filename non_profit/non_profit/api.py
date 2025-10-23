@@ -944,7 +944,7 @@ def get_events(search=None):
 
 
 @frappe.whitelist(allow_guest=True)
-def register_event(event_name: str | int, user: dict) -> None:
+def register_event(event_name: str | int, user: dict[str, any]) -> None:
 
     if not event_name or not frappe.db.exists("FE Event", event_name):
         frappe.throw("This event does not exist.")
@@ -956,7 +956,6 @@ def register_event(event_name: str | int, user: dict) -> None:
         ticket = frappe.db.get_value(
             "Event Ticket Type", {"event": event_name}, as_dict=True
         )
-        print("Non-ticketed event, using default ticket:", ticket)
 
     try:
         event_booking = frappe.get_doc(
