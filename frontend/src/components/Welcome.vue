@@ -26,7 +26,6 @@
         </p>
       </div>
 
-      <!-- Right Section: Actions -->
       <div class="flex flex-col items-center justify-center space-y-6">
         <div class="space-y-4 w-full max-w-sm">
           <Button

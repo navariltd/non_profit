@@ -40,18 +40,6 @@ def create_user(**kwargs):
 
         user.add_roles("Vmms Guest")
 
-        user_permission = frappe.get_doc(
-            {
-                "doctype": "User Permission",
-                "user": user.name,
-                "allow": "User",
-                "for_value": user.name,
-                "is_default": 1,
-            }
-        )
-
-        user_permission.insert(ignore_permissions=True)
-
         frappe.db.commit()
 
     except Exception as e:

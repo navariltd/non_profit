@@ -68,13 +68,20 @@
           >&#8203;</span
         >
 
-        <div
-          class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle w-full max-w-xl md:max-w-3xl"
-        >
-          <div class="bg-gray-50 px-4 py-5 sm:px-6 border-b">
-            <h3 class="text-2xl font-bold text-gray-900" id="modal-title">
-              Register as a <span class="text-red-600">Member</span>
-            </h3>
+          <!-- Branch -->
+          <div class="bg-white border rounded-lg p-4 shadow-sm">
+            <div class="p-2">
+              <FormControl
+                type="autocomplete"
+                :options="branches.data"
+                size="sm"
+                variant="subtle"
+                placeholder="Placeholder"
+                :disabled="payNow"
+                label="Branch / County"
+                v-model="branch"
+              />
+            </div>
           </div>
 
           <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -201,16 +208,37 @@
 </template>
 
 <script lang="ts" setup>
-import { Button, createResource, ErrorMessage, Input, toast } from "frappe-ui";
 import { inject, reactive, ref, watch } from "vue";
-import Link from "../components/Controls/Link.vue";
-import EmptyState from "../components/EmptyState.vue";
-import Member from "../components/MemberPlan.vue";
 import { membershipStore } from "../stores/membership";
+import {
+  Dialog,
+  Button,
+  createResource,
+  ErrorMessage,
+  toast,
+  Input,
+  FormControl,
+  createListResource,
+} from "frappe-ui";
+import Member from "../components/MemberPlan.vue";
+import EmptyState from "../components/EmptyState.vue";
 import { isValidPhone } from "../utils/volunteer";
 
 const { membershipTypes, currentMembership } = membershipStore();
 const user = inject<any>("$user");
+const branches = createListResource({
+  doctype: "Company",
+  fields: ["name"],
+  filters: { is_group: 0 },
+  cache: "branches",
+  auto: true,
+  transform(data: any) {
+    return data.map((branch: any) => ({
+      label: branch.name,
+      value: branch.name,
+    }));
+  },
+});
 
 const registerDialog = ref(false);
 const payNow = ref(false);
@@ -221,6 +249,19 @@ const membershipForm = reactive({
   member_name: user.data ? user.data.full_name : "",
   email_id: user.data ? user.data.email : "",
   phone_number: "",
+});
+
+const branch = ref("");
+
+watch(branch, (newValue: any) => {
+  if (typeof newValue === "object" && newValue !== null) {
+    membershipForm.branch = newValue.value || "";
+  } else {
+    membershipForm.branch = newValue || "";
+  }
+
+  console.log("Selected branch value:", membershipForm.branch);
+  console.log("membershipForm:", { ...membershipForm });
 });
 
 const createMembership = createResource({
@@ -250,6 +291,7 @@ function cleanUpMembershipForm() {
   membershipForm.membership_type = "";
   membershipForm.amount = 0;
   membershipForm.branch = "";
+  branch.value = "";
   membershipForm.phone_number = "";
   payNow.value = false;
   createMembership.error = "";
@@ -281,19 +323,9 @@ function payMembership() {
     return;
   }
   createMembership.error = "";
-
-  const membershipId = currentMembership.data?.[0]?.name;
-
-  if (membershipId) {
-    renewMembership.submit({
-      membership: membershipId,
-      phone_number: membershipForm.phone_number,
-    });
-  } else {
-    toast.info(
-      "Payment can only be initiated after a membership document has been created."
-    );
-  }
+  alert(
+    `Paying for membership with phone number: ${membershipForm.phone_number}`
+  );
 }
 
 watch(registerDialog, (newValue) => {
