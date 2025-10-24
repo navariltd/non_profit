@@ -1489,7 +1489,7 @@ def get_current_membership():
 
     memberships = frappe.get_all(
         "Membership",
-        filters={"member": member.name},
+        filters={"member": member.name, "membership_status": "Active"},
         fields=[
             "name",
         ],
