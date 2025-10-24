@@ -49,65 +49,62 @@ def create_user(**kwargs):
 
 
 @frappe.whitelist(allow_guest=True)
-def create_membership(**kwargs):
+def create_membership(
+    phone: str,
+    amount: float,
+    membership_type: str,
+    branch: str,
+) -> None:
+
+    if not phone or not amount or not membership_type or not branch:
+        frappe.throw("All fields are required")
+
+    user = frappe.db.get_value(
+        "User", frappe.session.user, ["full_name"], as_dict=1
+    ).full_name
 
     try:
         frappe.db.begin()
 
-        member = None
-        membership = None
-        branch = kwargs.get("branch")
-
-        if frappe.db.exists("Member", {"email_id": kwargs.get("email_id")}):
-            member = frappe.db.get_value(
-                "Member", {"email_id": kwargs.get("email_id")}, "name"
-            )
-
-            membership = frappe.db.exists(
-                "Membership", {"member": member, "company": branch}
-            )
-        if member and membership:
-            frappe.throw("Membership already exists for this member")
-
+        member = frappe.db.exists("Member", {"email_id": frappe.session.user})
         if not member:
             member = frappe.get_doc(
                 {
                     "doctype": "Member",
-                    "member_name": kwargs.get("member_name"),
-                    "email_id": kwargs.get("email_id"),
-                    "membership_type": kwargs.get("membership_type"),
+                    "member_name": user,
+                    "email_id": frappe.session.user,
+                    "phone_number": phone,
+                    "custom_company": branch,
                 }
             )
             member.insert(ignore_permissions=True)
+
         else:
             member = frappe.get_doc("Member", member)
 
-        if kwargs.get("membership_type"):
-            doc_name = kwargs.get("membership_type")
-            amount = frappe.db.get_value("Membership Type", doc_name, "amount")
-            from_date = frappe.utils.today()
-            to_date = add_to_date(from_date, years=1)
+        from_date = datetime.today().date()
 
-            membership = frappe.get_doc(
-                {
-                    "doctype": "Membership",
-                    "member": member.name,
-                    "membership_type": doc_name,
-                    "company": kwargs.get("branch"),
-                    "membership_status": "Pending",
-                    "amount": amount,
-                    "from_date": from_date,
-                    "to_date": to_date,
-                    "member_since_date": from_date,
-                }
-            )
+        membership = frappe.get_doc(
+            {
+                "doctype": "Membership",
+                "member": member.name,
+                "membership_type": membership_type,
+                "amount": amount,
+                "company": branch,
+                "status": "Draft",
+                "from_date": from_date,
+                "to_date": add_to_date(from_date, years=1, days=-1),
+                "member_since_date": from_date,
+            }
+        )
 
-            membership.insert(ignore_permissions=True)
+        membership.insert(ignore_permissions=True)
+
+        renew_membership(id=membership.name, phone_number=phone)
 
         frappe.db.commit()
-        return membership.name
 
-    except Exception as e:
+    except Exception:
         frappe.db.rollback()
         frappe.log_error(frappe.get_traceback(), "Error creating membership")
         frappe.throw("Error creating membership")
@@ -120,3 +117,4 @@ def renew_membership(**kwargs):
         membership.initiate_payment(phone_number=kwargs.get("phone_number"))
     except Exception:
         frappe.log_error(frappe.get_traceback(), "Error renewing membership")
+        frappe.throw("Error creating membership")
