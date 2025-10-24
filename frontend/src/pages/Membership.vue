@@ -51,13 +51,13 @@
     v-model="registerDialog"
     :membership_type="membershipForm.membership_type"
     :amount="membershipForm.amount"
+    @close="cleanUpMembershipForm"
   />
 </template>
 
 <script setup>
-import { Button, createResource, ErrorMessage, Input, toast } from "frappe-ui";
+import { createResource, ErrorMessage, toast } from "frappe-ui";
 import { inject, reactive, ref, watch } from "vue";
-import Link from "../components/Controls/Link.vue";
 import EmptyState from "../components/EmptyState.vue";
 import Member from "../components/MemberPlan.vue";
 import { membershipStore } from "../stores/membership";
