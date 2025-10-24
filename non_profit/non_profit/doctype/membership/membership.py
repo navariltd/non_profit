@@ -77,7 +77,7 @@ class Membership(Document):
         end_date = get_cycle_dates(start_date, membership_type.billing_cycle, cycles)
 
         self.to_date = end_date
-        self.membership_status = "Current"
+        self.membership_status = "Active"
 
     def create_member_from_website_user(self):
         member_name = frappe.get_value("Member", dict(email_id=frappe.session.user))
