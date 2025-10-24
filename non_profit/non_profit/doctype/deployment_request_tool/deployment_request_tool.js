@@ -69,6 +69,8 @@ frappe.ui.form.on("Deployment Request Tool", {
       return { filters };
     });
 
+    render_tor_preview(frm);
+
     frm
       .add_custom_button(__("Send Deployment Request"), () => {
         frm.trigger("deploy_employees");
@@ -139,6 +141,10 @@ frappe.ui.form.on("Deployment Request Tool", {
 
   expected_start_date: function (frm) {
     frm.trigger("get_employees");
+  },
+
+  terms_of_reference: function (frm) {
+    render_tor_preview(frm);
   },
 
   project(frm) {
@@ -516,19 +522,35 @@ frappe.ui.form.on("Deployment Request Tool", {
   },
 });
 
-$.each(
-  [
-    "companies",
-    "department",
-    "employment_type",
-    "designation",
-    "courses",
-    "skills",
-    "licences",
-  ],
-  function (i, fieldname) {
-    frappe.ui.form.on("Deployment Request Tool", fieldname, function (frm) {
-      frm.trigger("get_employees");
-    });
+async function render_tor_preview(frm) {
+  if (!frm.doc.terms_of_reference) {
+    frm.set_df_property("tor", "options", "");
+    frm.refresh_field("tor");
+    return;
   }
-);
+
+  const tor_name = frm.doc.terms_of_reference;
+  const doctype = "Personnel Terms of Reference";
+  const base_url = window.location.origin;
+
+  let pdf_url = `${base_url}/api/method/frappe.utils.print_format.download_pdf?doctype=${encodeURIComponent(
+    doctype
+  )}&name=${encodeURIComponent(tor_name)}`;
+
+  pdf_url += "&settings=%7B%7D&_lang=en";
+
+  const preview_html = `
+    <div style="text-align: right; margin-bottom: 10px;">
+      <a href="${pdf_url}" target="_blank" class="btn btn-primary btn-sm" style="margin-right: 5px;">View Full</a>
+      <a href="${pdf_url}" download class="btn btn-secondary btn-sm">Download</a>
+    </div>
+    <iframe src="${pdf_url}" style="width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 8px;"></iframe>
+  `;
+
+  frm.set_df_property("tor", "options", preview_html);
+  if (frm.doc.tor_url !== pdf_url) {
+    frm.doc.tor_url = pdf_url;
+    frm.save();
+  }
+  frm.refresh_field("tor");
+}

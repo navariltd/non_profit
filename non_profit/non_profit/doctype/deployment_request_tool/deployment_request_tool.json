@@ -21,6 +21,8 @@
   "require_contract_before_deployment",
   "terms_section",
   "terms_of_reference",
+  "tor_url",
+  "tor",
   "section_break_rmvn",
   "notes",
   "quick_filters_section",
@@ -225,6 +227,7 @@
    "options": "Volunteer Skill"
   },
   {
+   "collapsible": 1,
    "fieldname": "terms_section",
    "fieldtype": "Section Break",
    "label": "Terms"
@@ -292,6 +295,18 @@
    "fieldtype": "Table MultiSelect",
    "label": "Branch",
    "options": "Company Item"
+  },
+  {
+   "fieldname": "tor",
+   "fieldtype": "HTML",
+   "label": "TOR"
+  },
+  {
+   "fieldname": "tor_url",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "TOR Url",
+   "options": "URL"
   }
  ],
  "grid_page_length": 50,
@@ -333,7 +348,7 @@
    "link_fieldname": "personnel_deployment_request"
   }
  ],
- "modified": "2025-10-24 13:34:00.569418",
+ "modified": "2025-10-24 17:13:09.909785",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Deployment Request Tool",
