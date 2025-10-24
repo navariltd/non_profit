@@ -2,18 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Personnel Deployment Request", {
-  setup: function (frm) {
-    frm.trigger("set_query");
-    hrms.setup_employee_filter_group(frm);
-  },
-
-  refresh: function (frm) {
-    frm.page.clear_indicator();
-    frm.trigger("get_employees");
-    frm.trigger("set_primary_action");
-
-    frm.events.set_task_filter(frm);
-
+  refresh(frm) {
     frappe.call({
       method: "non_profit.non_profit.utils.get_expense_and_advance_approvers",
       callback: function (r) {
@@ -38,13 +27,38 @@ frappe.ui.form.on("Personnel Deployment Request", {
         }
       },
     });
-    frm
-      .add_custom_button(__("Send Deployment Request"), () => {
-        frm.trigger("deploy_employees");
-      })
-      .addClass("btn-primary");
-  },
+    if (!frm.is_new() && frm.doc.require_contract_before_deployment) {
+      frappe.db.get_value(
+        "Contract",
+        {
+          personnel_deployment_assignment: frm.doc.name,
+          docstatus: ["!=", 2],
+        },
+        ["name"],
+        (r) => {
+          if (r && !r.name) {
+            frm
+              .add_custom_button(__("Create Contract"), () => {
+                frappe.model.with_doctype("Contract", () => {
+                  let contract = frappe.model.get_new_doc("Contract");
+                  contract.party_type = "Employee";
+                  contract.party_name = frm.doc.employee;
+                  contract.start_date = frm.doc.expected_start_date;
+                  contract.end_date = frm.doc.expected_end_date;
+                  contract.project = frm.doc.project;
+                  contract.task = frm.doc.task;
+                  contract.personnel_deployment_assignment = frm.doc.name;
+                  contract.personnel_deployment_request = frm.doc.deployment;
 
+                  frappe.set_route("Form", "Contract", contract.name);
+                });
+              })
+              .addClass("btn-primary");
+          }
+        }
+      );
+    }
+  },
   task(frm) {
     if (!frm.doc.task) return;
 
@@ -103,6 +117,45 @@ frappe.ui.form.on("Personnel Deployment Request", {
     frm.trigger("get_employees");
   },
 
+  deployment(frm) {
+    if (!frm.doc.deployment) return;
+    frappe.db
+      .get_value("Deployment Request Tool", frm.doc.deployment, [
+        "project",
+        "expense_approver",
+        "advance_approver",
+        "deployment_approver",
+        "terms_of_reference",
+        "require_contract_before_deployment",
+        "expected_start_date",
+        "expected_end_date",
+        "notes",
+      ])
+      .then((r) => {
+        if (r && r.message) {
+          if (r.message.project) frm.set_value("project", r.message.project);
+          if (r.message.expense_approver)
+            frm.set_value("expense_approver", r.message.expense_approver);
+          if (r.message.advance_approver)
+            frm.set_value("advance_approver", r.message.advance_approver);
+          if (r.message.deployment_approver)
+            frm.set_value("deployment_approver", r.message.deployment_approver);
+          if (r.message.terms_of_reference)
+            frm.set_value("terms_of_reference", r.message.terms_of_reference);
+          if (r.message.require_contract_before_deployment !== undefined)
+            frm.set_value(
+              "require_contract_before_deployment",
+              r.message.require_contract_before_deployment
+            );
+          if (r.message.expected_start_date)
+            frm.set_value("expected_start_date", r.message.expected_start_date);
+          if (r.message.expected_end_date)
+            frm.set_value("expected_end_date", r.message.expected_end_date);
+          if (r.message.notes) frm.set_value("notes", r.message.notes);
+        }
+      });
+  },
+
   set_task_filter(frm) {
     frm.set_query("task", function () {
       return {
@@ -112,298 +165,4 @@ frappe.ui.form.on("Personnel Deployment Request", {
       };
     });
   },
-
-  companies: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  department: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  employment_type: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  designation: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  courses: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  skills: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  licences: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  filter_criteria: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  location: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  expected_start_date: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  expected_end_date: function (frm) {
-    frm.trigger("get_employees");
-  },
-
-  get_employees: function (frm) {
-    if (!frm.doc.project || !frm.doc.location || !frm.doc.expected_start_date) {
-      frm.events.render_employees_datatable(frm, []);
-      return;
-    }
-
-    frm
-      .call({
-        method: "get_employees",
-        args: {
-          advanced_filters: frm.advanced_filters || [],
-        },
-        doc: frm.doc,
-      })
-      .then((r) => {
-        const columns = frm.events.get_employees_datatable_columns();
-        frm.events.render_employees_datatable(frm, r.message || []);
-
-        if (r.message) {
-        }
-      });
-  },
-
-  render_employees_datatable: function (frm, employees) {
-    const columns = frm.events.get_employees_datatable_columns();
-
-    if (frm.employees_datatable) {
-      frm.employees_datatable.destroy();
-    }
-
-    const wrapper = frm.get_field("employee_list").$wrapper;
-    wrapper.empty();
-
-    if (employees && employees.length > 0) {
-      frm.employees_datatable = new frappe.DataTable(wrapper[0], {
-        columns: columns,
-        data: employees,
-        checkboxColumn: true,
-        layout: "fluid",
-        cellHeight: 40,
-        noDataMessage: __("No employees found matching the criteria"),
-      });
-    } else {
-      wrapper.html(`
-        <div class="text-muted text-center" style="padding: 40px;">
-          <i class="fa fa-users fa-3x" style="opacity: 0.3; margin-bottom: 15px;"></i>
-          <p>${__("No employees found matching the criteria")}</p>
-          <small>${__("Adjust your filters to find eligible employees")}</small>
-        </div>
-      `);
-    }
-  },
-
-  get_employees_datatable_columns: function () {
-    return [
-      {
-        name: "employee",
-        id: "employee",
-        content: __("Employee ID"),
-        width: 120,
-        format: (value, row, column, data) => {
-          return value
-            ? `<a href="/app/employee/${data.employee}" target="_blank">${value}</a>`
-            : "";
-        },
-      },
-      {
-        name: "employee_name",
-        id: "employee_name",
-        content: __("Employee Name"),
-        width: 180,
-        format: (value, row, column, data) => {
-          return value
-            ? `<a href="/app/employee/${data.employee}" target="_blank">${value}</a>`
-            : "";
-        },
-      },
-      {
-        name: "company",
-        id: "company",
-        content: __("Company"),
-        width: 150,
-        format: (value, row, column, data) => {
-          return value
-            ? `<a href="/app/company/${value}" target="_blank">${value}</a>`
-            : "";
-        },
-      },
-      {
-        name: "department",
-        id: "department",
-        content: __("Department"),
-        width: 150,
-        format: (value, row, column, data) => {
-          return value
-            ? `<a href="/app/department/${value}" target="_blank">${value}</a>`
-            : "";
-        },
-      },
-      {
-        name: "designation",
-        id: "designation",
-        content: __("Designation"),
-        width: 150,
-        format: (value, row, column, data) => {
-          return value
-            ? `<a href="/app/designation/${value}" target="_blank">${value}</a>`
-            : "";
-        },
-      },
-      {
-        name: "employment_type",
-        id: "employment_type",
-        content: __("Employment Type"),
-        width: 130,
-        format: (value) => {
-          return value || "";
-        },
-      },
-    ].map((x) => ({
-      ...x,
-      editable: false,
-      focusable: false,
-      dropdown: false,
-      align: "left",
-    }));
-  },
-
-  deploy_employees: function (frm) {
-    if (
-      !frm.employees_datatable ||
-      !frm.employees_datatable.rowmanager.checkMap
-    ) {
-      frappe.msgprint(__("Please select employees to deploy"));
-      return;
-    }
-
-    const check_map = frm.employees_datatable.rowmanager.checkMap;
-    const selected_employees = [];
-
-    check_map.forEach((is_checked, idx) => {
-      if (is_checked && frm.employees_datatable.datamanager.data[idx]) {
-        selected_employees.push(
-          frm.employees_datatable.datamanager.data[idx].employee
-        );
-      }
-    });
-
-    if (selected_employees.length === 0) {
-      frappe.msgprint(__("Please select at least one employee to deploy"));
-      return;
-    }
-
-    hrms.validate_mandatory_fields(frm, selected_employees);
-
-    if (frm.is_dirty()) {
-      frm.save().then(() => {
-        frm.events.confirm_deployment(frm, selected_employees);
-      });
-    } else {
-      frm.events.confirm_deployment(frm, selected_employees);
-    }
-  },
-
-  confirm_deployment: function (frm, selected_employees) {
-    frappe.confirm(
-      __("Send request to {0} personnel(s) for this project?", [
-        selected_employees.length,
-      ]),
-      () => frm.events.bulk_deploy_employees(frm, selected_employees)
-    );
-  },
-
-  bulk_deploy_employees: function (frm, employees) {
-    frm
-      .call({
-        method: "deploy_employees",
-        doc: frm.doc,
-        args: {
-          employees: employees,
-        },
-        freeze: true,
-        freeze_message: __("Sending Requests..."),
-      })
-      .then((r) => {
-        if (r.message) {
-          const { success, failure } = r.message;
-
-          let message = "";
-
-          if (success && success.length > 0) {
-            message += __("Successfully sent {0} request(s)", [success.length]);
-          }
-
-          if (failure && failure.length > 0) {
-            if (message) message += "<br>";
-            message += __("Failed to create {0} request(s):", [failure.length]);
-            message += "<ul>";
-            failure.forEach((f) => {
-              const employeeData =
-                frm.employees_datatable.datamanager.data.find(
-                  (d) => d.employee === f.employee
-                );
-              const employeeName =
-                (employeeData && employeeData.employee_name) ||
-                f.employee_name ||
-                "";
-              message += `<li><a href="/app/employee/${
-                f.employee
-              }" target="_blank">${employeeName || f.employee}</a>: ${
-                f.reason || "Unknown reason"
-              }</li>`;
-            });
-            message += "</ul>";
-          }
-
-          if (message) {
-            frappe.msgprint({
-              title: __("Deployment Status"),
-              message: message,
-              indicator: success && success.length > 0 ? "green" : "red",
-            });
-          }
-
-          frm.refresh();
-        }
-      });
-  },
 });
-
-$.each(
-  [
-    "companies",
-    "department",
-    "employment_type",
-    "designation",
-    "courses",
-    "skills",
-    "licences",
-  ],
-  function (i, fieldname) {
-    frappe.ui.form.on(
-      "Personnel Deployment Request",
-      fieldname,
-      function (frm) {
-        frm.trigger("get_employees");
-      }
-    );
-  }
-);

@@ -1,7 +1,9 @@
+from datetime import timedelta
+
 import frappe
+from frappe.utils.nestedset import get_descendants_of
 
 from non_profit.setup import setup_non_profit
-from datetime import timedelta
 
 
 def get_company():
@@ -145,3 +147,34 @@ def check_and_renew_membership(invoice_id: str) -> None:
         return
     membership = frappe.get_doc("Membership", invoice.membership)
     membership.validate_membership_period()
+
+
+@frappe.whitelist()
+def get_company_descendants(company=None, company_list=None, include_parent=True):
+    """
+    Retrieves the name of all descendants (children, grandchildren, etc.)
+    of one or more given Company names.
+
+    :param company: The name (string) of a parent Company or a list of company names.
+    :param company_list: Optional list of company names (alternative to `company`).
+    :param include_parent: If True, each parent company's name is included in the list.
+    :returns: A list of strings, where each string is the name of a descendant Company.
+    """
+    companies = company_list if company_list is not None else company
+    if not companies:
+        return []
+
+    if not isinstance(companies, (list, tuple)):
+        companies = [companies]
+
+    descendants_set = set()
+    for comp in companies:
+        if not comp:
+            continue
+        desc = get_descendants_of("Company", comp) or []
+        for d in desc:
+            descendants_set.add(d)
+        if include_parent:
+            descendants_set.add(comp)
+
+    return sorted(descendants_set)

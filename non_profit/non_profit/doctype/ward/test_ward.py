@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestPersonnelDeploymentRequest(FrappeTestCase):
+class TestWard(FrappeTestCase):
 	pass
