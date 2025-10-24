@@ -1,6 +1,5 @@
 from frappe import _
 
-
 app_name = "non_profit"
 app_title = "Non Profit"
 app_publisher = "Frappe"
@@ -246,6 +245,7 @@ fixtures = [
             ["name", "=", "Volunteer Availability"],
         ],
     },
+    {"doctype": "Organisation Type"},
     {"doctype": "Volunteer Status"},
     {"doctype": "Volunteer Deployment Criteria"},
     {"doctype": "Translation"},
@@ -279,7 +279,7 @@ fixtures = [
             ["module", "=", "Non Profit"],
         ],
     },
-     {
+    {
         "doctype": "Property Setter",
         "filters": [
             ["is_system_generated", "=", 0],
@@ -297,4 +297,3 @@ add_to_apps_screen = [
         "has_permission": "non_profit.non_profit.api.check_app_permission",
     }
 ]
-

@@ -1293,7 +1293,7 @@ def fetch_assigned_projects():
     volunteer = get_current_volunteer()
 
     assignees = frappe.get_all(
-        "Personnel Deployment Assignment",
+        "Personnel Deployment Request",
         filters={
             "employee": volunteer,
             "status": "Pending",
@@ -1310,7 +1310,7 @@ def fetch_assigned_projects():
         deployment_name = assignee.deployment
         assignee_name = assignee.name
 
-        deployment = frappe.get_doc("Personnel Deployment Request", deployment_name)
+        deployment = frappe.get_doc("Deployment Request Tool", deployment_name)
         if not deployment or not deployment.project:
             continue
 
@@ -1394,7 +1394,7 @@ def get_project_details(project_name):
 def get_assignment_details(assignment_name):
 
     assignment = frappe.get_doc(
-        "Personnel Deployment Assignment",
+        "Personnel Deployment Request",
         assignment_name,
     ).as_dict()
 
@@ -1412,7 +1412,7 @@ def get_assignment_details(assignment_name):
             ).as_dict()
         assignment["contract"] = contract
 
-    deployment = frappe.get_doc("Personnel Deployment Request", assignment.deployment)
+    deployment = frappe.get_doc("Deployment Request Tool", assignment.deployment)
 
     project = frappe.db.get_value(
         "Project",
@@ -1460,7 +1460,7 @@ def accept_assignment(name, accepted=True, contract_name=None):
             frappe.db.set_value("Contract", contract_name, {"is_signed": 1})
 
         assignee = frappe.get_doc(
-            "Personnel Deployment Assignment", name, ignore_permissions=True
+            "Personnel Deployment Request", name, ignore_permissions=True
         )
         assignee.status = "Accepted" if accepted else "Rejected"
         assignee.save(ignore_permissions=True)
@@ -1570,16 +1570,16 @@ def get_dashboard_stats():
     project_stats = {}
 
     total_projects_deployed = frappe.db.count(
-        "Personnel Deployment Assignment", {"employee": volunteer}
+        "Personnel Deployment Request", {"employee": volunteer}
     )
     pending_projects = frappe.db.count(
-        "Personnel Deployment Assignment", {"employee": volunteer, "status": "Pending"}
+        "Personnel Deployment Request", {"employee": volunteer, "status": "Pending"}
     )
     accepted_projects = frappe.db.count(
-        "Personnel Deployment Assignment", {"employee": volunteer, "status": "Accepted"}
+        "Personnel Deployment Request", {"employee": volunteer, "status": "Accepted"}
     )
     rejected_projects = frappe.db.count(
-        "Personnel Deployment Assignment", {"employee": volunteer, "status": "Rejected"}
+        "Personnel Deployment Request", {"employee": volunteer, "status": "Rejected"}
     )
 
     project_stats["total_projects_deployed"] = total_projects_deployed

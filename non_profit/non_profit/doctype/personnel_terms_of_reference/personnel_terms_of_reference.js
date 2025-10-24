@@ -6,15 +6,6 @@ frappe.ui.form.on("Personnel Terms of Reference", {
     if (!frm.doc.expected_start_date) {
       frm.set_value("expected_start_date", frappe.datetime.get_today());
     }
-    frm.add_custom_button(
-      __("Deployment Request"),
-      function () {
-        frappe.new_doc("Personnel Deployment Request", {
-          terms_of_reference: frm.doc.name,
-        });
-      },
-      __("Create")
-    );
   },
 
   validate(frm) {
@@ -26,13 +17,23 @@ frappe.ui.form.on("Personnel Terms of Reference", {
         frappe.validated = false;
       }
     }
-
-    if (frm.doc.expected_start_date && frm.doc) {
-      const today = frappe.datetime.get_today();
-      if (frm.doc.expected_start_date < today) {
-        frappe.msgprint(__("Expected Start Date cannot be in the past"));
-        frappe.validated = false;
-      }
-    }
   },
 });
+
+frappe.ui.form.on("TOR Resources", {
+  quantity(frm, cdt, cdn) {
+    _calculate_total_cost(frm, cdt, cdn);
+  },
+  cost_per_day(frm, cdt, cdn) {
+    _calculate_total_cost(frm, cdt, cdn);
+  },
+});
+
+function _calculate_total_cost(frm, cdt, cdn) {
+  const row = locals[cdt][cdn] || {};
+  const qty = parseFloat(row.quantity) || 0;
+  const cost = parseFloat(row.cost_per_day) || 0;
+  const total = qty * cost;
+  frappe.model.set_value(cdt, cdn, "total_cost", total);
+  frm.refresh_field("resources");
+}
