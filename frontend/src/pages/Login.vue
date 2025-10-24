@@ -74,26 +74,6 @@
             label="Email"
             v-model="signUpForm.email"
           />
-
-          <Input
-            required
-            type="text"
-            variant="subtle"
-            placeholder="+254123456789"
-            label="Phone Number"
-            v-model="signUpForm.phone"
-          />
-
-          <div>
-            <label class="text-gray-700 text-sm mb-2 block">Gender</label>
-            <Select
-              required
-              v-model="signUpForm.gender"
-              :options="genderOptions"
-              placeholder="Select Gender"
-              class="focus:ring-2 focus:ring-red-500"
-            />
-          </div>
         </template>
 
         <Button
@@ -142,22 +122,17 @@
 </template>
 
 <script setup lang="ts">
+import { createResource } from "frappe-ui";
 import Button from "frappe-ui/src/components/Button/Button.vue";
-import { sessionStore } from "../stores/session";
 import Card from "frappe-ui/src/components/Card.vue";
-import Input from "frappe-ui/src/components/Input.vue";
-import { computed, onMounted, reactive, ref } from "vue";
-import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
-import { createResource, Select } from "frappe-ui";
 import Dialog from "frappe-ui/src/components/Dialog/Dialog.vue";
-import {
-  SignUp,
-  initialForm,
-  isValidPhone,
-  resetSignUpForm,
-} from "../utils/volunteer";
-import { useRoute, useRouter } from "vue-router";
+import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
+import Input from "frappe-ui/src/components/Input.vue";
 import { Eye, EyeOff } from "lucide-vue-next";
+import { computed, onMounted, reactive, ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { sessionStore } from "../stores/session";
+import { initialForm, resetSignUpForm, SignUp } from "../utils/volunteer";
 
 const route = useRoute();
 const router = useRouter();
@@ -190,12 +165,6 @@ onMounted(() => {
   }
 });
 
-const genderOptions = [
-  { label: "Male", value: "Male" },
-  { label: "Female", value: "Female" },
-  { label: "Other", value: "Other" },
-];
-
 const createSignUp = createResource({
   url: "non_profit.non_profit.user.create_user",
   onSuccess() {
@@ -221,11 +190,6 @@ function submit() {
       }
     );
   } else {
-    if (!isValidPhone(signUpForm.phone)) {
-      createSignUp.error =
-        "Please enter a valid Kenyan phone number.eg. (+254123456789)";
-      return;
-    }
     createSignUp.submit({
       ...signUpForm,
     });
