@@ -239,7 +239,7 @@ const assignedProjects = ref<Project[]>([]);
 const fecthAssignments = createResource({
   url: "non_profit.non_profit.api.fetch_assigned_projects",
   auto: true,
-  onSuccess(data) {
+  onSuccess(data: any) {
     assignedProjects.value = data || [];
     hasNotification.value = assignedProjects.value.length > 0;
   },
