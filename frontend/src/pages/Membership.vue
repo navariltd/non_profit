@@ -23,9 +23,9 @@
 
     <div
       v-if="currentMembership.data"
-      class="p-2 pt-2 md:p-8 bg-gray-50 rounded-2xl shadow-md text-center mb-20"
+      class="p-2 pt-2 md:p-8 bg-gray-50 rounded-2xl shadow-md text-center mb-20 max-w-7xl mx-auto"
     >
-      <h1 class="text-3xl font-bold text-gray-800">Select a New Plan</h1>
+      <h1 class="text-lg md:text-3xl text-gray-900">Select a New Plan</h1>
 
       <div v-if="membershipTypes.data?.length > 0" class="mt-10">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">

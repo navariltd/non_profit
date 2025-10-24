@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col lg:flex-row gap-10 md:gap-12 px-4 md:px-8 py-6 bg-gray-50"
+    class="flex flex-col lg:flex-row gap-10 md:gap-12 px-4 md:px-8 py-6 bg-gray-50 max-w-6xl"
   >
     <div class="flex-1 space-y-2 md:space-y-6">
       <h1 class="text-lg md:text-3xl text-gray-900">Your Membership(s)</h1>
