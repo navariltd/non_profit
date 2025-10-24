@@ -91,20 +91,24 @@ import {
   FormControl,
   Button,
   createResource,
-  Input,
+  ErrorMessage,
+  toast,
 } from "frappe-ui";
-import ErrorMessage from "frappe-ui/src/components/ErrorMessage/ErrorMessage.vue";
 import { reactive, ref, toRaw, watch, watchEffect } from "vue";
 import { isValidPhone } from "../../utils/volunteer";
+import { membershipStore } from "../../stores/membership";
 
 const registerDialog = defineModel();
 const branch = ref("");
+const close = defineEmits(["close"]);
 
 const membershipForm = reactive({
   phone: "",
   amount: 0,
   membership_type: "",
 });
+
+const { currentMembership } = membershipStore();
 
 const props = defineProps({
   membership_type: String,
@@ -155,7 +159,11 @@ function submit() {
   createMembership.submit(
     {},
     {
-      onSuccess(data) {},
+      onSuccess(data) {
+        close("close");
+        toast.success("Membership registered successfully!");
+        currentMembership.reload();
+      },
       onError(error) {},
     }
   );
