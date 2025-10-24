@@ -3,30 +3,6 @@
 
 frappe.ui.form.on("Personnel Deployment Request", {
   refresh(frm) {
-    frappe.call({
-      method: "non_profit.non_profit.utils.get_expense_and_advance_approvers",
-      callback: function (r) {
-        if (r.message) {
-          frm.allowed_approvers = r.message;
-
-          frm.set_query("expense_approver", function () {
-            return {
-              filters: {
-                name: ["in", frm.allowed_approvers],
-              },
-            };
-          });
-
-          frm.set_query("advance_approver", function () {
-            return {
-              filters: {
-                name: ["in", frm.allowed_approvers],
-              },
-            };
-          });
-        }
-      },
-    });
     if (!frm.is_new() && frm.doc.require_contract_before_deployment) {
       frappe.db.get_value(
         "Contract",
@@ -58,7 +34,14 @@ frappe.ui.form.on("Personnel Deployment Request", {
         }
       );
     }
+
+    render_tor_preview(frm);
   },
+
+  terms_of_reference: function (frm) {
+    render_tor_preview(frm);
+  },
+
   task(frm) {
     if (!frm.doc.task) return;
 
@@ -94,9 +77,7 @@ frappe.ui.form.on("Personnel Deployment Request", {
         "expected_start_date",
         "expected_end_date",
         "notes",
-        "expense_approver",
-        "advance_approver",
-        "project_manager",
+        "terms_of_reference",
       ])
       .then((r) => {
         if (r && r.message) {
@@ -106,12 +87,8 @@ frappe.ui.form.on("Personnel Deployment Request", {
           if (r.message.expected_end_date)
             frm.set_value("expected_end_date", r.message.expected_end_date);
           if (r.message.notes) frm.set_value("notes", r.message.notes);
-          if (r.message.expense_approver)
-            frm.set_value("expense_approver", r.message.expense_approver);
-          if (r.message.advance_approver)
-            frm.set_value("advance_approver", r.message.advance_approver);
-          if (r.message.project_manager)
-            frm.set_value("deployment_approver", r.message.project_manager);
+          if (r.message.terms_of_reference)
+            frm.set_value("terms_of_reference", r.message.terms_of_reference);
         }
       });
     frm.trigger("get_employees");
@@ -122,11 +99,8 @@ frappe.ui.form.on("Personnel Deployment Request", {
     frappe.db
       .get_value("Deployment Request Tool", frm.doc.deployment, [
         "project",
-        "expense_approver",
-        "advance_approver",
-        "deployment_approver",
         "terms_of_reference",
-        "require_contract_before_deployment",
+        "tor_url",
         "expected_start_date",
         "expected_end_date",
         "notes",
@@ -134,19 +108,10 @@ frappe.ui.form.on("Personnel Deployment Request", {
       .then((r) => {
         if (r && r.message) {
           if (r.message.project) frm.set_value("project", r.message.project);
-          if (r.message.expense_approver)
-            frm.set_value("expense_approver", r.message.expense_approver);
-          if (r.message.advance_approver)
-            frm.set_value("advance_approver", r.message.advance_approver);
-          if (r.message.deployment_approver)
-            frm.set_value("deployment_approver", r.message.deployment_approver);
+          if (r.message.tor_url) frm.set_value("tor_url", r.message.tor_url);
           if (r.message.terms_of_reference)
             frm.set_value("terms_of_reference", r.message.terms_of_reference);
-          if (r.message.require_contract_before_deployment !== undefined)
-            frm.set_value(
-              "require_contract_before_deployment",
-              r.message.require_contract_before_deployment
-            );
+
           if (r.message.expected_start_date)
             frm.set_value("expected_start_date", r.message.expected_start_date);
           if (r.message.expected_end_date)
@@ -166,3 +131,36 @@ frappe.ui.form.on("Personnel Deployment Request", {
     });
   },
 });
+
+async function render_tor_preview(frm) {
+  if (!frm.doc.terms_of_reference) {
+    frm.set_df_property("tor", "options", "");
+    frm.refresh_field("tor");
+    return;
+  }
+
+  const tor_name = frm.doc.terms_of_reference;
+  const doctype = "Personnel Terms of Reference";
+  const base_url = window.location.origin;
+
+  let pdf_url = `${base_url}/api/method/frappe.utils.print_format.download_pdf?doctype=${encodeURIComponent(
+    doctype
+  )}&name=${encodeURIComponent(tor_name)}`;
+
+  pdf_url += "&settings=%7B%7D&_lang=en";
+
+  const preview_html = `
+    <div style="text-align: right; margin-bottom: 10px;">
+      <a href="${pdf_url}" target="_blank" class="btn btn-primary btn-sm" style="margin-right: 5px;">View Full</a>
+      <a href="${pdf_url}" download class="btn btn-secondary btn-sm">Download</a>
+    </div>
+    <iframe src="${pdf_url}" style="width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 8px;"></iframe>
+  `;
+
+  frm.set_df_property("tor", "options", preview_html);
+  if (frm.doc.tor_url !== pdf_url) {
+    frm.doc.tor_url = pdf_url;
+    frm.save();
+  }
+  frm.refresh_field("tor");
+}

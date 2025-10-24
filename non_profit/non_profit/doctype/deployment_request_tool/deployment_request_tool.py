@@ -83,9 +83,6 @@ class DeploymentRequestTool(Document):
                     "notes": self.notes,
                     "require_contract_before_deployment": self.require_contract_before_deployment,
                     "terms_of_reference": self.terms_of_reference,
-                    "expense_approver": self.expense_approver,
-                    "advance_approver": self.advance_approver,
-                    "deployment_approver": self.deployment_approver,
                 }
 
                 if self.get("deployment_request_term_template"):

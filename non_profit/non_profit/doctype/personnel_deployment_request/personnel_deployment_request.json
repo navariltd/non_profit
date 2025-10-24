@@ -26,6 +26,8 @@
   "notes",
   "terms_section",
   "terms_of_reference",
+  "tor_url",
+  "tor",
   "amended_from"
  ],
  "fields": [
@@ -131,6 +133,7 @@
    "label": "Notes"
   },
   {
+   "collapsible": 1,
    "fieldname": "terms_section",
    "fieldtype": "Section Break",
    "label": "Terms"
@@ -177,6 +180,18 @@
    "fieldtype": "Tab Break",
    "label": "Details",
    "show_dashboard": 1
+  },
+  {
+   "fieldname": "tor",
+   "fieldtype": "HTML",
+   "label": "TOR"
+  },
+  {
+   "fieldname": "tor_url",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "TOR Url",
+   "options": "URL"
   }
  ],
  "grid_page_length": 50,
@@ -215,7 +230,7 @@
    "link_fieldname": "personnel_deployment_assignment"
   }
  ],
- "modified": "2025-10-24 13:33:03.047476",
+ "modified": "2025-10-24 17:13:25.382968",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Request",

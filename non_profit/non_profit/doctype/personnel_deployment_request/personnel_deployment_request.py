@@ -11,16 +11,6 @@ class PersonnelDeploymentRequest(Document):
         if not self.date:
             self.date = today()
 
-    def before_submit(self):
-        if self.deployment:
-            deployment = frappe.get_doc("Deployment Request Tool", self.deployment)
-            if not self.expense_approver and deployment.expense_approver:
-                self.expense_approver = deployment.expense_approver
-            if not self.advance_approver and deployment.advance_approver:
-                self.advance_approver = deployment.advance_approver
-            if not self.deployment_approver and deployment.deployment_approver:
-                self.deployment_approver = deployment.deployment_approver
-
     def before_update_after_submit(self):
         self.number_of_volunteers_required()
 
