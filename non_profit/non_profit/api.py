@@ -1053,6 +1053,7 @@ def create_availability_schedule(slot_data):
         employee = slot_data.get("employee")
         fiscal_year = get_current_fiscal_year()
         weekly_availability = slot_data.get("weekly_availability", {})
+        available_on_holidays = slot_data.get("available_on_holidays", False)
 
         if frappe.db.exists("Personnel Availability Schedule", {"employee": employee}):
             existing_doc = frappe.get_value(
@@ -1062,16 +1063,18 @@ def create_availability_schedule(slot_data):
                 "Personnel Availability Schedule", existing_doc, ignore_permissions=True
             )
 
-        personal_schedule_name = create_personal_schedule(employee, fiscal_year)
+        personal_schedule_name = create_personal_schedule(
+            employee, fiscal_year, available_on_holidays
+        )
         create_schedule(personal_schedule_name, weekly_availability)
 
         return {"employee": employee}
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Availability Schedule Creation Error")
+        frappe.log_error("Availability Schedule Creation Error", frappe.get_traceback())
         frappe.throw("Availability Schedule Creation Error")
 
 
-def create_personal_schedule(employee, fiscal_year):
+def create_personal_schedule(employee, fiscal_year, available_on_holidays=False):
     """Create or get existing Personnel Availability Schedule"""
     existing = frappe.db.exists(
         "Personnel Availability Schedule",
@@ -1083,6 +1086,7 @@ def create_personal_schedule(employee, fiscal_year):
 
     schedule_doc = frappe.new_doc("Personnel Availability Schedule")
     schedule_doc.employee = employee
+    schedule_doc.available_on_holidays = available_on_holidays
     schedule_doc.fiscal_year = fiscal_year
     schedule_doc.save(ignore_permissions=True)
 
@@ -1146,19 +1150,25 @@ def create_schedule(schedule_name, weekly_availability):
 
 @frappe.whitelist()
 def get_availability_slots():
-
     user = get_user_info().get("employee")
 
     parent = frappe.db.get_value(
         "Personnel Availability Schedule", {"employee": user}, "name"
     )
+    available_on_holidays = frappe.db.get_value(
+        "Personnel Availability Schedule", parent, "available_on_holidays"
+    )
+
     schedules = frappe.get_all(
         "Schedule",
         filters={"parent": parent},
         fields=["name", "day", "shift_type"],
     )
 
-    return schedules
+    return {
+        "schedules": schedules,
+        "available_on_holidays": available_on_holidays,
+    }
 
 
 @frappe.whitelist()

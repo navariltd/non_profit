@@ -5,6 +5,7 @@
         Set Your Weekly Availability
       </h3>
     </template>
+
     <template #body-content>
       <div class="p-4 bg-red-50 rounded-lg mb-6">
         <p class="text-red-700">
@@ -13,7 +14,6 @@
         </p>
       </div>
 
-      <!-- Availability Table -->
       <div class="overflow-x-auto">
         <table class="w-full border-collapse border">
           <thead>
@@ -36,9 +36,7 @@
           </thead>
           <tbody>
             <tr v-for="day in daysList" :key="day.value">
-              <td class="border p-3">
-                <div class="font-semibold">{{ day.label }}</div>
-              </td>
+              <td class="border p-3 font-semibold">{{ day.label }}</td>
               <td
                 v-for="shift in shifts.data"
                 :key="`${day.value}-${shift.name}`"
@@ -57,7 +55,18 @@
         </table>
       </div>
 
-      <!-- Quick Actions -->
+      <div class="mt-6 flex items-center gap-3">
+        <input
+          id="available_on_holidays"
+          type="checkbox"
+          v-model="availableOnHolidays"
+          class="w-5 h-5 text-red-600 rounded focus:ring-red-500"
+        />
+        <label for="available_on_holidays" class="text-gray-800 text-base">
+          Available on Holidays
+        </label>
+      </div>
+
       <div class="mt-4 flex flex-wrap gap-2">
         <Button variant="outline" theme="red" @click="selectAllShifts">
           Select All
@@ -67,6 +76,7 @@
         </Button>
       </div>
     </template>
+
     <template #actions>
       <div class="flex flex-row justify-end space-x-2 w-full items-center">
         <Button variant="outline" theme="gray" @click="cancel"> Close </Button>
@@ -75,7 +85,7 @@
           theme="green"
           :loading="newSlot.loading"
           @click="submitAvailability"
-          :disabled="totalSelectedShifts === 0"
+          :disabled="totalSelectedShifts === 0 && !availableOnHolidays"
         >
           Save
         </Button>
@@ -87,21 +97,42 @@
 
 <script setup lang="ts">
 import {
-  Dialog,
   Button,
-  createResource,
-  ErrorMessage,
   createListResource,
+  createResource,
+  Dialog,
+  ErrorMessage,
 } from "frappe-ui";
-import { computed, reactive, ref, watch } from "vue";
+import { computed, reactive, ref } from "vue";
 import { usersStore } from "../../stores/user";
 
+interface ShiftType {
+  name: string;
+  start_time: string;
+  end_time: string;
+}
+
+interface AvailabilityData {
+  [key: string]: string[];
+}
+
+interface AvailabilityResponse {
+  schedules: {
+    day: string;
+    shift_type: string;
+  }[];
+  available_on_holidays: boolean;
+}
+
 const { roleResource, presentSlots } = usersStore();
-const setAvailability = ref(true);
+const setAvailability = ref<boolean>(true);
+const availableOnHolidays = ref<boolean>(false);
+const emit = defineEmits<{
+  (e: "success"): void;
+  (e: "cancel"): void;
+}>();
 
-const emit = defineEmits(["success", "cancel"]);
-
-const shifts = createListResource({
+const shifts = createListResource<ShiftType[]>({
   doctype: "Shift Type",
   fields: ["name", "start_time", "end_time"],
   auto: true,
@@ -119,7 +150,7 @@ const daysList = [
   { label: "Sunday", value: "Sunday" },
 ];
 
-const availability = reactive({
+const availability = reactive<AvailabilityData>({
   Monday: [],
   Tuesday: [],
   Wednesday: [],
@@ -131,7 +162,7 @@ const availability = reactive({
 
 const newSlot = createResource({
   url: "non_profit.non_profit.api.create_availability_schedule",
-  makeParams(values) {
+  makeParams(values: Record<string, any>) {
     return { slot_data: { ...values } };
   },
   onSuccess() {
@@ -142,38 +173,36 @@ const newSlot = createResource({
   },
 });
 
-function formatTime(timeString) {
+function formatTime(timeString: string): string {
   if (!timeString) return "";
-  const time = timeString.split(":");
-  const hours = parseInt(time[0]);
-  const minutes = time[1];
+  const [hour, minute] = timeString.split(":");
+  const hours = parseInt(hour);
   const ampm = hours >= 12 ? "PM" : "AM";
   const displayHours = hours % 12 || 12;
-  return `${displayHours}:${minutes} ${ampm}`;
+  return `${displayHours}:${minute} ${ampm}`;
 }
 
-function capitalizeDay(day) {
+function capitalizeDay(day: string): string {
   return day.charAt(0).toUpperCase() + day.slice(1);
 }
 
-const availabilitySlots = createResource({
+const availabilitySlots = createResource<AvailabilityResponse>({
   url: "non_profit.non_profit.api.get_availability_slots",
   auto: true,
   onSuccess(data) {
-    if (data && Array.isArray(data) && data.length > 0) {
-      data.forEach((slot) => {
-        const day = slot.day.toLowerCase();
-        const shiftType = slot.shift_type;
-
+    resetForm();
+    if (data?.schedules?.length) {
+      data.schedules.forEach((slot) => {
+        const day = capitalizeDay(slot.day.trim().toLowerCase());
+        const shiftType = slot.shift_type?.trim();
         if (availability[day] && Array.isArray(availability[day])) {
           if (!availability[day].includes(shiftType)) {
             availability[day].push(shiftType);
           }
         }
       });
-    } else {
-      resetForm();
     }
+    availableOnHolidays.value = !!data?.available_on_holidays;
   },
 });
 
@@ -183,13 +212,10 @@ function cancel() {
 }
 
 function resetForm() {
-  availability.Monday = [];
-  availability.Tuesday = [];
-  availability.Wednesday = [];
-  availability.Thursday = [];
-  availability.Friday = [];
-  availability.Saturday = [];
-  availability.Sunday = [];
+  Object.keys(availability).forEach((day) => {
+    availability[day] = [];
+  });
+  availableOnHolidays.value = false;
   newSlot.error = "";
 }
 
@@ -206,21 +232,20 @@ function clearAllShifts() {
 
 function submitAvailability() {
   newSlot.error = "";
-
-  if (totalSelectedShifts.value === 0) {
-    newSlot.error = "Please select at least one shift";
+  if (totalSelectedShifts.value === 0 && !availableOnHolidays.value) {
+    newSlot.error =
+      "Please select at least one shift or enable holiday availability";
     return;
   }
-
   const slotData = {
     employee: roleResource.data.employee,
     weekly_availability: { ...availability },
+    available_on_holidays: availableOnHolidays.value,
   };
-
   newSlot.submit(slotData);
 }
 
-const totalSelectedShifts = computed(() => {
+const totalSelectedShifts = computed<number>(() => {
   return Object.values(availability).reduce(
     (total, dayShifts) => total + dayShifts.length,
     0

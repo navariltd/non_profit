@@ -188,7 +188,7 @@
   },
   {
    "fieldname": "tor_url",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hidden": 1,
    "label": "TOR Url",
    "options": "URL"
@@ -225,12 +225,17 @@
    "link_fieldname": "personnel_deployment_assignment"
   },
   {
+   "group": "Attendance",
+   "link_doctype": "Attendance",
+   "link_fieldname": "personnel_deployment_request"
+  },
+  {
    "group": "Contract",
    "link_doctype": "Contract",
    "link_fieldname": "personnel_deployment_assignment"
   }
  ],
- "modified": "2025-10-24 17:13:25.382968",
+ "modified": "2025-10-24 20:22:51.002129",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Deployment Request",

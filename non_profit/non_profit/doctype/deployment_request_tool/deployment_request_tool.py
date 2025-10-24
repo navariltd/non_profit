@@ -4,6 +4,9 @@
 # Copyright (c) 2025, Frappe and contributors
 # For license information, please see license.txt
 
+import datetime
+from datetime import datetime, time, timedelta
+
 import frappe
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form
@@ -83,6 +86,7 @@ class DeploymentRequestTool(Document):
                     "notes": self.notes,
                     "require_contract_before_deployment": self.require_contract_before_deployment,
                     "terms_of_reference": self.terms_of_reference,
+                    "tor_url": self.tor_url,
                 }
 
                 if self.get("deployment_request_term_template"):
@@ -436,58 +440,75 @@ class DeploymentRequestTool(Document):
     def filter_by_availability(
         self, employees: list, expected_start_date, expected_end_date
     ) -> list:
-        available_employees = []
-
-        employee_ids = [emp.get("employee") for emp in employees]
-        if not employee_ids:
+        if not employees:
             return []
 
-        schedules = frappe.get_all(
-            "Personnel Availability Schedule",
-            filters={
-                "employee": ["in", employee_ids],
-                "start_date": ["<=", expected_end_date],
-                "end_date": [">=", expected_start_date],
-            },
-            fields=["name", "employee"],
-            as_dict=False,
-        )
+        expected_start_date = frappe.utils.getdate(expected_start_date)
+        expected_end_date = frappe.utils.getdate(expected_end_date)
+        final_employees = []
 
-        if not schedules:
-            return []
-
-        schedule_map = {}
-        schedule_names = []
-        for s in schedules:
-            schedule_map.setdefault(s.employee, []).append(s.name)
-            schedule_names.append(s.name)
-
-        shifts = frappe.get_all(
-            "Schedule",
-            filters={"parent": ["in", schedule_names]},
-            fields=["parent", "day", "shift_type"],
-            as_dict=False,
-        )
-
-        schedule_with_shifts = set(s.parent for s in shifts)
-
-        available_employee_set = set()
         for emp in employees:
-            schedules_for_emp = schedule_map.get(emp.employee, [])
-            for schedule_name in schedules_for_emp:
-                if schedule_name in schedule_with_shifts:
-                    available_employee_set.add(emp.employee)
+            emp_name = emp.get("name")
+
+            pas = frappe.get_all(
+                "Personnel Availability Schedule",
+                filters={"employee": emp_name},
+                fields=["name", "start_date", "end_date"],
+            )
+
+            if not pas:
+                final_employees.append(emp)
+                continue
+
+            available = False
+
+            for sched in pas:
+                sched_start = frappe.utils.getdate(sched.start_date)
+                sched_end = frappe.utils.getdate(sched.end_date)
+
+                if sched_end < expected_start_date or sched_start > expected_end_date:
+                    continue
+
+                schedule_rows = frappe.get_all(
+                    "Schedule",
+                    filters={
+                        "parent": sched.name,
+                        "parenttype": "Personnel Availability Schedule",
+                    },
+                    fields=["day", "shift_type"],
+                )
+
+                for row in schedule_rows:
+                    day = (row.get("day") or "").lower()
+                    shift_type = row.get("shift_type")
+
+                    if not shift_type:
+                        continue
+
+                    shift = frappe.get_value(
+                        "Shift Type",
+                        shift_type,
+                        ["start_time", "end_time"],
+                        as_dict=True,
+                    )
+                    if not shift:
+                        continue
+
+                    current_day = expected_start_date
+                    while current_day <= expected_end_date:
+                        if current_day.strftime("%A").lower() == day:
+
+                            available = True
+                            break
+                        current_day += timedelta(days=1)
+
+                    if available:
+                        break
+
+                if available:
                     break
 
-        available_employees = [
-            emp for emp in employees if emp.employee in available_employee_set
-        ]
+            if available:
+                final_employees.append(emp)
 
-        return available_employees
-
-    @frappe.whitelist()
-    def get_filter_criteria_options(self):
-        return frappe.get_list(
-            "Volunteer Deployment Criteria",
-            fields=["name", "criteria_name", "description"],
-        )
+        return final_employees

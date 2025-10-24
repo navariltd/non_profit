@@ -303,7 +303,7 @@
   },
   {
    "fieldname": "tor_url",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "hidden": 1,
    "label": "TOR Url",
    "options": "URL"
@@ -348,7 +348,7 @@
    "link_fieldname": "personnel_deployment_request"
   }
  ],
- "modified": "2025-10-24 17:13:09.909785",
+ "modified": "2025-10-24 19:58:01.077390",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Deployment Request Tool",
