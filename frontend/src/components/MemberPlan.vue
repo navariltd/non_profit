@@ -21,10 +21,8 @@
               <div
                 class="w-3 h-3 rounded-full"
                 :class="{
-                  'bg-green-500': membership.membership_status === 'Current',
+                  'bg-green-500': membership.membership_status === 'Active',
                   'bg-red-500': membership.membership_status === 'Expired',
-                  'bg-orange-500': membership.membership_status === 'Pending',
-                  'bg-gray-400': membership.membership_status === 'Cancelled',
                 }"
               ></div>
               <div>
@@ -74,9 +72,15 @@
                 theme="red"
                 size="sm"
                 class="rounded-lg px-5 py-2"
-                @click="openRenewDialog(membership.name)"
+                @click="
+                  openRenewDialog(membership.membership_status, membership.name)
+                "
               >
-                Renew
+                {{
+                  membership.membership_status === "Active"
+                    ? "Print Certificate"
+                    : "Renew"
+                }}
               </Button>
             </div>
           </div>
@@ -236,7 +240,12 @@ function formatDate(dateStr?: string): string {
   });
 }
 
-function openRenewDialog(membershipId?: string) {
+function openRenewDialog(membershipStatus?: string, membershipId?: string) {
+  if (membershipStatus === "Active") {
+    // TODO: Implement certificate printing logic here
+    return;
+  }
+
   if (membershipId) {
     selectedMembershipId.value = membershipId;
     errorMessage.value = "";

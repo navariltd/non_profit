@@ -254,6 +254,60 @@ class Membership(Document):
         self.generate_invoice(save=False)
         self.send_acknowlement()
 
+    @frappe.whitelist()
+    def approve_membership(self):
+
+        qr_data_to_encode = frappe._dict(
+            {
+                "membership": self.name,
+                "member": self.member_name,
+                "membership_type": self.membership_type,
+                "membership_status": self.membership_status,
+            }
+        )
+        qr_data = make_qr_code(qr_data_to_encode)
+
+        qr_code_file = frappe.get_doc(
+            {
+                "doctype": "File",
+                "content": qr_data,
+                "attached_to_doctype": "Membership",
+                "attached_to_name": self.name,
+                "file_name": f"Membership-{self.name}-QR.png",
+            }
+        ).save(ignore_permissions=True)
+
+        self.qr_code = qr_code_file.file_url
+
+        self.membership_status = "Active"
+
+        return self.save(ignore_permissions=True)
+
+
+def make_qr_code(data: dict[str, any]) -> bytes:
+
+    import io
+
+    import qrcode
+    from qrcode.image.styledpil import StyledPilImage
+    from qrcode.image.styles.moduledrawers.pil import HorizontalBarsDrawer
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+
+    img = qr.make_image(
+        image_factory=StyledPilImage, module_drawer=HorizontalBarsDrawer()
+    )
+    output = io.BytesIO()
+    img.save(output, format="PNG")
+    return output.getvalue()
+
 
 def get_cycle_dates(start_date, billing_cycle, cycles=1):
     """Return end_date given start_date, billing cycle, and cycles count."""

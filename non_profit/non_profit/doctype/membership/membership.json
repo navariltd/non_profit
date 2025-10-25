@@ -12,6 +12,7 @@
   "column_break_3",
   "company",
   "membership_status",
+  "qr_code",
   "membership_validity_section",
   "from_date",
   "to_date",
@@ -48,6 +49,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "Draft",
    "fieldname": "membership_status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -137,6 +139,8 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -148,8 +152,16 @@
   {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qr_code",
+   "fieldtype": "Attach Image",
+   "label": "QR Code",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
+ "image_field": "qr_code",
  "index_web_pages_for_search": 1,
  "links": [
   {
@@ -163,7 +175,7 @@
    "link_fieldname": "reference_name"
   }
  ],
- "modified": "2025-10-24 13:11:36.630766",
+ "modified": "2025-10-25 12:02:00.281943",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",
