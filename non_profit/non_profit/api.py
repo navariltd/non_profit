@@ -5,6 +5,7 @@ import string
 import time
 from collections import defaultdict
 from datetime import datetime
+import qrcode
 
 import frappe
 from frappe import _, cint, cstr
@@ -855,12 +856,11 @@ def get_user_info():
         member = frappe.db.get_value(
             "Member",
             {"email_id": user.email},
-            ["name", "membership_type"],
+            ["name"],
             as_dict=True,
         )
         if member:
             user["member"] = member.get("name")
-            user["membership_type"] = member.get("membership_type")
             user["is_member"] = True
 
     if frappe.db.exists("Job Applicant", {"email_id": user.email}):
@@ -1489,10 +1489,12 @@ def get_current_membership():
 
     memberships = frappe.get_all(
         "Membership",
-        filters={"member": member.name, "membership_status": "Active"},
-        fields=[
-            "name",
+        filters={"member": member.name},
+        or_filters=[
+            {"membership_status": "Active"},
+            {"membership_status": "Expired"},
         ],
+        fields=["name"],
         order_by="from_date desc",
     )
 
