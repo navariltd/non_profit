@@ -18,48 +18,73 @@ frappe.ui.form.on("Membership", {
     if (frm.doc.__islocal) return;
 
     if (!frm.is_new()) {
-      frm.add_custom_button("Request Payment", () => {
-        frappe.prompt(
-          [
-            {
-              fieldname: "phone_number",
-              label: __("Phone Number"),
-              fieldtype: "Data",
-              reqd: 1,
-              description: __("Enter the phone number for payment request"),
-            },
-          ],
-          (values) => {
-            frm.call({
-              doc: frm.doc,
-              method: "initiate_payment",
-              args: { phone_number: values.phone_number },
-              freeze: true,
-              freeze_message: __("Requesting Payment"),
-              callback: function (r) {
-                if (r.invoice) frm.reload_doc();
+      if (
+        frm.doc.membership_status !== "Pending" &&
+        frm.doc.membership_status !== "Active"
+      ) {
+        frm.add_custom_button("Request Payment", () => {
+          frappe.prompt(
+            [
+              {
+                fieldname: "phone_number",
+                label: __("Phone Number"),
+                fieldtype: "Data",
+                reqd: 1,
+                description: __("Enter the phone number for payment request"),
               },
-            });
-          },
-          __("Enter Phone Number"),
-          __("Request Payment")
-        );
-      });
+            ],
+            (values) => {
+              frm.call({
+                doc: frm.doc,
+                method: "initiate_payment",
+                args: { phone_number: values.phone_number },
+                freeze: true,
+                freeze_message: __("Requesting Payment"),
+                callback: function (r) {
+                  if (r.invoice) frm.reload_doc();
+                },
+              });
+            },
+            __("Enter Phone Number"),
+            __("Request Payment")
+          );
+        });
+      }
     }
 
-    !frm.doc.invoice &&
-      frm.add_custom_button("Generate Invoice", () => {
+    if (
+      frm.doc.membership_status !== "Pending" &&
+      frm.doc.membership_status !== "Active"
+    ) {
+      !frm.doc.invoice &&
+        frm.add_custom_button("Generate Invoice", () => {
+          frm.call({
+            doc: frm.doc,
+            method: "generate_invoice",
+            args: { save: true },
+            freeze: true,
+            freeze_message: __("Creating Membership Invoice"),
+            callback: function (r) {
+              if (r.invoice) frm.reload_doc();
+            },
+          });
+        });
+    }
+
+    if (frm.doc.membership_status === "Pending") {
+      frm.add_custom_button("Approve Membership", () => {
         frm.call({
           doc: frm.doc,
-          method: "generate_invoice",
-          args: { save: true },
+          method: "approve_membership",
           freeze: true,
-          freeze_message: __("Creating Membership Invoice"),
+          freeze_message: __("Approving Membership"),
           callback: function (r) {
-            if (r.invoice) frm.reload_doc();
+            frappe.msgprint(__("Membership Approved"));
+            frm.reload_doc();
           },
         });
       });
+    }
 
     frappe.db
       .get_single_value("Non Profit Settings", "send_email")
