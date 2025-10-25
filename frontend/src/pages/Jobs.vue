@@ -47,13 +47,6 @@
               </template>
             </FormControl>
             <Link
-              doctype="Employment Type"
-              v-model="jobType"
-              :placeholder="__('Opportunity Type')"
-              class="w-full"
-              @change="updateJobs"
-            />
-            <Link
               doctype="Designation"
               v-model="designation"
               :placeholder="__('Designation')"
@@ -64,6 +57,13 @@
               doctype="Profession"
               v-model="profession"
               :placeholder="__('Profession')"
+              class="w-full"
+              @change="updateJobs"
+            />
+            <Link
+              doctype="Location"
+              v-model="job_location"
+              :placeholder="__('Location')"
               class="w-full"
               @change="updateJobs"
             />
@@ -140,7 +140,7 @@ import JobApplication from "./JobApplication.vue";
 const user = inject("$user");
 const { brand } = sessionStore();
 
-const jobType = ref(null);
+const job_location = ref(null);
 const designation = ref(null);
 const profession = ref(null);
 const searchQuery = ref("");
@@ -174,7 +174,7 @@ const branchFilters = computed(() => {
 
 onMounted(() => {
   const queries = new URLSearchParams(location.search);
-  if (queries.has("type")) jobType.value = queries.get("type");
+  if (queries.has("type")) job_location.value = queries.get("type");
   updateContent();
 });
 
@@ -200,8 +200,8 @@ const updateJobs = () => {
 const updateFilters = () => {
   filters.value.status = "Open";
 
-  if (jobType.value) filters.value.employment_type = jobType.value;
-  else delete filters.value.employment_type;
+  if (job_location.value) filters.value.job_location = job_location.value;
+  else delete filters.value.job_location;
 
   if (designation.value) filters.value.designation = designation.value;
   else delete filters.value.designation;
@@ -244,7 +244,7 @@ const onRegionChange = () => {
 const clearFilters = () => {
   selectedRegions.value = [];
   selectedBranches.value = [];
-  jobType.value = null;
+  job_location.value = null;
   designation.value = null;
   profession.value = null;
   searchQuery.value = "";
@@ -256,7 +256,7 @@ watch(currentTab, () => {
   jobCount.value = 0;
 });
 
-watch([jobType, designation, profession, selectedBranches], () => {
+watch([job_location, designation, profession, selectedBranches], () => {
   if (currentTab.value === "Open") {
     updateJobs();
   }

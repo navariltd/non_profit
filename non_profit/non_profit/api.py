@@ -404,29 +404,20 @@ def get_job_openings(filters=None, orFilters=None):
     elif companies:
         filters["company"] = ["in", companies]
 
-    jobs = frappe.get_all(
+    job_names = frappe.get_all(
         "Job Opening",
         filters=filters,
         or_filters=or_filters,
-        fields=[
-            "job_title",
-            "posted_on",
-            "closes_on",
-            "closed_on",
-            "designation",
-            "vacancies",
-            "location",
-            "employment_type",
-            "company",
-            "department",
-            "name",
-            "creation",
-            "description",
-            "status",
-            "is_internal",
-        ],
+        fields=["name"],
         order_by="creation desc",
     )
+
+    jobs = []
+    for j in job_names:
+        try:
+            jobs.append(frappe.get_doc("Job Opening", j.name).as_dict())
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Failed to fetch Job Opening doc")
 
     if user != "Guest":
         user_email = frappe.db.get_value("User", user, "email")
@@ -739,7 +730,7 @@ def create_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             "applicant_name": name_to_use,
             "email_id": email_id,
             "company": company,
-            "status": "Draft",
+            "status": "Open",
         }
 
         if job_opening:

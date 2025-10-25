@@ -408,8 +408,8 @@ const userDetails = ref({});
 
 const isSubmitted = computed(() => {
   return (
-    opportunityApplication.data?.status &&
-    opportunityApplication.data.status !== "Draft"
+    opportunityApplication.data?.docstatus &&
+    opportunityApplication.data.docstatus !== 0
   );
 });
 
@@ -454,7 +454,7 @@ const opportunityApplication = createResource({
         job.update({ params: { job: data.job_title } });
       }
 
-      if (data.status && data.status !== "Draft") {
+      if (data.docstatus && data.docstatus !== 0) {
         const reviewIndex = steps.findIndex((s) => s.hash === "#review");
         if (reviewIndex !== -1) {
           currentStep.value = reviewIndex;

@@ -1,37 +1,6 @@
 import frappe
 from frappe.model.document import Document
 
-FIELD_GROUPS = {
-    0: [
-        "ward",
-        "id_number",
-        "passport_number",
-        "number_of_dependants",
-        "marital_status",
-        "blood_group",
-        "citizenship",
-        "country_of_citizenship",
-        "administrative_location",
-        "sub_county",
-        "county",
-        "access_to_internet",
-        "profession",
-        "reason_to_join_krcs",
-        "gender",
-        "profession",
-    ],
-    1: [
-        "languages",
-        "education",
-        "disabilities",
-        "driving_licence",
-        "certification",
-        "licences",
-        "additional_skills",
-        "courses",
-    ],
-}
-
 SKIP_CHILD_FIELDS = [
     "name",
     "parent",
@@ -47,76 +16,113 @@ SKIP_CHILD_FIELDS = [
 ]
 
 FIELD_MAP = {
-    "date_of_birth": ["birth_date"],
-    "mpesa_mobile_phone": ["mobile_no"],
-    "phone_number": ["phone"],
+    "date_of_birth": "birth_date",
+    "mpesa_mobile_phone": "mobile_no",
+    "surname": "last_name",
+    "other_names": "middle_name",
+    "phone_number": "phone",
 }
 
+NORMAL_FIELDS = [
+    "ward",
+    "first_name",
+    "passport_number",
+    "number_of_dependants",
+    "marital_status",
+    "blood_group",
+    "citizenship",
+    "country_of_citizenship",
+    "administrative_location",
+    "sub_county",
+    "county",
+    "access_to_internet",
+    "profession",
+    "reason_to_join_krcs",
+    "gender",
+]
 
-def on_update(doc: Document, method: str) -> None:
+TABLE_FIELDS = [
+    "languages",
+    "education",
+    "disabilities",
+    "driving_licence",
+    "certification",
+    "licences",
+    "additional_skills",
+    "allergies",
+    "allergies",
+    "allergies",
+    "allergies",
+    "certification",
+    "work_references",
+    "work_experience",
+    "supporting_documents",
+    "work_experience",
+]
+
+
+def update_user_from_applicant(doc: Document):
     """
-    Sync Job Applicant data to User and update screening responses, scores, and eligibility.
+    Sync Job Applicant data to User after submit.
+    Updates normal fields, mapped fields, and child table fields.
+    Returns the prepared User doc (does not save it).
+    """
+    email = getattr(doc, "email_id", None)
+    if not email:
+        return
+
+    user_list = frappe.get_all("User", filters={"email": email}, limit=1)
+    if not user_list:
+        return
+
+    user_doc = frappe.get_doc("User", user_list[0].name)
+
+    for applicant_field, user_field in FIELD_MAP.items():
+        value = getattr(doc, applicant_field, None)
+        if value is not None:
+            setattr(user_doc, user_field, value)
+
+    for field in NORMAL_FIELDS:
+        if field in SKIP_CHILD_FIELDS:
+            continue
+        value = getattr(doc, field, None)
+        if value is not None:
+            setattr(user_doc, field, value)
+
+    for table_field in TABLE_FIELDS:
+        if not hasattr(doc, table_field):
+            continue
+        applicant_table = getattr(doc, table_field) or []
+        if not applicant_table:
+            continue
+
+        if not user_doc.meta.get_field(table_field):
+            continue
+
+        if hasattr(user_doc, table_field):
+            user_doc.set(table_field, [])
+
+        for row in applicant_table:
+            row_data = {
+                key: value
+                for key, value in row.as_dict().items()
+                if key not in SKIP_CHILD_FIELDS
+            }
+            user_doc.append(table_field, row_data)
+
+    user_doc.flags.ignore_mandatory = True
+    user_doc.save(ignore_permissions=True)
+
+
+def update_screening_scores(doc: Document):
+    """
+    Calculate and update screening scores before submit.
     """
     try:
-        if doc.status != "Open":
-            return
-
-        email = doc.email_id
-        if not email:
-            return
-
-        user_list = frappe.get_all("User", filters={"email": email}, limit=1)
-        if not user_list:
-            return
-
-        user_doc = frappe.get_doc("User", user_list[0].name)
-        has_changes = False
-
-        for field in FIELD_GROUPS[0]:
-            if not hasattr(doc, field):
-                continue
-            value = getattr(doc, field)
-            if value is None or value == "":
-                continue
-            user_fields = FIELD_MAP.get(field, [field])
-            for user_field in user_fields:
-                if not hasattr(user_doc, user_field):
-                    continue
-                if getattr(user_doc, user_field, None) != value:
-                    user_doc.set(user_field, value)
-                    has_changes = True
-
-        for field in FIELD_GROUPS[1]:
-            try:
-                if not hasattr(doc, field):
-                    continue
-                value = getattr(doc, field)
-                if not isinstance(value, list) or not value:
-                    continue
-                rows = []
-                for row in value:
-                    row_dict = row.as_dict()
-                    for skip_field in SKIP_CHILD_FIELDS:
-                        row_dict.pop(skip_field, None)
-                    rows.append(row_dict)
-                user_doc.set(field, rows)
-                has_changes = True
-            except Exception:
-                continue
-
-        if has_changes:
-            user_doc.save(ignore_permissions=True)
-            frappe.db.commit()
-
         total_score = 0
         max_total_score = 0
-        knock_out_failed = False
-
-        responses = frappe.get_all(
-            "Job Application Screening Responses",
-            filters={"parent": doc.name},
-            fields=["name", "question_id", "answer", "score_obtained"],
-        )
+        knock_off_failed = False
+        responses = doc.screening_question_responses
 
         for resp in responses:
             question = frappe.get_doc(
@@ -130,47 +136,51 @@ def on_update(doc: Document, method: str) -> None:
             if question.is_required and not resp.answer:
                 score = 0
             elif resp.answer and question.expected_answer:
-
                 score = (
                     min(max_score, question.weight)
                     if resp.answer == question.expected_answer
                     else 0
                 )
 
-            frappe.db.set_value(
-                "Job Application Screening Responses",
-                resp.name,
-                "score_obtained",
-                score,
-            )
+            resp.score_obtained = score
+            resp.max_score = max_score
+            resp.expected_answer = question.expected_answer
 
             total_score += score
             max_total_score += max_score
 
-            if getattr(question, "is_knock_out", False) and score == 0:
-                knock_out_failed = True
+            if getattr(question, "is_knock_off", False) and score == 0:
+                knock_off_failed = True
 
-        screening_score_percent = 0
-        if max_total_score > 0:
-            screening_score_percent = (total_score / max_total_score) * 100
+        screening_score_percent = (
+            (total_score / max_total_score) * 100 if max_total_score > 0 else 0
+        )
 
         doc.total_score = total_score
         doc.screening_score_percent = screening_score_percent
 
-        if knock_out_failed:
+        if knock_off_failed:
             doc.eligibility_status = "Not Eligible"
             doc.status = "Rejected"
         else:
-            if screening_score_percent >= 70:
-                doc.eligibility_status = "Eligible"
-            else:
-                doc.eligibility_status = "Pending Review"
-
-        doc.save(ignore_permissions=True)
-        frappe.db.commit()
+            doc.eligibility_status = (
+                "Eligible" if screening_score_percent >= 70 else "Pending Review"
+            )
 
     except Exception:
         frappe.log_error(
-            "Job Applicant -> User & Screening Sync Error",
-            frappe.get_traceback(),
+            "Job Applicant -> Screening Score Update Error", frappe.get_traceback()
         )
+
+
+def before_submit(doc, method):
+    """Run before submit: handle scoring and eligibility."""
+    update_screening_scores(doc)
+
+
+def on_submit(doc, method):
+    """Run after submit: prepare user updates (no save here)."""
+    try:
+        update_user_from_applicant(doc)
+    except Exception:
+        frappe.log_error("Job Applicant -> User Update Error", frappe.get_traceback())
