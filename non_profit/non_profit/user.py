@@ -74,7 +74,6 @@ def create_membership(
                     "member_name": user,
                     "email_id": frappe.session.user,
                     "phone_number": phone,
-                    "custom_company": branch,
                 }
             )
             member.insert(ignore_permissions=True)
@@ -91,7 +90,7 @@ def create_membership(
                 "membership_type": membership_type,
                 "amount": amount,
                 "company": branch,
-                "status": "Draft",
+                "membership_status": "Draft",
                 "from_date": from_date,
                 "to_date": add_to_date(from_date, years=1, days=-1),
                 "member_since_date": from_date,
@@ -115,6 +114,8 @@ def renew_membership(**kwargs):
     try:
         membership = frappe.get_doc("Membership", kwargs.get("id"))
         membership.initiate_payment(phone_number=kwargs.get("phone_number"))
+        membership.membership_status = "Pending"
+        membership.save(ignore_permissions=True)
     except Exception:
         frappe.log_error(frappe.get_traceback(), "Error renewing membership")
         frappe.throw("Error creating membership")
