@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { usersStore } from "./stores/user";
 import { sessionStore } from "./stores/session";
+import { usersStore } from "./stores/user";
 
 const routes = [
   {
@@ -66,12 +66,6 @@ const routes = [
     path: "/volunteer/signup",
     component: () => import("@/pages/VolunteerSignup.vue"),
     meta: { requiresAuth: true },
-  },
-  {
-    name: "NewJobApplication",
-    path: "/opportunities/:job/apply",
-    component: () => import("@/pages/NewJobApplication.vue"),
-    props: true,
   },
   {
     name: "JobApplication",

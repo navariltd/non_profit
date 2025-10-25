@@ -140,7 +140,8 @@ doc_events = {
         "on_update": "non_profit.non_profit.overrides.server.gl_entry.on_update",
     },
     "Job Applicant": {
-        "on_update": "non_profit.non_profit.overrides.server.job_applicant.on_update"
+        "before_submit": "non_profit.non_profit.overrides.server.job_applicant.before_submit",
+        "on_submit": "non_profit.non_profit.overrides.server.job_applicant.on_submit",
     },
 }
 
