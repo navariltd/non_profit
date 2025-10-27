@@ -161,13 +161,50 @@
     <div v-else class="text-center py-20 text-gray-500">
       Loading application details...
     </div>
+    <Dialog v-model="showSubmitDialog">
+      <template #body-title>
+        <h2 class="text-lg font-bold text-gray-900">
+          {{ __("Confirm Submission") }}
+        </h2>
+      </template>
 
+      <template #body-content>
+        <p class="text-gray-700 leading-relaxed">
+          {{ __("Are you sure you want to submit this application?") }}
+        </p>
+        <p class="mt-2 text-sm text-red-600 font-medium">
+          {{ __("You won't be able to make further edits after submission.") }}
+        </p>
+      </template>
+
+      <template #actions>
+        <div class="flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <Button
+            variant="outline"
+            class="w-full sm:w-auto py-3"
+            @click="showSubmitDialog = false"
+          >
+            {{ __("Cancel") }}
+          </Button>
+          <Button
+            variant="solid"
+            class="w-full sm:w-auto bg-red-700 hover:bg-red-800 text-white py-3"
+            @click="submitApplication"
+          >
+            <template #prefix>
+              <FeatherIcon name="check-circle" class="w-4" />
+            </template>
+            {{ __("Submit") }}
+          </Button>
+        </div>
+      </template>
+    </Dialog>
     <ErrorModal v-model="showErrorDialog" :errors="flatErrors" />
   </div>
 </template>
 
 <script setup>
-import { Button, createResource, toast } from "frappe-ui";
+import { Button, createResource, Dialog, toast } from "frappe-ui";
 import { computed, inject, markRaw, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -190,6 +227,7 @@ const maxCompletedStep = ref(-1);
 const isSaving = ref(false);
 
 const showErrorDialog = ref(false);
+const showSubmitDialog = ref(false);
 const validationErrors = ref([]);
 
 const flatErrors = computed(() => {
@@ -248,16 +286,15 @@ const steps = [
         errors.push("Profession is required.");
       }
 
+      if (!form.education || form.education.length === 0) {
+        errors.push("Education History is required.");
+      }
+
       const childTableChecks = [
         {
           field: "education",
           label: "Education History",
           requiredFields: ["school_univ", "level", "year_of_passing"],
-        },
-        {
-          field: "certification",
-          label: "Certifications",
-          requiredFields: ["certification_name", "organization", "issue_date"],
         },
         {
           field: "additional_skills",
@@ -266,8 +303,13 @@ const steps = [
         },
         {
           field: "courses",
-          label: "Courses",
-          requiredFields: ["course_name", "institution"],
+          label: "Certifications and Trainings",
+          requiredFields: [
+            "course_name",
+            "start_date",
+            "date_completed",
+            "institution",
+          ],
         },
         {
           field: "licences",
@@ -662,7 +704,7 @@ const handleStepAction = () => {
   if (currentStep.value < steps.length - 1) {
     saveApplicationDraft();
   } else {
-    submitApplication();
+    showSubmitDialog.value = true;
   }
 };
 
@@ -703,13 +745,16 @@ const submitApplication = () => {
       onSuccess: (response) => {
         if (response?.error) {
           toast.error("Application submission failed.", response.error);
+          window.location.reload();
         } else {
           toast.success("Application submission successful.");
           window.location.reload();
         }
       },
-      onError: (err) =>
-        toast.error(err.messages?.[0] || "Failed to submit application."),
+      onError: (err) => {
+        (toast.error(err.messages?.[0] || "Failed to submit application."),
+          window.location.reload());
+      },
       onSettled: () => (isSaving.value = false),
     }
   );

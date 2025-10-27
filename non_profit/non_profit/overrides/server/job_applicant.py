@@ -26,6 +26,8 @@ FIELD_MAP = {
 NORMAL_FIELDS = [
     "ward",
     "first_name",
+    "identification_type",
+    "id_number",
     "passport_number",
     "number_of_dependants",
     "marital_status",

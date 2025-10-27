@@ -667,14 +667,13 @@ def submit_job_application(id: str = None) -> dict:
 
         application = frappe.get_doc("Job Applicant", id)
 
-        if application.status != "Draft":
-            return {"error": "Only applications with status 'Draft' can be submitted."}
-
-        application.status = "Open"
-        application.save(ignore_permissions=True)
+        application.flags.ignore_permissions = True
+        application.submit()
         frappe.db.commit()
         return {"message": "Application submitted successfully"}
+
     except Exception as e:
+        frappe.log_error("Job Application Submission Error", frappe.get_traceback())
         return {"error": str(e)}
 
 
@@ -801,6 +800,25 @@ def get_user_info():
             "user_type",
             "username",
             "phone",
+            "ward",
+            "first_name",
+            "last_name",
+            "middle_name",
+            "birth_date",
+            "identification_type",
+            "id_number",
+            "passport_number",
+            "number_of_dependants",
+            "marital_status",
+            "blood_group",
+            "citizenship",
+            "country_of_citizenship",
+            "administrative_location",
+            "sub_county",
+            "county",
+            "access_to_internet",
+            "profession",
+            "gender",
         ],
         as_dict=1,
     )
@@ -815,7 +833,7 @@ def get_user_info():
         as_dict=True,
     )
 
-    if job_applicant and job_applicant.get("status") == "Open":
+    if job_applicant and job_applicant.get("docstatus") == 1:
         user["is_pending_approval"] = True
     else:
         user["is_pending_approval"] = False

@@ -180,9 +180,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from "vue";
 import { toast } from "frappe-ui";
 import { Cloud, FileText } from "lucide-vue-next";
+import { computed, onMounted, ref, watch } from "vue";
 
 const emit = defineEmits<{
   (e: "success", data: any): void;
@@ -217,7 +217,7 @@ const props = withDefaults(
     modelValue: "",
     label: "",
     description: "",
-    fileTypes: () => ["*/*"],
+    fileTypes: () => [".pdf", ".jpg", ".jpeg", ".png"],
     required: false,
     uploadArgs: () => ({}),
     multi: false,
@@ -290,41 +290,28 @@ const simulateProgress = (update: (p: number) => void) => {
   });
 };
 
-const normalizeFileTypes = computed(() =>
-  (props.fileTypes || ["*/*"]).map((t) => t.trim().toLowerCase())
-);
+const normalizeFileTypes = computed(() => {
+  return props.fileTypes.map((t) => {
+    const trimmed = t.trim().toLowerCase();
+    return trimmed.startsWith(".") ? trimmed : `.${trimmed}`;
+  });
+});
 
-const acceptAttribute = computed(() =>
-  normalizeFileTypes.value.includes("*/*")
-    ? undefined
-    : normalizeFileTypes.value.join(",")
-);
+const acceptAttribute = computed(() => normalizeFileTypes.value.join(","));
 
 const supportedFormatsText = computed(() =>
-  props.fileTypes?.length
-    ? props.fileTypes
-        .map((t) => t.replace(".", ""))
-        .join(", ")
-        .toUpperCase()
-    : "ANY"
+  normalizeFileTypes.value
+    .map((t) => t.replace(".", ""))
+    .join(", ")
+    .toUpperCase()
 );
 
 function fileMatchesAllowed(file: File) {
-  if (normalizeFileTypes.value.includes("*/*")) return true;
-
   const lowerName = file.name.toLowerCase();
-  const mime = file.type.toLowerCase();
 
   for (const pattern of normalizeFileTypes.value) {
-    if (pattern.startsWith(".")) {
-      if (lowerName.endsWith(pattern)) return true;
-    } else if (pattern.endsWith("/*")) {
-      const major = pattern.split("/")[0];
-      if (mime.startsWith(major + "/")) return true;
-    } else if (pattern.includes("/")) {
-      if (mime === pattern) return true;
-    } else {
-      if (lowerName.endsWith("." + pattern)) return true;
+    if (lowerName.endsWith(pattern)) {
+      return true;
     }
   }
 
@@ -361,7 +348,7 @@ const validateFiles = (files: File[]): File[] => {
 
     if (!fileMatchesAllowed(file)) {
       toast.error(
-        `File ${file.name} is not an allowed type. Supported: ${supportedFormatsText.value}`
+        `File ${file.name} has unsupported format. Supported formats: ${supportedFormatsText.value}`
       );
       continue;
     }

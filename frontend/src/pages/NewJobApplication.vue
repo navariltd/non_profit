@@ -1,7 +1,27 @@
 <template>
   <div class="w-full space-y-8">
     <div
-      v-if="isApplied"
+      v-if="!user.data?.name"
+      class="bg-gray-50 rounded-xl p-6 border border-gray-200"
+    >
+      <h3 class="text-xl font-semibold text-gray-800 mb-6">
+        Authentication Required
+      </h3>
+      <p class="text-gray-600 mb-8 max-w-md">
+        Please create an account to submit your application
+      </p>
+
+      <div
+        variant="solid"
+        class="bg-red-600 hover:bg-red-700 w-fit text-white px-8 py-3 flex items-center gap-3 rounded-xl shadow-lg cursor-pointer"
+        @click="redirectToLogin"
+      >
+        <LogIn class="w-5 h-5" />
+        Sign Up
+      </div>
+    </div>
+    <div
+      v-else-if="isApplied"
       class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center"
     >
       <h2 class="text-xl font-semibold text-yellow-800 mb-4">
@@ -41,26 +61,6 @@
         Register as Volunteer
       </Button>
     </div>
-    <div
-      v-if="!user.data?.name"
-      class="bg-gray-50 rounded-xl p-6 border border-gray-200"
-    >
-      <h3 class="text-xl font-semibold text-gray-800 mb-6">
-        Authentication Required
-      </h3>
-      <p class="text-gray-600 mb-8 max-w-md">
-        Please create an account to submit your application
-      </p>
-
-      <div
-        variant="solid"
-        class="bg-red-600 hover:bg-red-700 w-fit text-white px-8 py-3 flex items-center gap-3 rounded-xl shadow-lg cursor-pointer"
-        @click="redirectToLogin"
-      >
-        <LogIn class="w-5 h-5" />
-        Sign Up
-      </div>
-    </div>
 
     <div
       v-else
@@ -87,7 +87,6 @@
 
 <script setup>
 import { Button, createResource, toast } from "frappe-ui";
-import { LogIn } from "lucide-vue-next";
 import { computed, inject, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
