@@ -60,16 +60,6 @@
           />
           <div class="mt-4 gap-2 flex items-end justify-end">
             <Button
-              type="button"
-              variant="outline"
-              theme="red"
-              class="rounded-lg px-5"
-              @click="cleanUpMembershipForm"
-            >
-              Cancel
-            </Button>
-
-            <Button
               type="submit"
               variant="solid"
               theme="green"
@@ -132,6 +122,7 @@ watch(branch, (newValue) => {
 const branches = createListResource({
   doctype: "Company",
   filters: { is_group: 0 },
+  auto: true,
   cache: "branches",
   transform: (data) =>
     data.map((item) => ({ label: item.name, value: item.name })),
