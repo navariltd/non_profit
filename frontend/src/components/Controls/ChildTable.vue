@@ -807,7 +807,7 @@ function getFieldProps(field: DocField, rowIndex?: number) {
     case "Attach":
     case "Attach Image":
     case "Image":
-      props.fileTypes = [".pdf", ".jpg", ".png", ".doc", ".docx"];
+      props.fileTypes = [".pdf", ".jpg", ".jpeg", ".png"];
       props.multi = false;
       props.maxFileSize = 10;
       props.success = (file: any) => {

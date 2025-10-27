@@ -15,22 +15,23 @@
   "expected_end_date",
   "section_break_calj",
   "mission_background",
+  "stakeholders_section",
+  "stakeholders",
   "section_break_7hzn",
   "amended_from",
   "objectives_approach_tab",
   "specific_objectives_section",
   "objectives",
+  "expected_outputs_section",
+  "expected_outputs",
   "proposed_approach_section",
   "approach_methods",
-  "stakeholders_section",
-  "stakeholders",
   "itinerary_outputs_resources_tab",
   "itinerary_section",
   "itinerary",
-  "expected_outputs_section",
-  "expected_outputs",
   "resources_section",
-  "resources"
+  "resources",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -78,7 +79,7 @@
   {
    "fieldname": "objectives_approach_tab",
    "fieldtype": "Tab Break",
-   "label": "Objectives, Approach & Stakeholders"
+   "label": "Approach, Objectives & Outputs "
   },
   {
    "fieldname": "specific_objectives_section",
@@ -86,6 +87,7 @@
    "label": "Specific Objectives"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "objectives",
    "fieldtype": "Table",
    "label": "Objectives",
@@ -100,14 +102,14 @@
   {
    "fieldname": "approach_methods",
    "fieldtype": "Table",
-   "label": "Approach Methods",
+   "label": "Approach Methodology",
    "options": "TOR Approach Methods",
    "reqd": 1
   },
   {
    "fieldname": "itinerary_outputs_resources_tab",
    "fieldtype": "Tab Break",
-   "label": "Itinerary, Outputs & Resources"
+   "label": "Itinerary & Resources"
   },
   {
    "fieldname": "itinerary_section",
@@ -185,6 +187,12 @@
    "fieldtype": "Date",
    "label": "Expected End Date",
    "reqd": 1
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
  "grid_page_length": 50,
@@ -192,17 +200,17 @@
  "is_submittable": 1,
  "links": [
   {
-   "group": "Deployment",
-   "link_doctype": "Personnel Deployment Request",
+   "group": "Deployments",
+   "link_doctype": "Deployment Request Tool",
    "link_fieldname": "terms_of_reference"
   },
   {
-   "group": "Deployment",
-   "link_doctype": "Personnel Deployment Assignment",
+   "group": "Projects",
+   "link_doctype": "Project",
    "link_fieldname": "terms_of_reference"
   }
  ],
- "modified": "2025-10-23 12:47:14.397828",
+ "modified": "2025-10-25 09:28:59.307810",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Personnel Terms of Reference",

@@ -79,6 +79,14 @@
           :form-data="localModel"
           @validationErrors="onChildErrors('Disabilities', $event)"
         />
+        <ChildTable
+          v-model="localModel.allergies"
+          doctype="Allergy Table"
+          label="Allergies"
+          :autoEditGrid="true"
+          :form-data="localModel"
+          @validationErrors="onChildErrors('Allergies', $event)"
+        />
 
         <ChildTable
           v-model="localModel.education"
@@ -91,7 +99,7 @@
         <ChildTable
           v-model="localModel.courses"
           doctype="User External Course"
-          label="Courses"
+          label="Trainings & Certifications"
           :autoEditGrid="true"
           @validationErrors="onChildErrors('Courses', $event)"
         />
@@ -110,14 +118,6 @@
           label="Licences"
           :autoEditGrid="true"
           @validationErrors="onChildErrors('Licences', $event)"
-        />
-
-        <ChildTable
-          v-model="localModel.certification"
-          doctype="Certification"
-          label="Certifications"
-          :autoEditGrid="true"
-          @validationErrors="onChildErrors('Certifications', $event)"
         />
       </div>
     </div>

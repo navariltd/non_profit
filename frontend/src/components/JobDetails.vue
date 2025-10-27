@@ -1,5 +1,8 @@
 <template>
-  <div v-if="job.data" class="mx-auto px-4 sm:px-6 pt-8 max-w-4xl">
+  <div
+    v-if="job.data"
+    class="px-4 sm:px-6 pt-8 max-w-7xl space-y-10 h-fit mb-10"
+  >
     <div class="p-8 bg-white rounded-2xl shadow-sm border border-gray-100">
       <div
         class="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8"
@@ -142,21 +145,23 @@
         ></div>
       </section>
     </div>
+    <NewJobApplication />
   </div>
 </template>
 
 <script setup>
 import { Badge } from "frappe-ui";
 import {
-  Check,
-  CalendarDays,
-  FileText,
-  ClipboardType,
-  Briefcase,
   Award,
+  Briefcase,
+  CalendarDays,
+  Check,
   CheckCircle,
+  ClipboardType,
+  FileText,
 } from "lucide-vue-next";
 import { inject } from "vue";
+import NewJobApplication from "../pages/NewJobApplication.vue";
 
 const props = defineProps({
   job: Object,

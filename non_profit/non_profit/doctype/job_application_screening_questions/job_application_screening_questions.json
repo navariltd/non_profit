@@ -8,6 +8,7 @@
   "question_type",
   "question_id",
   "is_required",
+  "is_knock_off",
   "help_text",
   "column_break_mjrj",
   "question",
@@ -135,13 +136,23 @@
    "fieldname": "show_if_answer_is",
    "fieldtype": "Small Text",
    "label": "Show If Answer Is"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_knock_off",
+   "fieldtype": "Check",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Is Knock Off"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-10-23 12:55:25.246401",
+ "modified": "2025-10-25 09:37:39.409571",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Job Application Screening Questions",

@@ -13,44 +13,6 @@
           },
         ]"
       />
-
-      <div class="flex items-center gap-2">
-        <Button
-          v-if="(!user.data?.name && job.data?.is_internal) || !user.data?.name"
-          variant="solid"
-          class="bg-red-600 hover:bg-red-700 text-white"
-          @click="redirectToLogin"
-        >
-          <template #prefix>
-            <LogIn class="w-4 h-4" />
-          </template>
-          {{ __("Login to Apply") }}
-        </Button>
-
-        <Button
-          v-else-if="isApplied"
-          variant="outline"
-          class="border-red-500 text-red-600 hover:bg-red-50"
-          @click="goToApplicationDetail"
-        >
-          <template #prefix>
-            <Check class="w-4 h-4 text-red-600" />
-          </template>
-          {{ __("View Application") }}
-        </Button>
-
-        <Button
-          v-else
-          variant="solid"
-          class="bg-red-600 hover:bg-red-700 text-white"
-          @click="goToNewApplication"
-        >
-          <template #prefix>
-            <SendHorizonal class="w-4 h-4" />
-          </template>
-          {{ __("Apply Now") }}
-        </Button>
-      </div>
     </header>
 
     <div v-if="job.data" class="mx-auto px-4 sm:px-6 pt-6">
@@ -60,26 +22,11 @@
 </template>
 
 <script setup>
-import {
-  Badge,
-  Button,
-  Breadcrumbs,
-  createResource,
-  usePageMeta,
-} from "frappe-ui";
-import { inject, computed, watch } from "vue";
+import { Breadcrumbs, createResource, usePageMeta } from "frappe-ui";
+import { computed, inject } from "vue";
 import { useRouter } from "vue-router";
-import { sessionStore } from "../stores/session";
-import {
-  Check,
-  SendHorizonal,
-  LogIn,
-  CalendarDays,
-  SquareUserRound,
-  FileText,
-  ClipboardType,
-} from "lucide-vue-next";
 import JobDetails from "../components/JobDetails.vue";
+import { sessionStore } from "../stores/session";
 
 const router = useRouter();
 const user = inject("$user");

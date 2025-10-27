@@ -9,6 +9,7 @@
       />
 
       <FormControl v-model="form.email_id" label="Email Address" required />
+
       <FormControl
         v-model="form.citizenship"
         :label="__('Citizenship')"
@@ -17,23 +18,31 @@
         required
       />
 
-      <FormControl
-        v-if="form.citizenship === 'Citizen'"
-        v-model="form.id_number"
-        label="ID Number"
-      />
       <Link
-        v-if="form.citizenship !== 'Citizen'"
         doctype="Country"
         v-model="form.country_of_citizenship"
         :label="__('Country of Citizenship')"
+        :filters="
+          form.citizenship === 'Citizen'
+            ? [['name', '=', 'Kenya']]
+            : [['name', '!=', 'Kenya']]
+        "
+        :required="true"
       />
-      <FormControl
-        v-if="form.citizenship !== 'Citizen'"
-        v-model="form.passport_number"
-        label="Passport Number"
+      <Link
+        doctype="Identification Document Type"
+        v-model="form.identification_type"
+        :label="__('Identification Document Type')"
+        :required="true"
       />
 
+      <FormControl v-model="form.id_number" label="ID Number" />
+      <Link
+        v-model="form.gender"
+        :label="__('Gender')"
+        doctype="Gender"
+        :required="true"
+      />
       <!-- <FormControl
         v-model="form.date_of_birth"
         label="Date of Birth"
@@ -68,7 +77,12 @@
         label="Sub County"
         :filters="{ county: form.county }"
       />
-      <FormControl v-model="form.ward" label="Ward" type="text" />
+      <Link
+        doctype="Ward"
+        v-model="form.ward"
+        label="Ward"
+        :filters="{ county: form.county }"
+      />
       <Link
         v-if="form.sub_county"
         doctype="Administrative Location"

@@ -1,45 +1,27 @@
 <template>
-  <div class="max-w-5xl mx-auto py-10 space-y-8">
+  <div class="w-full space-y-8">
     <div
-      v-if="job.data"
-      class="p-6 rounded-xl shadow-sm border border-gray-200 bg-gradient-to-r from-red-50 to-white"
+      v-if="!user.data?.name"
+      class="bg-gray-50 rounded-xl p-6 border border-gray-200"
     >
-      <div class="flex items-start gap-4">
-        <div>
-          <img
-            v-if="job.data.company_logo"
-            :src="job.data.company_logo"
-            class="w-16 h-16 rounded-lg object-contain cursor-pointer bg-gray-50 border"
-            :alt="job.data.company"
-            @click="redirectToWebsite(job.data.company_website)"
-          />
-          <div
-            v-else
-            class="w-16 h-16 flex items-center justify-center rounded-lg bg-red-100 text-red-700 font-semibold text-xl cursor-default"
-          >
-            {{ getCompanyAbbr(job.data.company) }}
-          </div>
-        </div>
-        <div>
-          <h1 class="text-3xl font-bold text-gray-900 mb-1">
-            {{ job.data.job_title }}
-          </h1>
-          <div class="text-lg font-medium text-red-600">
-            {{ job.data.company }}
-          </div>
-          <div
-            v-if="job.data.location || job.data.country"
-            class="text-sm text-gray-500 mt-1"
-          >
-            {{ job.data.location
-            }}<span v-if="job.data.country">, {{ job.data.country }}</span>
-          </div>
-        </div>
+      <h3 class="text-xl font-semibold text-gray-800 mb-6">
+        Authentication Required
+      </h3>
+      <p class="text-gray-600 mb-8 max-w-md">
+        Please create an account to submit your application
+      </p>
+
+      <div
+        variant="solid"
+        class="bg-red-600 hover:bg-red-700 w-fit text-white px-8 py-3 flex items-center gap-3 rounded-xl shadow-lg cursor-pointer"
+        @click="redirectToLogin"
+      >
+        <LogIn class="w-5 h-5" />
+        Sign Up
       </div>
     </div>
-
     <div
-      v-if="isApplied"
+      v-else-if="isApplied"
       class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 text-center"
     >
       <h2 class="text-xl font-semibold text-yellow-800 mb-4">
@@ -66,9 +48,9 @@
         user.data &&
         !user.data?.employee
       "
-      class="bg-blue-50 border border-blue-200 rounded-xl p-6 text-center"
+      class="bg-red-50 border border-red-200 rounded-xl p-6 text-center"
     >
-      <h2 class="text-xl font-semibold text-blue-800 mb-4">
+      <h2 class="text-xl font-semibold text-red-800 mb-4">
         This opportunity is available for volunteers only.
       </h2>
       <Button
@@ -89,45 +71,6 @@
       </h2>
 
       <form class="space-y-10" @submit.prevent="submitApplication">
-        <div
-          v-if="!user.data?.name"
-          class="bg-gray-50 rounded-xl p-6 border border-gray-200"
-        >
-          <h3 class="text-xl font-semibold text-gray-800 mb-6">
-            Personal Information
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormControl
-              v-model="form.surname"
-              :label="__('Surname')"
-              type="text"
-              placeholder="Enter surname"
-              required
-            />
-            <FormControl
-              v-model="form.other_names"
-              :label="__('Other Names')"
-              type="text"
-              placeholder="Enter other names"
-              required
-            />
-            <FormControl
-              v-model="form.email_id"
-              :label="__('Email Address')"
-              type="email"
-              placeholder="Enter email"
-              required
-            />
-            <FormControl
-              v-model="form.phone"
-              :label="__('Phone Number')"
-              type="tel"
-              placeholder="Enter phone number"
-              required
-            />
-          </div>
-        </div>
-
         <div class="flex justify-start">
           <Button
             type="submit"
@@ -143,7 +86,7 @@
 </template>
 
 <script setup>
-import { Button, createResource, FormControl, toast } from "frappe-ui";
+import { Button, createResource, toast } from "frappe-ui";
 import { computed, inject, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
@@ -156,8 +99,6 @@ const job = createResource({
   url: "non_profit.non_profit.api.get_job_details",
   params: { job: jobId },
   onSuccess: (data) => {
-    console.log(data);
-
     if (!data) {
       toast.error("Job not found");
       router.replace({ name: "JobListings" });
@@ -222,6 +163,10 @@ const submitApplication = () => {
     }
   );
 };
+
+function redirectToLogin() {
+  router.push("/login#signup");
+}
 
 const redirectToWebsite = (url) => window.open(url, "_blank");
 const getCompanyAbbr = (name) =>

@@ -405,29 +405,20 @@ def get_job_openings(filters=None, orFilters=None):
     elif companies:
         filters["company"] = ["in", companies]
 
-    jobs = frappe.get_all(
+    job_names = frappe.get_all(
         "Job Opening",
         filters=filters,
         or_filters=or_filters,
-        fields=[
-            "job_title",
-            "posted_on",
-            "closes_on",
-            "closed_on",
-            "designation",
-            "vacancies",
-            "location",
-            "employment_type",
-            "company",
-            "department",
-            "name",
-            "creation",
-            "description",
-            "status",
-            "is_internal",
-        ],
+        fields=["name"],
         order_by="creation desc",
     )
+
+    jobs = []
+    for j in job_names:
+        try:
+            jobs.append(frappe.get_doc("Job Opening", j.name).as_dict())
+        except Exception:
+            frappe.log_error(frappe.get_traceback(), "Failed to fetch Job Opening doc")
 
     if user != "Guest":
         user_email = frappe.db.get_value("User", user, "email")
@@ -677,14 +668,13 @@ def submit_job_application(id: str = None) -> dict:
 
         application = frappe.get_doc("Job Applicant", id)
 
-        if application.status != "Draft":
-            return {"error": "Only applications with status 'Draft' can be submitted."}
-
-        application.status = "Open"
-        application.save(ignore_permissions=True)
+        application.flags.ignore_permissions = True
+        application.submit()
         frappe.db.commit()
         return {"message": "Application submitted successfully"}
+
     except Exception as e:
+        frappe.log_error("Job Application Submission Error", frappe.get_traceback())
         return {"error": str(e)}
 
 
@@ -740,7 +730,7 @@ def create_job_application(job_opening: str = None, id: str = None, **kwargs) ->
             "applicant_name": name_to_use,
             "email_id": email_id,
             "company": company,
-            "status": "Draft",
+            "status": "Open",
         }
 
         if job_opening:
@@ -811,6 +801,25 @@ def get_user_info():
             "user_type",
             "username",
             "phone",
+            "ward",
+            "first_name",
+            "last_name",
+            "middle_name",
+            "birth_date",
+            "identification_type",
+            "id_number",
+            "passport_number",
+            "number_of_dependants",
+            "marital_status",
+            "blood_group",
+            "citizenship",
+            "country_of_citizenship",
+            "administrative_location",
+            "sub_county",
+            "county",
+            "access_to_internet",
+            "profession",
+            "gender",
         ],
         as_dict=1,
     )
@@ -825,7 +834,7 @@ def get_user_info():
         as_dict=True,
     )
 
-    if job_applicant and job_applicant.get("status") == "Open":
+    if job_applicant and job_applicant.get("docstatus") == 1:
         user["is_pending_approval"] = True
     else:
         user["is_pending_approval"] = False
@@ -1053,6 +1062,7 @@ def create_availability_schedule(slot_data):
         employee = slot_data.get("employee")
         fiscal_year = get_current_fiscal_year()
         weekly_availability = slot_data.get("weekly_availability", {})
+        available_on_holidays = slot_data.get("available_on_holidays", False)
 
         if frappe.db.exists("Personnel Availability Schedule", {"employee": employee}):
             existing_doc = frappe.get_value(
@@ -1062,16 +1072,18 @@ def create_availability_schedule(slot_data):
                 "Personnel Availability Schedule", existing_doc, ignore_permissions=True
             )
 
-        personal_schedule_name = create_personal_schedule(employee, fiscal_year)
+        personal_schedule_name = create_personal_schedule(
+            employee, fiscal_year, available_on_holidays
+        )
         create_schedule(personal_schedule_name, weekly_availability)
 
         return {"employee": employee}
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Availability Schedule Creation Error")
+        frappe.log_error("Availability Schedule Creation Error", frappe.get_traceback())
         frappe.throw("Availability Schedule Creation Error")
 
 
-def create_personal_schedule(employee, fiscal_year):
+def create_personal_schedule(employee, fiscal_year, available_on_holidays=False):
     """Create or get existing Personnel Availability Schedule"""
     existing = frappe.db.exists(
         "Personnel Availability Schedule",
@@ -1083,6 +1095,7 @@ def create_personal_schedule(employee, fiscal_year):
 
     schedule_doc = frappe.new_doc("Personnel Availability Schedule")
     schedule_doc.employee = employee
+    schedule_doc.available_on_holidays = available_on_holidays
     schedule_doc.fiscal_year = fiscal_year
     schedule_doc.save(ignore_permissions=True)
 
@@ -1146,19 +1159,25 @@ def create_schedule(schedule_name, weekly_availability):
 
 @frappe.whitelist()
 def get_availability_slots():
-
     user = get_user_info().get("employee")
 
     parent = frappe.db.get_value(
         "Personnel Availability Schedule", {"employee": user}, "name"
     )
+    available_on_holidays = frappe.db.get_value(
+        "Personnel Availability Schedule", parent, "available_on_holidays"
+    )
+
     schedules = frappe.get_all(
         "Schedule",
         filters={"parent": parent},
         fields=["name", "day", "shift_type"],
     )
 
-    return schedules
+    return {
+        "schedules": schedules,
+        "available_on_holidays": available_on_holidays,
+    }
 
 
 @frappe.whitelist()
@@ -1293,7 +1312,7 @@ def fetch_assigned_projects():
     volunteer = get_current_volunteer()
 
     assignees = frappe.get_all(
-        "Personnel Deployment Assignment",
+        "Personnel Deployment Request",
         filters={
             "employee": volunteer,
             "status": "Pending",
@@ -1310,7 +1329,7 @@ def fetch_assigned_projects():
         deployment_name = assignee.deployment
         assignee_name = assignee.name
 
-        deployment = frappe.get_doc("Personnel Deployment Request", deployment_name)
+        deployment = frappe.get_doc("Deployment Request Tool", deployment_name)
         if not deployment or not deployment.project:
             continue
 
@@ -1394,7 +1413,7 @@ def get_project_details(project_name):
 def get_assignment_details(assignment_name):
 
     assignment = frappe.get_doc(
-        "Personnel Deployment Assignment",
+        "Personnel Deployment Request",
         assignment_name,
     ).as_dict()
 
@@ -1412,7 +1431,7 @@ def get_assignment_details(assignment_name):
             ).as_dict()
         assignment["contract"] = contract
 
-    deployment = frappe.get_doc("Personnel Deployment Request", assignment.deployment)
+    deployment = frappe.get_doc("Deployment Request Tool", assignment.deployment)
 
     project = frappe.db.get_value(
         "Project",
@@ -1460,7 +1479,7 @@ def accept_assignment(name, accepted=True, contract_name=None):
             frappe.db.set_value("Contract", contract_name, {"is_signed": 1})
 
         assignee = frappe.get_doc(
-            "Personnel Deployment Assignment", name, ignore_permissions=True
+            "Personnel Deployment Request", name, ignore_permissions=True
         )
         assignee.status = "Accepted" if accepted else "Rejected"
         assignee.save(ignore_permissions=True)
@@ -1573,16 +1592,16 @@ def get_dashboard_stats():
     project_stats = {}
 
     total_projects_deployed = frappe.db.count(
-        "Personnel Deployment Assignment", {"employee": volunteer}
+        "Personnel Deployment Request", {"employee": volunteer}
     )
     pending_projects = frappe.db.count(
-        "Personnel Deployment Assignment", {"employee": volunteer, "status": "Pending"}
+        "Personnel Deployment Request", {"employee": volunteer, "status": "Pending"}
     )
     accepted_projects = frappe.db.count(
-        "Personnel Deployment Assignment", {"employee": volunteer, "status": "Accepted"}
+        "Personnel Deployment Request", {"employee": volunteer, "status": "Accepted"}
     )
     rejected_projects = frappe.db.count(
-        "Personnel Deployment Assignment", {"employee": volunteer, "status": "Rejected"}
+        "Personnel Deployment Request", {"employee": volunteer, "status": "Rejected"}
     )
 
     project_stats["total_projects_deployed"] = total_projects_deployed

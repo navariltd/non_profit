@@ -8,14 +8,17 @@
     <div class="relative">
       <Autocomplete
         ref="autocomplete"
-        :options="options.data"
+        :options="currentOptions"
         v-model="value"
         :size="attrs.size || 'sm'"
         :variant="attrs.variant"
         :placeholder="attrs.placeholder"
         :filterable="false"
         :readonly="attrs.readonly || props.readOnly"
-        class="relative !z-100"
+        :loadingMore="loadingMore"
+        :hasMore="hasMore"
+        @load-more="loadMore"
+        class="relative !z-100 bg-gray-100 rounded-sm"
       >
         <template #target="{ open, togglePopover }">
           <slot name="target" v-bind="{ open, togglePopover }" />
@@ -94,6 +97,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  pageLength: {
+    type: Number,
+    default: 10,
+  },
 });
 
 const emit = defineEmits(["update:modelValue", "change"]);
@@ -112,57 +119,121 @@ const value = computed({
 
 const autocomplete = ref(null);
 const text = ref("");
+const currentPage = ref(1);
+const loadingMore = ref(false);
+const hasMore = ref(true);
+const currentOptions = ref([]);
 
-watchDebounced(
-  () => autocomplete.value?.query,
-  (val) => {
-    val = val || "";
-    if (text.value === val) return;
-    text.value = val;
-    reload(val);
-  },
-  { debounce: 300, immediate: true }
-);
-
-watchDebounced(
-  () => props.doctype,
-  () => reload(""),
-  { debounce: 300, immediate: true }
-);
+// Reset pagination when search text changes
+watch(text, () => {
+  currentPage.value = 1;
+  hasMore.value = true;
+  currentOptions.value = [];
+});
 
 const serializeFilters = (f) => {
   if (!f) return "{}";
-  return typeof f === "string" ? f : JSON.stringify(f);
+  if (typeof f === "string") return f;
+  if (Array.isArray(f)) return JSON.stringify(f);
+  return JSON.stringify(f);
 };
 
 const options = createResource({
   url: "non_profit.non_profit.api.custom_search_link",
-  cache: [props.doctype, text.value, serializeFilters(props.filters)],
+  cache: [
+    props.doctype,
+    text.value,
+    serializeFilters(props.filters),
+    currentPage.value,
+    props.pageLength,
+  ],
   method: "POST",
   auto: true,
   params: {
     doctype: props.doctype,
     txt: text.value,
     filters: serializeFilters(props.filters),
+    page_length: props.pageLength,
+    page: currentPage.value,
   },
   transform: (data) => {
-    return data.map((option) => ({
+    const transformed = data.map((option) => ({
       label: option.label || option.value,
       value: option.value,
       description: option.description,
     }));
+
+    // For first page, replace all options
+    if (currentPage.value === 1) {
+      currentOptions.value = removeDuplicates(transformed);
+    } else {
+      // For subsequent pages, append only new options
+      currentOptions.value = removeDuplicates([
+        ...currentOptions.value,
+        ...transformed,
+      ]);
+    }
+
+    // Check if we have more results
+    hasMore.value = data.length >= props.pageLength;
+
+    return transformed;
   },
 });
 
+function removeDuplicates(options) {
+  const seen = new Set();
+  return options.filter((option) => {
+    const key = `${option.value}-${option.label}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
+
 const reload = (val = autocomplete.value?.query || "") => {
+  currentPage.value = 1;
+  hasMore.value = true;
+  text.value = val;
   options.update({
     params: {
       doctype: props.doctype,
       txt: val,
       filters: serializeFilters(props.filters),
+      page_length: props.pageLength,
+      page: currentPage.value,
     },
   });
   options.reload();
+};
+
+const loadMore = async () => {
+  if (loadingMore.value || !hasMore.value) return;
+
+  loadingMore.value = true;
+  currentPage.value += 1;
+
+  try {
+    await options.update({
+      params: {
+        doctype: props.doctype,
+        txt: text.value,
+        filters: serializeFilters(props.filters),
+        page_length: props.pageLength,
+        page: currentPage.value,
+      },
+    });
+
+    await options.reload();
+  } catch (error) {
+    console.error("Error loading more options:", error);
+    currentPage.value -= 1;
+    hasMore.value = false;
+  } finally {
+    loadingMore.value = false;
+  }
 };
 
 const clearValue = (close) => {
@@ -179,6 +250,23 @@ watch(
   () => props.filters,
   () => reload(autocomplete.value?.query || ""),
   { immediate: true, deep: true }
+);
+
+watchDebounced(
+  () => autocomplete.value?.query,
+  (val) => {
+    val = val || "";
+    if (text.value === val) return;
+    text.value = val;
+    reload(val);
+  },
+  { debounce: 300, immediate: true }
+);
+
+watchDebounced(
+  () => props.doctype,
+  () => reload(""),
+  { debounce: 300, immediate: true }
 );
 </script>
 
