@@ -81,6 +81,12 @@ def create_membership(
         else:
             member = frappe.get_doc("Member", member)
 
+        if frappe.db.exists(
+            "Membership",
+            {"member": member.name, "membership_status": "Active", "company": branch},
+        ):
+            frappe.throw("You already have an active membership for this branch")
+
         from_date = datetime.today().date()
 
         membership = frappe.get_doc(
@@ -118,8 +124,6 @@ def renew_membership(**kwargs):
         _, invoice = membership.initiate_payment(
             phone_number=kwargs.get("phone_number")
         )
-        membership.membership_status = "Draft"
-        membership.save(ignore_permissions=True)
 
         return invoice
     except Exception:

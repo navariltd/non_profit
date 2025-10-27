@@ -10,7 +10,7 @@
       <div v-if="!paymentStatus" class="py-4">
         <form action="" @submit.prevent="submit">
           <div
-            class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4 bg-white border border-red-400 rounded-2xl shadow-sm"
+            class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4 bg-red-200 border border-red-100 rounded-2xl shadow-sm"
           >
             <div class="space-y-1">
               <FormControl
