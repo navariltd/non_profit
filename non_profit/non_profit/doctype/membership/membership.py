@@ -40,6 +40,8 @@ class Membership(Document):
         frappe.db.commit()
 
     def _apply_membership_period_logic(self):
+        if self.membership_status == "Pending":
+            return
         membership_type = frappe.get_doc("Membership Type", self.membership_type)
 
         invoices = frappe.get_all(
@@ -141,10 +143,12 @@ class Membership(Document):
 
         plan = frappe.get_doc("Membership Type", self.membership_type)
 
-        payment_request = make_payment_request(self, member, plan, phone_number)
+        payment_request, invoice = make_payment_request(
+            self, member, plan, phone_number
+        )
         self.reload()
 
-        return payment_request
+        return payment_request, invoice
 
     def validate_membership_type_and_settings(self, plan, settings):
         settings_link = get_link_to_form("Non Profit Settings", "Non Profit Settings")
@@ -191,6 +195,8 @@ class Membership(Document):
         pe.flags.ignore_mandatory = True
         pe.save()
         pe.submit()
+
+        self.membership_status = "Pending"
 
     @frappe.whitelist()
     def send_acknowlement(self):
@@ -438,7 +444,7 @@ def make_payment_request(membership, member, plan, phone_number=None):
         payment_request.submit()
 
         frappe.msgprint(_("Payment Request created successfully"))
-        return payment_request
+        return payment_request, invoice
 
     except Exception as e:
         message = "{0}\n\n{1}".format(e, frappe.get_traceback())
