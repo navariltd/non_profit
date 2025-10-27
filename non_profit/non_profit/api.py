@@ -2099,15 +2099,15 @@ def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, las
 @frappe.whitelist()
 def membership_certificate_template(membership_type: str) -> str:
 
-    error_message = "An unexpected error occurred"
+    error_message = "Error printing membership certificate"
     if not membership_type:
         frappe.throw(error_message)
 
     try:
         membership_template = frappe.db.get_value(
-            "Print Format",
-            {"name": membership_type, "doc_type": "Membership"},
-            "name",
+            "Membership Type",
+            {"name": membership_type},
+            "template",
             as_dict=True,
         )
 
@@ -2124,9 +2124,11 @@ def membership_certificate_template(membership_type: str) -> str:
 
 @frappe.whitelist()
 def confirm_payment(invoice_name: str) -> str:
+
+    error_message = "Error confirming payment"
   
     if not invoice_name:
-        frappe.throw(_("Invoice name is required to confirm payment."))
+        frappe.throw(_(error_message))
 
     try:
         invoice = frappe.get_doc("Sales Invoice", invoice_name)
