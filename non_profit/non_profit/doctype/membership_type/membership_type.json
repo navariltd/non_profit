@@ -10,6 +10,7 @@
   "membership_package",
   "razorpay_plan_id",
   "linked_item",
+  "template",
   "column_break_tssr",
   "amount",
   "currency",
@@ -84,6 +85,13 @@
    "fieldname": "age_requirement",
    "fieldtype": "Data",
    "label": "Age Requirement"
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "label": "Template",
+   "link_filters": "[[\"Print Format\",\"doc_type\",\"=\",\"Membership\"]]",
+   "options": "Print Format"
   }
  ],
  "links": [
@@ -93,7 +101,7 @@
    "link_fieldname": "membership_type"
   }
  ],
- "modified": "2025-09-26 08:13:13.854649",
+ "modified": "2025-10-27 17:48:28.269561",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Type",
