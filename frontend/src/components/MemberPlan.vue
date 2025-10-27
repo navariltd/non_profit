@@ -23,6 +23,7 @@
                 :class="{
                   'bg-green-500': membership.membership_status === 'Active',
                   'bg-red-500': membership.membership_status === 'Expired',
+                  'bg-yellow-500': membership.membership_status === 'Pending',
                 }"
               ></div>
               <div>
