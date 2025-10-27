@@ -72,8 +72,13 @@
                 theme="red"
                 size="sm"
                 class="rounded-lg px-5 py-2"
+                :loading="certificate.loading"
                 @click="
-                  openRenewDialog(membership.membership_status, membership.name)
+                  openRenewDialog(
+                    membership.membership_status,
+                    membership.name,
+                    membership.membership_type
+                  )
                 "
               >
                 {{
@@ -84,6 +89,7 @@
               </Button>
             </div>
           </div>
+          <ErrorMessage :message="certificate.error" class="text-center mt-2" />
         </div>
       </div>
 
@@ -182,6 +188,7 @@ import { ref } from "vue";
 import { RouterLink } from "vue-router";
 import { usersStore } from "../stores/user";
 import { isValidPhone } from "../utils/volunteer";
+import { on } from "superagent";
 
 const { roleResource } = usersStore();
 
@@ -201,6 +208,7 @@ interface Membership {
   type_details?: Record<string, any>;
 }
 
+const membershipTypeCert = ref("");
 const membershipList = createResource<Membership[]>({
   url: "non_profit.non_profit.api.get_current_membership",
   auto: true,
@@ -240,9 +248,25 @@ function formatDate(dateStr?: string): string {
   });
 }
 
-function openRenewDialog(membershipStatus?: string, membershipId?: string) {
+const certificate = createResource({
+  url: "non_profit.non_profit.api.membership_certificate_template",
+  makeParams() {
+    return {
+      membership_type: membershipTypeCert.value,
+    };
+  },
+});
+
+function openRenewDialog(
+  membershipStatus?: string,
+  membershipId?: string,
+  membershipType?: string
+) {
   if (membershipStatus === "Active") {
-    // TODO: Implement certificate printing logic here
+    membershipTypeCert.value = membershipType || "";
+
+    getCertificate(membershipId);
+
     return;
   }
 
@@ -251,6 +275,20 @@ function openRenewDialog(membershipStatus?: string, membershipId?: string) {
     errorMessage.value = "";
     payNow.value = true;
   }
+}
+
+function getCertificate(membershipId?: string) {
+  certificate.submit(
+    {},
+    {
+      onSuccess() {
+        window.open(
+          `/api/method/frappe.utils.print_format.download_pdf?doctype=Membership&name=${membershipId}&format=${membershipTypeCert.value}`,
+          "_blank"
+        );
+      },
+    }
+  );
 }
 
 function payMembership() {
@@ -276,4 +314,14 @@ function payMembership() {
     phone_number: phoneNumber.value,
   });
 }
+
+const downloadCertificate = createResource({
+  url: "/api/method/frappe.utils.print_format.download_pdf",
+  makeParams() {
+    return {
+      doctype: "Membership",
+      name: selectedMembershipId.value,
+    };
+  },
+});
 </script>
