@@ -142,7 +142,6 @@
     </main>
   </div>
 
-  <!-- Submit Confirmation Dialog -->
   <Dialog v-model="showSubmitDialog">
     <template #body-title>
       <h2 class="text-lg font-bold text-gray-900">
@@ -186,18 +185,61 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch, onMounted, onUnmounted } from "vue";
-import { Button, toast, createResource, Dialog } from "frappe-ui";
-import { LogIn, FeatherIcon } from "lucide-vue-next";
 import PendingApproval from "@/components/PendingApproval.vue";
-import StepOrganization from "@/components/Signup/StepOrganization.vue";
 import StepAdditional from "@/components/Signup/StepAdditional.vue";
 import StepDocuments from "@/components/Signup/StepDocuments.vue";
-import { usersStore } from "../stores/user";
-import { sessionStore } from "../stores/session";
+import StepOrganization from "@/components/Signup/StepOrganization.vue";
+import { Button, createResource, Dialog, toast } from "frappe-ui";
+import { FeatherIcon, LogIn } from "lucide-vue-next";
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import ReviewApplication from "../components/Signup/ReviewApplication.vue";
 import ErrorModal from "../components/Modals/ErrorModal.vue";
+import ReviewApplication from "../components/Signup/ReviewApplication.vue";
+import { sessionStore } from "../stores/session";
+import { usersStore } from "../stores/user";
+
+const FIELD_MAP = {
+  date_of_birth: "birth_date",
+  mpesa_mobile_phone: "mobile_no",
+  surname: "last_name",
+  other_names: "middle_name",
+  phone_number: "phone",
+};
+
+const NORMAL_FIELDS = [
+  "ward",
+  "first_name",
+  "identification_type",
+  "id_number",
+  "passport_number",
+  "number_of_dependants",
+  "marital_status",
+  "blood_group",
+  "citizenship",
+  "country_of_citizenship",
+  "administrative_location",
+  "sub_county",
+  "county",
+  "access_to_internet",
+  "profession",
+  "reason_to_join_krcs",
+  "gender",
+  "email_id",
+];
+
+const TABLE_FIELDS = [
+  "languages",
+  "education",
+  "disabilities",
+  "driving_licence",
+  "certification",
+  "licences",
+  "additional_skills",
+  "allergies",
+  "work_references",
+  "work_experience",
+  "supporting_documents",
+];
 
 const { userResource } = usersStore();
 const { isLoggedIn } = sessionStore();
@@ -219,6 +261,7 @@ const documents = ref([]);
 const saveInProgress = ref(false);
 const showSubmitDialog = ref(false);
 const showErrorDialog = ref(false);
+const loading = ref(true);
 
 const originalFormData = ref({});
 const hasUnsavedChanges = ref(false);
@@ -226,6 +269,8 @@ const changedFields = ref(new Set());
 const flatErrors = ref("");
 
 const form = reactive({
+  email_id: "",
+  phone_number: "",
   company: "",
   mpesa_mobile_phone: "",
   date_of_birth: "",
@@ -234,11 +279,13 @@ const form = reactive({
   administrative_location: "",
   sub_county: "",
   citizenship: "",
+  country_of_citizenship: "",
   marital_status: "",
   education: "",
   profession: "",
+  allergies: [],
   access_to_internet: "",
-  citizenship: "",
+  identification_type: "",
   number_of_dependants: null,
   reason_to_join_krcs: "",
   disabilities: "",
@@ -262,6 +309,8 @@ const errors = reactive({});
 
 const stepFields = {
   0: [
+    "email_id",
+    "phone_number",
     "company",
     "ward",
     "date_of_birth",
@@ -273,6 +322,8 @@ const stepFields = {
     "blood_group",
     "has_insurance",
     "citizenship",
+    "country_of_citizenship",
+    "identification_type",
     "administrative_location",
     "sub_county",
     "county",
@@ -280,6 +331,7 @@ const stepFields = {
   1: [
     "access_to_internet",
     "profession",
+    "allergies",
     "languages",
     "education",
     "disabilities",
@@ -340,6 +392,56 @@ watch(
   { deep: true }
 );
 
+function populateFormFromUser(userData) {
+  const allFields = [...new Set([...NORMAL_FIELDS, ...Object.keys(FIELD_MAP)])];
+
+  allFields.forEach((formField) => {
+    const userField = FIELD_MAP[formField] || formField;
+    let userValue = userData[userField];
+
+    if (formField === "email_id" && user.data?.email) {
+      userValue = user.data.email;
+    } else if (formField === "phone_number" && user.data?.phone) {
+      userValue = user.data.phone;
+    }
+
+    const formValue = form[formField];
+    const formIsEmpty =
+      formValue === null ||
+      formValue === undefined ||
+      formValue === "" ||
+      (Array.isArray(formValue) && formValue.length === 0);
+
+    const userValueExists =
+      userValue !== null &&
+      userValue !== undefined &&
+      userValue !== "" &&
+      (!Array.isArray(userValue) || userValue.length > 0);
+
+    if (formIsEmpty && userValueExists) {
+      if (form[formField] !== userValue) {
+        form[formField] = userValue;
+      }
+    }
+  });
+
+  updateOriginalData();
+  hasUnsavedChanges.value = false;
+  changedFields.value.clear();
+}
+
+const userDetailsResource = createResource({
+  url: "non_profit.non_profit.api.get_user_details",
+  onSuccess(data) {
+    if (data) populateFormFromUser(data);
+    loading.value = false;
+  },
+  onError(err) {
+    toast.error(err.message || "Failed to fetch user details");
+    loading.value = false;
+  },
+});
+
 function getCurrentStepData(onlyChanges = false) {
   const currentStepData = {};
   const currentStepFieldList = stepFields[currentStep.value] || [];
@@ -362,6 +464,9 @@ function getCurrentStepData(onlyChanges = false) {
 
   if (user.data?.email) {
     currentStepData.email_id = user.data.email;
+  }
+  if (user.data?.phone) {
+    currentStepData.phone_number = user.data.phone;
   }
 
   return currentStepData;
@@ -387,7 +492,7 @@ const jobApplication = createResource({
 
       alreadyApplied.value = true;
       applicationStatus.value =
-        application.status || application.workflow_state;
+        application.docstatus == 0 ? "Draft" : application.name;
       applicationId.value = application.name;
 
       if (applicationStatus.value === "Draft") {
@@ -396,6 +501,9 @@ const jobApplication = createResource({
     } else {
       form.email_id = user.data?.email || "";
     }
+
+    // Fetch user details to fill missing fields
+    userDetailsResource.submit();
   },
 });
 
@@ -418,7 +526,7 @@ const confirmSubmit = async () => {
         alreadyApplied.value = true;
         hasUnsavedChanges.value = false;
         changedFields.value.clear();
-        window.location.hash = "";
+        window.location.reload();
       },
       onError: (err) => {
         toast.error(err.messages?.[0] || "Submission failed");
@@ -488,6 +596,30 @@ function populateForm(data) {
   if (data.licences && Array.isArray(data.licences)) {
     form.licences = data.licences;
   }
+  if (data.certification && Array.isArray(data.certification)) {
+    form.certification = data.certification;
+  }
+  if (data.allergies && Array.isArray(data.allergies)) {
+    form.allergies = data.allergies;
+  }
+  if (data.disabilities && Array.isArray(data.disabilities)) {
+    form.disabilities = data.disabilities;
+  }
+  if (data.supporting_documents && Array.isArray(data.supporting_documents)) {
+    form.supporting_documents = data.supporting_documents;
+  }
+  if (data.education) {
+    form.education = data.education;
+  }
+  if (data.additional_skills) {
+    form.additional_skills = data.additional_skills;
+  }
+  if (data.work_references) {
+    form.work_references = data.work_references;
+  }
+  if (data.work_experience) {
+    form.work_experience = data.work_experience;
+  }
 
   if (data.documents && Array.isArray(data.documents)) {
     documents.value = data.documents;
@@ -531,92 +663,8 @@ function validateStep(stepIndex) {
   let valid = true;
 
   if (flatErrors.value) {
-    console.log("Validation failed due to existing errors:", flatErrors.value);
-
     return false;
   }
-
-  // Object.keys(errors).forEach((k) => (errors[k] = ""));
-
-  // if (stepIndex === 0) {
-  //   if (!form.company) {
-  //     errors.company = __("Branch is required");
-  //     valid = false;
-  //   }
-
-  //   if (form.mpesa_mobile_phone) {
-  //     const phone = form.mpesa_mobile_phone.toString().replace(/\s+/g, "");
-  //     const phoneRegex = /^(?:\+254|0)(7\d{8}|1\d{8})$/;
-  //     if (!phoneRegex.test(phone)) {
-  //       errors.mpesa_mobile_phone = __("Enter a valid phone number");
-  //       valid = false;
-  //     }
-  //   }
-
-  //   if (!form.administrative_location) {
-  //     errors.administrative_location = __("This field is required");
-  //     valid = false;
-  //   }
-  //   if (!form.sub_county) {
-  //     errors.sub_county = __("This field is required");
-  //     valid = false;
-  //   }
-  //   if (!form.citizenship) {
-  //     errors.citizenship = __("This field is required");
-  //     valid = false;
-  //   }
-
-  //   if (!form.date_of_birth) {
-  //     errors.date_of_birth = __("Date of birth is required");
-  //     valid = false;
-  //   } else {
-  //     const dob = new Date(form.date_of_birth);
-  //     const today = new Date();
-  //     let age = today.getFullYear() - dob.getFullYear();
-  //     const m = today.getMonth() - dob.getMonth();
-  //     if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
-  //       age--;
-  //     }
-
-  //     if (age < 7 || age > 100) {
-  //       errors.date_of_birth = __("Age must be between 7 and 100 years");
-  //       valid = false;
-  //     }
-  //   }
-
-  //   if (!form.id_number && !form.passport_number) {
-  //     errors.id_number = __("Passport or ID number is required");
-  //     valid = false;
-  //   }
-
-  //   if (form.id_number && !/^\d{7,9}$/.test(form.id_number)) {
-  //     errors.id_number = __("ID number must be 7–9 digits");
-  //     valid = false;
-  //   }
-
-  //   if (
-  //     form.passport_number &&
-  //     !/^[A-Z0-9]{6,9}$/i.test(form.passport_number)
-  //   ) {
-  //     errors.passport_number = __("Invalid passport number format");
-  //     valid = false;
-  //   }
-  // }
-
-  // if (stepIndex === 1) {
-  //   if (!form.reason_to_join_krcs) {
-  //     errors.reason_to_join_krcs = __("This field is required");
-  //     valid = false;
-  //   }
-  //   if (!form.profession) {
-  //     errors.profession = __("This field is required");
-  //     valid = false;
-  //   }
-  //   if (!form.access_to_internet) {
-  //     errors.access_to_internet = __("This field is required");
-  //     valid = false;
-  //   }
-  // }
 
   return valid;
 }
@@ -635,7 +683,6 @@ async function saveApplication() {
       await updateApplication.submit();
     }
   } catch (error) {
-    console.error("Save error:", error);
     saveInProgress.value = false;
   }
 }
@@ -724,11 +771,11 @@ watch(currentStep, (newStep) => {
   form._current_step = newStep;
   form._current_progress = Math.round(progressPercentage.value);
 });
-
 watch(
-  errors,
-  (newErrors) => {
-    const stepErrors = newErrors[currentStep.value] || {};
+  [errors, currentStep],
+  ([newErrors, newStep]) => {
+    const stepErrors = newErrors[newStep] || {};
+
     flatErrors.value = Object.keys(stepErrors).length > 0 ? stepErrors : null;
   },
   { deep: true, immediate: true }

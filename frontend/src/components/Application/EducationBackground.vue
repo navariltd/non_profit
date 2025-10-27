@@ -12,6 +12,7 @@
         v-model="form.education"
         doctype="Employee Education"
         label="Education History"
+        required
         :autoEditGrid="false"
       />
       <ChildTable
