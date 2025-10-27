@@ -73,7 +73,7 @@
                 theme="red"
                 size="sm"
                 class="rounded-lg px-5 py-2"
-                :loading="certificate.loading"
+                :loading="loadCertificate === membership.name"
                 @click="
                   openRenewDialog(
                     membership.membership_status,
@@ -189,7 +189,6 @@ import { ref } from "vue";
 import { RouterLink } from "vue-router";
 import { usersStore } from "../stores/user";
 import { isValidPhone } from "../utils/volunteer";
-import { on } from "superagent";
 
 const { roleResource } = usersStore();
 
@@ -197,6 +196,7 @@ const payNow = ref(false);
 const phoneNumber = ref("");
 const errorMessage = ref("");
 const selectedMembershipId = ref<string | undefined>(undefined);
+const loadCertificate = ref<string | null>(null);
 
 interface Membership {
   name?: string;
@@ -279,10 +279,12 @@ function openRenewDialog(
 }
 
 function getCertificate(membershipId?: string) {
+  loadCertificate.value = membershipId || null;
   certificate.submit(
     {},
     {
       onSuccess() {
+        loadCertificate.value = null;
         window.open(
           `/api/method/frappe.utils.print_format.download_pdf?doctype=Membership&name=${membershipId}&format=${membershipTypeCert.value}`,
           "_blank"
@@ -315,14 +317,4 @@ function payMembership() {
     phone_number: phoneNumber.value,
   });
 }
-
-const downloadCertificate = createResource({
-  url: "/api/method/frappe.utils.print_format.download_pdf",
-  makeParams() {
-    return {
-      doctype: "Membership",
-      name: selectedMembershipId.value,
-    };
-  },
-});
 </script>
