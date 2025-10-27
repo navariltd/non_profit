@@ -18,7 +18,7 @@
         :loadingMore="loadingMore"
         :hasMore="hasMore"
         @load-more="loadMore"
-        class="relative !z-100"
+        class="relative !z-100 bg-gray-100 rounded-sm"
       >
         <template #target="{ open, togglePopover }">
           <slot name="target" v-bind="{ open, togglePopover }" />
