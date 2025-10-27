@@ -178,3 +178,8 @@ def get_company_descendants(company=None, company_list=None, include_parent=True
             descendants_set.add(comp)
 
     return sorted(descendants_set)
+
+
+@frappe.whitelist()
+def get_companies():
+    return frappe.get_all("Company", filters={"is_group": 0}, fields=["name"])

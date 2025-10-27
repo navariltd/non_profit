@@ -7,7 +7,7 @@
     </template>
 
     <template #body-content>
-      <div class="py-4">
+      <div v-if="!paymentStatus" class="py-4">
         <form action="" @submit.prevent="submit">
           <div
             class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 p-4 bg-white border border-red-400 rounded-2xl shadow-sm"
@@ -60,16 +60,7 @@
           />
           <div class="mt-4 gap-2 flex items-end justify-end">
             <Button
-              type="button"
-              variant="outline"
-              theme="red"
-              class="rounded-lg px-5"
-              @click="cleanUpMembershipForm"
-            >
-              Cancel
-            </Button>
-
-            <Button
+              v-if="!confirmPayment"
               type="submit"
               variant="solid"
               theme="green"
@@ -80,6 +71,53 @@
             </Button>
           </div>
         </form>
+        <div class="flex items-end justify-end">
+          <Button
+            v-if="confirmPayment"
+            variant="solid"
+            theme="red"
+            class="rounded-lg px-6"
+            @click="checkPayment"
+            :loading="confirmPaymentStatus.loading"
+          >
+            Confirm Payment
+          </Button>
+        </div>
+      </div>
+
+      <div v-if="paymentStatus">
+        <div class="text-center py-8">
+          <div class="mb-4">
+            <svg
+              class="mx-auto h-16 w-16 text-green-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-2">
+            Membership Successful!
+          </h3>
+          <p class="text-gray-600 mb-6">
+            Your membership registration has been completed successfully.
+            Welcome to our community!
+          </p>
+          <Button
+            variant="solid"
+            theme="green"
+            class="rounded-lg px-6"
+            @click="registerDialog = false"
+          >
+            Close
+          </Button>
+        </div>
       </div>
     </template>
   </Dialog>
@@ -101,6 +139,9 @@ import { membershipStore } from "../../stores/membership";
 const registerDialog = defineModel();
 const branch = ref("");
 const close = defineEmits(["close"]);
+const confirmPayment = ref(false);
+const invoice = ref("");
+const paymentStatus = ref(false);
 
 const membershipForm = reactive({
   phone: "",
@@ -129,9 +170,9 @@ watch(branch, (newValue) => {
   }
 });
 
-const branches = createListResource({
-  doctype: "Company",
-  filters: { is_group: 0 },
+const branches = createResource({
+  url: "non_profit.non_profit.utils.get_companies",
+  auto: true,
   cache: "branches",
   transform: (data) =>
     data.map((item) => ({ label: item.name, value: item.name })),
@@ -160,9 +201,13 @@ function submit() {
     {},
     {
       onSuccess(data) {
-        close("close");
-        toast.success("Membership registered successfully!");
+        toast.success(
+          "Membership registered successfully! You will receive a payment prompt shortly."
+        );
         currentMembership.reload();
+        createMembership.error = "";
+        invoice.value = data;
+        confirmPayment.value = true;
       },
       onError(error) {},
     }
@@ -174,6 +219,49 @@ watch(registerDialog, (isOpen) => {
     branch.value = "";
     membershipForm.phone = "";
     createMembership.error = "";
+    confirmPayment.value = false;
+    paymentStatus.value = false;
+    invoice.value = "";
   }
 });
+
+const confirmPaymentStatus = createResource({
+  url: "non_profit.non_profit.api.confirm_payment",
+  makeParams() {
+    return {
+      invoice_name: invoice.value,
+    };
+  },
+});
+
+const checkPayment = () => {
+  if (!invoice.value) {
+    toast.error("Error confirming payment. Please try again.");
+
+    return;
+  }
+
+  confirmPaymentStatus.submit(
+    {},
+    {
+      onSuccess(data) {
+        data === "paid"
+          ? handlePaymentStatus()
+          : toast.info(
+              "Payment confirmation pending. Please click 'Confirm Payment' again to verify your transaction status."
+            );
+      },
+      onError(error) {
+        toast.error("Error confirming payment. Please try again.");
+      },
+    }
+  );
+};
+
+const handlePaymentStatus = () => {
+  toast.success("Payment confirmed! Thank you for your membership.");
+  currentMembership.reload();
+  confirmPayment.value = false;
+  paymentStatus.value = true;
+};
 </script>

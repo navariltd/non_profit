@@ -1512,6 +1512,7 @@ def get_current_membership():
         or_filters=[
             {"membership_status": "Active"},
             {"membership_status": "Expired"},
+            {"membership_status": "Pending"},
         ],
         fields=["name"],
         order_by="from_date desc",
@@ -2119,3 +2120,22 @@ def membership_certificate_template(membership_type: str) -> str:
         frappe.throw(error_message)
 
     return membership_template.name
+
+
+@frappe.whitelist()
+def confirm_payment(invoice_name: str) -> str:
+  
+    if not invoice_name:
+        frappe.throw(_("Invoice name is required to confirm payment."))
+
+    try:
+        invoice = frappe.get_doc("Sales Invoice", invoice_name)
+
+        if invoice.status == "Paid" and invoice.outstanding_amount == 0:
+            return "paid"    
+
+        return "unpaid"
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Confirm Payment Error")
+        frappe.throw(_("Error confirming payment: {0}").format(str(e)))

@@ -99,9 +99,11 @@ def create_membership(
 
         membership.insert(ignore_permissions=True)
 
-        renew_membership(id=membership.name, phone_number=phone)
+        invoice = renew_membership(id=membership.name, phone_number=phone)
 
         frappe.db.commit()
+
+        return invoice.name
 
     except Exception:
         frappe.db.rollback()
@@ -113,9 +115,13 @@ def create_membership(
 def renew_membership(**kwargs):
     try:
         membership = frappe.get_doc("Membership", kwargs.get("id"))
-        membership.initiate_payment(phone_number=kwargs.get("phone_number"))
-        membership.membership_status = "Pending"
+        _, invoice = membership.initiate_payment(
+            phone_number=kwargs.get("phone_number")
+        )
+        membership.membership_status = "Draft"
         membership.save(ignore_permissions=True)
+
+        return invoice
     except Exception:
         frappe.log_error(frappe.get_traceback(), "Error renewing membership")
         frappe.throw("Error creating membership")
