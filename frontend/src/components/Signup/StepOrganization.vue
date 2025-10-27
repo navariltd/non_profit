@@ -43,17 +43,6 @@
           {{ errors[0]?.["Email Address"] }}
         </p>
       </div>
-
-      <div>
-        <Link
-          v-model="localModel.county"
-          :label="__('County of Residence')"
-          doctype="Company"
-          :required="true"
-          hidden
-          :filters="{ is_group: 0 }"
-        />
-      </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -68,6 +57,18 @@
           class="text-sm text-red-600 mt-1"
         >
           {{ errors[0]?.["Date of Birth"] }}
+        </p>
+      </div>
+
+      <div>
+        <Link
+          v-model="localModel.gender"
+          :label="__('Gender')"
+          doctype="Gender"
+          :required="true"
+        />
+        <p v-if="errors[0]?.['Gender']" class="text-sm text-red-600 mt-1">
+          {{ errors[0]?.["Gender"] }}
         </p>
       </div>
       <div>
@@ -141,6 +142,16 @@
       {{ __("Location Info") }}
     </h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div>
+        <Link
+          v-model="localModel.county"
+          :label="__('County of Residence')"
+          doctype="Company"
+          :required="true"
+          :readonly="true"
+          :filters="{ is_group: 0 }"
+        />
+      </div>
       <div v-if="localModel.county">
         <Link
           v-model="localModel.sub_county"
@@ -173,6 +184,7 @@
           :label="__('Ward')"
           doctype="Ward"
           :required="true"
+          :filters="{ county: localModel.county }"
         />
         <p v-if="errors[0]?.['Ward']" class="text-sm text-red-600 mt-1">
           {{ errors[0]?.["Ward"] }}
@@ -231,8 +243,11 @@
           v-model="localModel.country_of_citizenship"
           :label="__('Country of Citizenship')"
           :required="true"
-          :readOnly="localModel.citizenship === 'Citizen'"
-          :filters="[['name', '!=', 'Kenya']]"
+          :filters="
+            localModel.citizenship === 'Citizen'
+              ? [['name', '=', 'Kenya']]
+              : [['name', '!=', 'Kenya']]
+          "
         />
         <p
           v-if="errors[0]?.['Country of Citizenship']"
@@ -303,6 +318,7 @@ function validateForm() {
     stepErrors[0]["Phone Number"] = "Phone number is required";
   if (!form.email_id)
     stepErrors[0]["Email Address"] = "Email address is required";
+  if (!form.gender) stepErrors[0]["Gender"] = "Gender is required";
   if (!form.county) stepErrors[0]["County of Residence"] = "County is required";
   if (!form.sub_county) stepErrors[0]["Sub County"] = "This field is required";
   if (!form.administrative_location)
