@@ -145,3 +145,8 @@ def check_and_renew_membership(invoice_id: str) -> None:
         return
     membership = frappe.get_doc("Membership", invoice.membership)
     membership.validate_membership_period()
+
+
+@frappe.whitelist()
+def get_companies():
+    return frappe.get_all("Company", filters={"is_group": 0}, fields=["name"])
