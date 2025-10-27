@@ -2074,3 +2074,29 @@ def handle_ticket_payment(phone, event_name, ticket_name, email, first_name, las
             "success": False,
             "message": "Error occurred while processing ticket. Please try again.",
         }
+
+
+@frappe.whitelist()
+def membership_certificate_template(membership_type: str) -> str:
+
+    error_message = "An unexpected error occurred"
+    if not membership_type:
+        frappe.throw(error_message)
+
+    try:
+        membership_template = frappe.db.get_value(
+            "Print Format",
+            {"name": membership_type, "doc_type": "Membership"},
+            "name",
+            as_dict=True,
+        )
+
+        if not membership_template:
+            frappe.throw(error_message)
+    except Exception as e:
+        frappe.log_error(
+            frappe.get_traceback(), "Membership Certificate Template Error"
+        )
+        frappe.throw(error_message)
+
+    return membership_template.name
