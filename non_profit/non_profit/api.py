@@ -1554,6 +1554,7 @@ def fetch_applications(email: str):
             "designation",
             "job_title",
             "status",
+            "docstatus",
             "company",
             "cover_letter",
             "creation",
@@ -2126,7 +2127,7 @@ def membership_certificate_template(membership_type: str) -> str:
 def confirm_payment(invoice_name: str) -> str:
 
     error_message = "Error confirming payment"
-  
+
     if not invoice_name:
         frappe.throw(_(error_message))
 
@@ -2134,7 +2135,7 @@ def confirm_payment(invoice_name: str) -> str:
         invoice = frappe.get_doc("Sales Invoice", invoice_name)
 
         if invoice.status == "Paid" and invoice.outstanding_amount == 0:
-            return "paid"    
+            return "paid"
 
         return "unpaid"
 

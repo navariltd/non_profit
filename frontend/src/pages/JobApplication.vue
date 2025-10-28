@@ -72,9 +72,15 @@
                   </h2>
                   <span
                     class="px-3 py-1 text-xs font-semibold rounded-full"
-                    :class="statusClass(app.status)"
+                    :class="statusClass(app.status, app.docstatus)"
                   >
-                    {{ app.status || "Unknown" }}
+                    {{
+                      app.docstatus === 2
+                        ? "Cancelled"
+                        : app.docstatus === 0
+                          ? "Draft"
+                          : app.status
+                    }}
                   </span>
                 </div>
                 <p class="text-red-700 font-medium">{{ app.company }}</p>
@@ -184,7 +190,13 @@ const getCompanyAbbr = (name) =>
         .toUpperCase()
     : "NA";
 
-const statusClass = (status) => {
+const statusClass = (status, docstatus) => {
+  if (docstatus === 0) {
+    return "bg-gray-200 text-gray-800";
+  }
+  if (docstatus === 2) {
+    return "bg-red-200 text-red-800";
+  }
   switch (status?.toLowerCase()) {
     case "open":
       return "bg-green-100 text-green-700";
@@ -195,8 +207,6 @@ const statusClass = (status) => {
     case "in progress":
     case "under review":
       return "bg-yellow-100 text-yellow-700";
-    case "draft":
-      return "bg-gray-200 text-gray-800";
     default:
       return "bg-gray-100 text-gray-700";
   }
@@ -214,27 +224,62 @@ const currentTab = ref(null);
 
 const jobTabs = computed(() => {
   if (!applications.data) return [];
+
+  const tabs = [];
+
+  if (applications.data.some((a) => a.docstatus === 0)) {
+    tabs.push({ label: "Draft", value: "Draft" });
+  }
+
+  const submittedApplications = applications.data.filter(
+    (a) => a.docstatus === 1
+  );
   const statuses = [
-    ...new Set(applications.data.map((a) => a.status).filter(Boolean)),
+    ...new Set(submittedApplications.map((a) => a.status).filter(Boolean)),
   ];
-  const ordered = statuses.sort((a, b) => {
-    const priority = { draft: 1, open: 2 };
-    return (
-      (priority[a?.toLowerCase()] || 3) - (priority[b?.toLowerCase()] || 3)
-    );
+
+  const priority = {
+    open: 1,
+    "in progress": 2,
+    "under review": 3,
+    accepted: 4,
+    closed: 5,
+  };
+
+  const orderedStatuses = statuses.sort((a, b) => {
+    const aLower = a?.toLowerCase();
+    const bLower = b?.toLowerCase();
+    return (priority[aLower] || 99) - (priority[bLower] || 99);
   });
-  const tabs = ordered.map((status) => ({
-    label: status.charAt(0).toUpperCase() + status.slice(1),
-    value: status,
-  }));
+
+  orderedStatuses.forEach((status) => {
+    tabs.push({
+      label: status.charAt(0).toUpperCase() + status.slice(1),
+      value: status,
+    });
+  });
+
+  if (applications.data.some((a) => a.docstatus === 2)) {
+    tabs.push({ label: "Cancelled", value: "Cancelled" });
+  }
+
   if (!currentTab.value && tabs.length) currentTab.value = tabs[0].value;
   return tabs;
 });
 
 const filteredApplications = computed(() => {
   if (!applications.data || !currentTab.value) return [];
-  return applications.data.filter(
-    (app) => app.status?.toLowerCase() === currentTab.value.toLowerCase()
-  );
+
+  const tabValue = currentTab.value.toLowerCase();
+
+  if (tabValue === "draft") {
+    return applications.data.filter((app) => app.docstatus === 0);
+  } else if (tabValue === "cancelled") {
+    return applications.data.filter((app) => app.docstatus === 2);
+  } else {
+    return applications.data.filter(
+      (app) => app.docstatus === 1 && app.status?.toLowerCase() === tabValue
+    );
+  }
 });
 </script>

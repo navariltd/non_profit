@@ -40,7 +40,7 @@ class Membership(Document):
         frappe.db.commit()
 
     def _apply_membership_period_logic(self):
-        if self.membership_status == "Pending":
+        if not self.membership_status == "Draft":
             return
         membership_type = frappe.get_doc("Membership Type", self.membership_type)
 
