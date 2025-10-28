@@ -104,7 +104,7 @@
 import Link from "@/components/Controls/Link.vue";
 import { FormControl } from "frappe-ui";
 
-import { watch } from "vue";
+import { nextTick, onMounted, watch } from "vue";
 
 const props = defineProps({
   form: {
@@ -150,4 +150,15 @@ watch(
     form.administrative_location = null;
   }
 );
+onMounted(async () => {
+  await nextTick();
+  if (form.county) form.county = form.county;
+  if (form.sub_county) form.sub_county = form.sub_county;
+  if (form.ward) form.ward = form.ward;
+  if (form.country_of_citizenship)
+    form.country_of_citizenship = form.country_of_citizenship;
+  if (form.identification_type)
+    form.identification_type = form.identification_type;
+  if (form.gender) form.gender = form.gender;
+});
 </script>

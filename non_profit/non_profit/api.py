@@ -5,9 +5,9 @@ import string
 import time
 from collections import defaultdict
 from datetime import datetime
-import qrcode
 
 import frappe
+import qrcode
 from frappe import _, cint, cstr
 from frappe.desk.search import (
     LinkSearchResults,
