@@ -1,0 +1,88 @@
+{
+ "app": "non_profit",
+ "creation": "2026-01-08 15:26:51.041224",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "header_icon": "non-profit",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "home",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Home",
+   "link_to": "Non Profit",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "settings",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Non Profit Settings",
+   "link_to": "Non Profit Settings",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "user-round-cog",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Donor",
+   "link_to": "Donor",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "solid-success",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Donation",
+   "link_to": "Donation",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "user-star",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Member",
+   "link_to": "Member",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "color-review-points",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Membership",
+   "link_to": "Membership",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-01-08 13:14:49.558507",
+ "modified_by": "Administrator",
+ "module": "Non Profit",
+ "name": "Non Profit",
+ "owner": "Administrator",
+ "title": "Non Profit"
+}
