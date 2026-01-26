@@ -9,12 +9,13 @@
  "idx": 0,
  "label": "Non Profit",
  "link_to": "Non Profit",
- "link_type": "Workspace",
+ "link_type": "Workspace Sidebar",
  "logo_url": "/assets/non_profit/non-profit.png",
- "modified": "2026-01-08 13:14:36.210947",
+ "modified": "2026-01-26 14:37:10.135583",
  "modified_by": "Administrator",
  "name": "Non Profit",
  "owner": "Administrator",
+ "restrict_removal": 0,
  "roles": [],
  "standard": 1
 }
