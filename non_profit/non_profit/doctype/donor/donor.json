@@ -8,33 +8,64 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "primary_details_section",
   "donor_name",
   "email",
   "phone_number",
-  "id_number",
   "salutation",
   "column_break_5",
   "donor_type",
-  "charter",
+  "id_number",
+  "image",
+  "customer",
+  "create_customer",
+  "donor_info_section",
   "birthday_date",
   "date_registered",
+  "column_break_15",
   "is_a_frequent_donor",
-  "image",
+  "charter",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "address_and_contact_tab",
   "address_contacts",
   "address_html",
   "column_break_9",
   "contact_html",
-  "accounting_dimensions_section",
-  "cost_center",
-  "dimension_col_break"
+  "connections_tab"
  ],
  "fields": [
+  {
+   "fieldname": "primary_details_section",
+   "fieldtype": "Section Break",
+   "label": "Primary Details"
+  },
   {
    "fieldname": "donor_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Donor Name",
    "reqd": 1
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "salutation",
+   "fieldtype": "Link",
+   "label": "Salutation",
+   "options": "Salutation"
   },
   {
    "fieldname": "column_break_5",
@@ -49,12 +80,16 @@
    "reqd": 1
   },
   {
-   "fieldname": "email",
+   "description": "Link this donor to a Customer record for accounting purposes.",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Linked Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "id_number",
    "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Email",
-   "reqd": 1,
-   "unique": 1
+   "label": "ID Number"
   },
   {
    "fieldname": "image",
@@ -63,6 +98,37 @@
    "label": "Image",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "donor_info_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_a_frequent_donor",
+   "fieldtype": "Check",
+   "label": "Is a frequent donor?"
+  },
+  {
+   "fieldname": "birthday_date",
+   "fieldtype": "Date",
+   "label": "Birthday Date"
+  },
+  {
+   "fieldname": "date_registered",
+   "fieldtype": "Date",
+   "label": "Date Registered"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "charter",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Charter",
+   "options": "Funding Pool"
   },
   {
    "depends_on": "eval:!doc.__islocal;",
@@ -102,43 +168,20 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "is_a_frequent_donor",
-   "fieldtype": "Check",
-   "label": "Is a frequent donor?"
+   "fieldname": "create_customer",
+   "fieldtype": "Button",
+   "label": "Create Customer"
   },
   {
-   "fieldname": "phone_number",
-   "fieldtype": "Data",
-   "label": "Phone Number"
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address and Contact"
   },
   {
-   "fieldname": "birthday_date",
-   "fieldtype": "Date",
-   "label": "Birthday Date"
-  },
-  {
-   "fieldname": "id_number",
-   "fieldtype": "Data",
-   "label": "ID Number"
-  },
-  {
-   "fieldname": "salutation",
-   "fieldtype": "Link",
-   "label": "Salutation",
-   "options": "Salutation"
-  },
-  {
-   "fieldname": "date_registered",
-   "fieldtype": "Date",
-   "label": "Date Registered"
-  },
-  {
-   "fieldname": "charter",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Charter",
-   "options": "Funding Pool"
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
  "image_field": "image",
@@ -148,7 +191,7 @@
    "link_fieldname": "donor"
   }
  ],
- "modified": "2025-05-17 14:50:15.607245",
+ "modified": "2026-01-27 11:31:51.998451",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donor",
