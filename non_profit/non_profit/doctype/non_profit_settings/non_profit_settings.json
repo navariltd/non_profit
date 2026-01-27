@@ -28,6 +28,7 @@
   "default_donor_type",
   "donation_webhook_secret",
   "column_break_22",
+  "generate_customer_when_donor_is_created",
   "automate_donation_payment_entries",
   "enable_payment_table_on_donation",
   "donation_debit_account",
@@ -235,12 +236,18 @@
    "fieldname": "enable_payment_table_on_donation",
    "fieldtype": "Check",
    "label": "Enable Payment Table on Donation"
+  },
+  {
+   "default": "0",
+   "fieldname": "generate_customer_when_donor_is_created",
+   "fieldtype": "Check",
+   "label": "Generate Customer When Donor is Created"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-06-30 09:44:23.963735",
+ "modified": "2026-01-27 11:44:02.915320",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit Settings",
