@@ -17,7 +17,7 @@ class Donor(Document):
 			validate_email_address(self.email.strip(), True)
 
 	def after_insert(self):
-		settings = frappe.get_doc("Changemakers Settings")
+		settings = frappe.get_doc("Non Profit Settings")
 
 		if settings.generate_customer_when_donor_is_created:
 			self.create_customer()
