@@ -1,1 +1,7 @@
+[pre_model_sync]
+# Patches added in this section will be executed before doctypes are migrated
+
+[post_model_sync]
+# Patches added in this section will be executed after doctypes are migrated
 non_profit.patches.rename_non_profit_fields
+non_profit.patches.delete_orphaned_custom_fields
