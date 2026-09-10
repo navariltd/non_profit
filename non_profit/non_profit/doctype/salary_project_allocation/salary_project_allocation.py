@@ -23,7 +23,7 @@ class SalaryProjectAllocation(Document):
 	- keep the selected Salary Structure Assignment consistent with the Employee,
 	- restrict allocation rows to Earning components of the linked structure,
 	- reject duplicate (component, project) rows and any component whose total
-	  is not exactly 100%.
+	  exceeds 100% (any remainder is left unallocated).
 	"""
 
 	def validate(self):
@@ -83,7 +83,7 @@ class SalaryProjectAllocation(Document):
 			)
 
 	def validate_allocations(self):
-		"""Validate every allocation row and enforce 100% totals per component."""
+		"""Validate every row and enforce a maximum of 100% per component."""
 		rows = self.get("allocations") or []
 		if not rows:
 			frappe.throw(
@@ -153,12 +153,12 @@ class SalaryProjectAllocation(Document):
 			)
 
 		for component, total in sorted(component_totals.items()):
-			if flt(total, 2) != 100:
+			if flt(total, 2) > 100:
 				frappe.throw(
-					_("{0} is allocated {1}% in total; each component must total exactly 100%.").format(
+					_("{0} is allocated {1}% in total; a component cannot be allocated more than 100%.").format(
 						frappe.bold(component), flt(total, 2)
 					),
-					title=_("Incomplete Allocation"),
+					title=_("Over-Allocated"),
 				)
 
 	def get_structure_earnings(self):
