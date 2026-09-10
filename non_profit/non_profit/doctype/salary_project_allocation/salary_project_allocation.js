@@ -194,13 +194,6 @@ frappe.ui.form.on("Salary Project Allocation", {
             round2(total),
           ])
         );
-      } else if (round2(total) < 100) {
-        issues.push(
-          __("{0} is only {1}% allocated; the total must be exactly 100%.", [
-            component,
-            round2(total),
-          ])
-        );
       }
     }
 
